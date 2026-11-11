@@ -137,4 +137,4 @@ EMPTY =
 
 ## 结论 {#conclusion}
 
-通过在 `silo-pkg/v3`（`1a0d788`）中收紧 `config.ReadEnvFile` 词法规则并在服务端（`a643483be`）升级依赖，`MINIO_CONFIG_ENV_FILE` 在冷启动与原地热重启下具备完全一致的解析行为，同时保持对标准 Shell 环境文件的完整向后兼容。
+通过在 `cmd/common-main.go`（`6b0998157` 与 `2aea7fe9c`）中收紧 `MINIO_CONFIG_ENV_FILE` 解析与目标命名规则，服务端在冷启动与原地热重启下具备完全一致的解析行为，同时保持对标准 Shell 环境文件与多目标配置的完整向后兼容。

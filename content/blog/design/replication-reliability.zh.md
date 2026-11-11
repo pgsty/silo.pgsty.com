@@ -238,7 +238,7 @@ go test ./... -count=1 -timeout=30m
 
 ## 第三轮（2026-09-16）：指定版本清除、标记 heal 与过期的排队创建 {#third-round}
 
-第二轮确保了 worker 的清除出口如实反映执行结果。第三轮——提交 [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3)、[`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0) 与 [`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb)，随 [Server 20260916](/zh/blog/release/silo-20260916/)（`40220bd836cbd066ca424fa4dc5dbb90057fb55a`，配合 `silo-pkg` `6f27ee6`）发布——进一步修复了指定版本清除在底层磁盘上的写回与仲裁逻辑，以及排队中的创建任务在版本清除之后乱序执行的问题。该问题由三站点容器集群测试（三个站点，每站点 4 进程 16 盘，EC 12+4）暴露：一个已被永久清除的删除标记在两个目标站点上死灰复燃，而源站点却仍返回正常的数据版本。
+第二轮确保了 worker 的清除出口如实反映执行结果。第三轮——提交 [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3)、[`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0) 与 [`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb)，随 [Server 20260916](/zh/blog/release/silo-20260916/)（`40220bd836cbd066ca424fa4dc5dbb90057fb55a`，配合 `silo-pkg` [`v3.14.1`](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) / `fa657ef`）发布——进一步修复了指定版本清除在底层磁盘上的写回与仲裁逻辑，以及排队中的创建任务在版本清除之后乱序执行的问题。该问题由三站点容器集群测试（三个站点，每站点 4 进程 16 盘，EC 12+4）暴露：一个已被永久清除的删除标记在两个目标站点上死灰复燃，而源站点却仍返回正常的数据版本。
 
 ### 第三轮排查出的遗留缺陷 {#third-round-defects}
 

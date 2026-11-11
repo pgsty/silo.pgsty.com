@@ -47,7 +47,7 @@ url: "/zh/blog/security/20260926-governance-retention-bypass/"
 
 ## 复现路径与验证对比 {#verification}
 
-在 `20261018` 之前的版本上（基线提交 `b0a540190`），F1～F3 均可稳定复现：
+在 `20261018` 之前的版本上（基线提交 `bcb5fc956`，即 `3196480da` 的前一提交），F1～F3 均可稳定复现：
 
 ### 复现 1：无 `s3:BypassGovernanceRetention` 权限清空治理锁并删库（F2） {#reproduction-1-clearing-an-active}
 
@@ -115,7 +115,7 @@ func isPutRetentionAllowed(ctx context.Context, r *http.Request, bucket, object 
 ### 五条核心安全不变量 {#invariants}
 
 我们的修复方案在 `PutObjectRetention`（`0d3ba5d4c`）与全部对象写入路径（`14042b5aa`）上严格建立并锁死了五条安全不变量：
-1. **不变量 1（`s3:PutObjectRetention` 必检）**：任何 `PutObjectRetention` 请求，无论是否携带 `x-amz-bypass-governance-retention` 请求头，都必须通过 `s3:PutObjectRetention` 权限校验（包含 `s3:object-lock-remaining-retention-days`、`s3:object-lock-retention-mode`、`s3:object-lock-retain-until-date` 与 `s3:ExistingObjectTag/<key>` 条件）。
+1. **不变量 1（`s3:PutObjectRetention` 必检）**：任何 `PutObjectRetention` 请求，无论是否携带 `x-amz-bypass-governance-retention` 请求头，都必须通过 `s3:PutObjectRetention` 权限校验（包含 `s3:object-lock-remaining-retention-days`、`s3:object-lock-retention-mode`与 `s3:object-lock-retain-until-date` 等受支持条件）。
 2. **不变量 2（削弱有效 `GOVERNANCE` 锁必须叠加 `s3:BypassGovernanceRetention`）**：若目标版本当前处于未过期的 `GOVERNANCE` 锁定期，且请求试图清空保留锁（`Mode == ""`）、缩短保留截止时间（`!RetainUntilDate.After(existing.RetainUntilDate)`）或跨模式变更，则请求必须**同时**携带 `x-amz-bypass-governance-retention: true` 并通过 `s3:BypassGovernanceRetention` 权限校验。
 3. **不变量 3（`COMPLIANCE` 绝对不可削弱）**：处于未过期 `COMPLIANCE` 锁定期的对象版本，任何身份均不可清空、缩短保留期或降级为 `GOVERNANCE`。
 4. **不变量 4（禁止非复制请求指定 `?versionId=` 覆盖写）**：非复制 S3 客户端不得在 `PutObject`、`CopyObject` 或 `PutObjectExtract` 中指定已有或自定义的 `versionId` 原地覆写对象。
@@ -144,7 +144,7 @@ func isPutRetentionAllowed(ctx context.Context, r *http.Request, bucket, object 
 
 在设计复核阶段，我们评估并否决了五个看似更简单的改法：
 1. **仅把 `isPutRetentionAllowed` 中的 `byPass || retSet` 改成 `byPass && retSet`**：这样虽能修掉 F2 与 F3，但未加锁分支上的 **F1** 依然存在；而且如果一个仅有 `s3:PutObjectRetention` 的用户在正常**延长**保留期时顺手带上了 `x-amz-bypass-governance-retention: true`，`byPass && retSet` 会错误地拒绝该合法延长请求。
-2. **直接在 `PutObjectRetentionHandler` 最顶部加一行 `checkRequestAuthType(..., PutObjectRetentionAction)`**：在 Handler 入口处，请求体 XML（`<Retention>`）尚未解析，磁盘上的对象现有标签也尚未读取，此时求值会导致所有依赖 `s3:object-lock-remaining-retention-days`、`s3:object-lock-retain-until-date`、`s3:object-lock-retention-mode` 与 `s3:ExistingObjectTag/<key>` 的 IAM 策略条件全部失效！
+2. **直接在 `PutObjectRetentionHandler` 最顶部加一行 `checkRequestAuthType(..., PutObjectRetentionAction)`**：在 Handler 入口处，请求体 XML（`<Retention>`）尚未解析，`s3:object-lock-remaining-retention-days`、`s3:object-lock-retain-until-date` 与 `s3:object-lock-retention-mode` 等保留期条件尚不具备求值所需的输入。
 3. **只要请求头带了 `x-amz-bypass-governance-retention: true` 就一律要求 `s3:BypassGovernanceRetention`**：不符合 S3 规范——只有当操作确实需要突破有效 `GOVERNANCE` 锁时才需要检查 `s3:BypassGovernanceRetention`。
 4. **直接禁止传入空 `<Retention/>` 请求体**：通过 `<Retention/>` 清空治理锁是 `mcli retention clear` 长期依赖的公开扩展能力；只要调用方同时具备 `s3:PutObjectRetention` 与 `s3:BypassGovernanceRetention` 且显式传入 `x-amz-bypass-governance-retention: true`，就应当继续支持。
 5. **仅在开启了 Object Lock 的桶上拦截 `?versionId=` 写入（`SN-2026-016`）**：允许普通客户端通过 `?versionId=` 原地篡改已有历史版本违背了所有版本化桶的不可变语义，因此在所有桶上统一拦截非复制流量的 `?versionId=` 写入。
@@ -152,7 +152,7 @@ func isPutRetentionAllowed(ctx context.Context, r *http.Request, bucket, object 
 ### 实现细节补充 {#notes}
 
 - **空 `<Retention/>` 与超长年份下的 `s3:object-lock-remaining-retention-days` 计算**：当调用方发送 `<Retention/>` 清空治理锁时，`retDate` 为零值 `time.Time{}`。旧代码直接对零值时间调用耗时差计算，由于 `time.Duration` 最多只能表示约 290 年，算出了约 `-106751` 天的荒谬负数！提交 `0d3ba5d4c` 将零值 `retDate` 的剩余天数明确归零，并使用不溢出的日历秒差计算未来保留天数，使 `2400` 年等远期保留时间也不会因 `time.Duration` 290 年上限而发生饱和截断。
-- **`s3:ExistingObjectTag/<key>` 完整透传**：`s3:PutObjectRetention` 与 `s3:BypassGovernanceRetention` 两次鉴权均完整传入目标版本的现有对象标签。
+- **条件键边界**：`s3:PutObjectRetention` 与 `s3:BypassGovernanceRetention` 检查各自支持的保留期和版本条件。当前维护的策略模型不支持在这两个动作上使用 `s3:ExistingObjectTag/<key>`，因此不能依靠标签条件约束这两个动作。
 
 ---
 

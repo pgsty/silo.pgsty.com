@@ -107,7 +107,7 @@ When both lock groups are the same host list, the two choices describe one domai
 
 ## Where the behavior came from {#history}
 
-**Upstream origin, in several steps.** All commits below are ancestors of the last upstream master [7aac2a2c5](https://github.com/pgsty/silo/commit/7aac2a2c5), and upstream master has the same code today.
+**Upstream origin, in several steps.** All commits below are ancestors of the last upstream master [7aac2a2c5](https://github.com/minio/minio/commit/7aac2a2c5b7c882e68c1ce017d8256be2feea27f), and upstream master has the same code today.
 
 | Ingredient                                                                       | Commit                                                                                                                                                     | Date       | First upstream release         |
 | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------ |

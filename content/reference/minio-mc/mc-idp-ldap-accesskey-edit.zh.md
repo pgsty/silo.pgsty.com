@@ -3,7 +3,7 @@ title: "mc idp ldap accesskey edit"
 url: "/zh/reference/minio-mc/mc-idp-ldap-accesskey-edit/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-accesskey-edit.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-idp-ldap-accesskey-edit"></a>
@@ -121,7 +121,7 @@ access key 保持有效的时长，格式为 `#d#h#s`。
 
 账号使用的 JSON 格式策略文件路径。
 
-如果未指定，账号将使用与已认证用户相同的策略。
+新策略会覆盖此前附加的任何策略。省略 `--policy` 会保留现有的内联策略；若需移除已附加的内联策略并恢复为继承已认证用户的策略，请传入包含空策略文档（`{}` 或 `{"Version":"2012-10-17","Statement":[]}`）的文件。
 
 ##### `--secret-key` {#mc.idp.ldap.accesskey.edit.-secret-key}
 
@@ -157,6 +157,4 @@ mc idp ldap accesskey edit myminio/ mykey ---expiry-duration 24h
 
 ### S3 兼容性 {#s3}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
-
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+PGSTY mcli 受支持的服务端为 SILO；与上游 MinIO 及其他 S3 服务的兼容按[尽最大努力](/zh/reference/minio-mc/#command-mc)原则提供。

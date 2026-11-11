@@ -6,10 +6,13 @@
 
 ## 当前版本
 
-当前版本为 **SILO Server 与 mcli 20261109**、**SILO Console v2.7.0**、**silo-pkg v3.16.0** 与 **KES 20261026**，均使用 Go 1.27.3。Server 20261109 内嵌 Console 2.7.0、mcli 20261109 与 pkg v3.16.0；KES 保持独立、可选的外部密钥服务。
+当前版本为 **SILO Server 20261109**（Go 1.27.3）、独立版 **SILO Console v2.7.1**、**mcli 20261112**、**silo-pkg v3.16.1**（Go 1.27.4）与 **KES 20261026**（Go 1.27.3）。Server 20261109 内嵌 Console 2.7.0、mcli 20261109 与 pkg v3.16.0；KES 保持独立、可选的外部密钥服务。
 
 | 发布说明                      | English                                                | 简体中文                                             |
 | ----------------------------- | ------------------------------------------------------ | ---------------------------------------------------- |
+| Console 2.7.1                 | [Release notes](content/blog/release/console-2.7.1.md) | [发布说明](content/blog/release/console-2.7.1.zh.md) |
+| mcli 20261112                 | [Release notes](content/blog/release/mcli-20261112.md) | [发布说明](content/blog/release/mcli-20261112.zh.md) |
+| silo-pkg 3.16.1               | [Release notes](content/blog/release/pkg-3.16.1.md)    | [发布说明](content/blog/release/pkg-3.16.1.zh.md)    |
 | Server 20261109               | [Release notes](content/blog/release/silo-20261109.md) | [发布说明](content/blog/release/silo-20261109.zh.md) |
 | Console 2.7.0                 | [Release notes](content/blog/release/console-2.7.0.md) | [发布说明](content/blog/release/console-2.7.0.zh.md) |
 | Console 2.6.0                 | [Release notes](content/blog/release/console-2.6.0.md) | [发布说明](content/blog/release/console-2.6.0.zh.md) |

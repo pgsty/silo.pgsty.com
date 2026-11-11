@@ -137,4 +137,4 @@ The original [#65](https://github.com/pgsty/silo/issues/65) investigation also u
 
 ## Conclusion {#conclusion}
 
-Restoring `config.ReadEnvFile` in `silo-pkg/v3` (`1a0d788`) and updating the server (`a643483be`) aligns `MINIO_CONFIG_ENV_FILE` parsing across cold starts and warm restarts while preserving full backward compatibility with standard shell-style environment files.
+Hardening the `MINIO_CONFIG_ENV_FILE` loader in `cmd/common-main.go` (`6b0998157` and `2aea7fe9c`) aligns environment-file parsing across cold starts and warm restarts while preserving full backward compatibility with standard shell-style environment files and named configuration targets.

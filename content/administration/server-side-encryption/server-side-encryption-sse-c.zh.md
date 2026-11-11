@@ -62,31 +62,27 @@ SSE-C 密钥 *必须* 是一个 256 位原始编码字符串或十六进制编�
 
 ### 1) 生成加密密钥 {#id6}
 
-生成一个 256 位 base64 原始编码字符串或十六进制编码字符串作为加密密钥。
-
-以下示例生成一个满足加密密钥要求的字符串。 生成的字符串适用于非生产环境：
+SSE-C 密钥必须包含 32 个随机字节。`mcli --enc-c` 接受无填充 base64 或 64 个十六进制字符；下面使用十六进制，避免与 HTTP 请求头的编码格式混淆。
 
 ```shell
-cat /dev/urandom | head -c 32 | base64 -
+SSE_KEY_HEX="$(openssl rand -hex 32)"
 ```
 
-请遵循您所在组织关于生成加密安全密钥的要求。
-
-复制该加密密钥，以便在下一步中使用。
+后续示例在同一 shell 中使用 `SSE_KEY_HEX`。关闭 shell 前务必安全保存密钥，之后每次读取或复制加密对象都需要它。SILO 无法恢复遗失的 SSE-C 密钥，不要复用公开示例密钥。
 
 ### 2) 使用 SSE-C 加密对象 {#id7}
 
 MinIO 支持使用以下 AWS S3 请求头指定 SSE-C 加密：
 
 - `X-Amz-Server-Side-Encryption-Customer-Algorithm` 设置为 `AES256`。
-- `X-Amz-Server-Side-Encryption-Customer-Key` 设置为加密密钥值。
+- `X-Amz-Server-Side-Encryption-Customer-Key` 设置为原始 32 字节密钥的标准 base64 编码（含填充）；CLI/SDK 负责构造该请求头。
 - `X-Amz-Server-Side-Encryption-Customer-Key-MD5` 设置为加密密钥的 128 位 MD5 摘要。
 
 MinIO [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具及兼容 S3 的 SDK 提供了设置这些请求头的特定语法。 某些 [`mc`](/zh/reference/minio-mc/#command-mc) 命令（例如 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp)）包含用于启用 SSE-C 加密的 专用参数：
 
 ```shell
-mc cp ~/data/mydata.json ALIAS/BUCKET/mydata.json \
-   --encrypt-key "ALIAS/BUCKET/=c2VjcmV0ZW5jcnlwdGlvbmtleWNoYW5nZW1lMTIzNAo="
+mcli cp ~/data/mydata.json ALIAS/BUCKET/mydata.json \
+   --enc-c "ALIAS/BUCKET/=${SSE_KEY_HEX}"
 ```
 
 - 将 [`ALIAS`](/zh/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) 替换为您要写入 SSE-C 加密对象的 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
@@ -105,8 +101,8 @@ MinIO 支持使用以下 AWS S3 请求头，将 SSE-C 加密对象复制到另�
 MinIO [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具及兼容 S3 的 SDK 提供了设置这些请求头的特定语法。 某些 [`mc`](/zh/reference/minio-mc/#command-mc) 命令（例如 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp)）包含用于启用 SSE-C 加密的 专用参数：
 
 ```shell
-mc cp SOURCE/BUCKET/mydata.json TARGET/BUCKET/mydata.json  \
---encrypt-key "SOURCE/BUCKET/=c2VjcmV0ZW5jcnlwdGlvbmtleWNoYW5nZW1lMTIzNAo=,TARGET/BUCKET/=c2VjcmV0ZW5jcnlwdGlvbmtleWNoYW5nZW1lMTIzNAo="
+mcli cp SOURCE/BUCKET/mydata.json TARGET/BUCKET/mydata.json  \
+--enc-c "SOURCE/BUCKET/=${SSE_KEY_HEX},TARGET/BUCKET/=${SSE_KEY_HEX}"
 ```
 
 - 将 [`SOURCE/BUCKET`](/zh/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) 替换为您要读取 加密对象所在的 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)， 以及您要读取 SSE-C 加密对象的存储桶或存储桶前缀的完整路径。

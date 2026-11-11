@@ -15,17 +15,17 @@ icon: fa-solid fa-server
 
 ## 20261109 之后的候选改动（未发布） {#candidate-after-20261109}
 
-以下修复已为下一次 SILO 配套发布准备，**不包含在已发布的 Server 20261109、Console v2.7.0 或 mcli 20261109 制品中**。目前尚未分配新组件版本；候选 Server 源码仍固定依赖此前已发布的 Console 和 mcli，因此交付客户端与界面修复还需要选定并发布对应组件。
+以下修复已在 `pgsty/silo` `main`（[`34ba7cc1ff3e`](https://github.com/pgsty/silo/commit/34ba7cc1ff3ef8f55888933921ab1e69e2182bf8)，Draft 标签 `RELEASE.2026-11-12T00-00-00Z`，Go `1.27.4`，Helm chart `7.0.5`）完成准备，待下一版 SILO Server 公开后交付，**不包含在已公开发布的 Server 20261109（`d998292387cc`）制品中**。配套的独立 [Console v2.7.1](/zh/blog/release/console-2.7.1/)、[mcli 20261112](/zh/blog/release/mcli-20261112/) 与 [silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/) 已正式发布并锁定于 `34ba7cc1ff3e`；服务端行为变更须在相应 Server 正式发布并部署后生效。
 
-- **读取授权：** `GetObjectAttributes` 使用目标版本的实际标签，同时检查 Attributes 与 GetObject 权限；显式提供 `versionId` 时使用对应的版本动作。对象不存在时仍依据 `s3:ListBucket` 决定错误掩码；已获授权但无法读取元数据的请求保留存储错误。
+- **读写标签与版本鉴权：** `GetObjectAttributes` 使用目标版本的实际标签，同时检查 Attributes 与 GetObject 权限；`GetObject`/`HeadObject` 在带标签条件读取未达读仲裁时保留 `5xx` 存储错误（[#294](https://github.com/pgsty/silo/pull/294)）。`CopyObject`、`UploadPartCopy` 与 `SelectObjectContent` 按源对象的实际标签鉴权；`CopyObject` 使用 `COPY` 标签指令时，目的端请求标签条件以实际复制的标签为准。标签接口将鉴权绑定到存储标签和请求版本。普通元数据列举检查当前对象权限，版本列举逐版本检查。GET 与标签操作显式提供 `versionId` 时，版本动作的显式拒绝优先；没有此类拒绝时，SILO 保留历史基础动作授权。这一兼容行为不同于 AWS 要求单独授予版本动作的规则。对象锁变更继续检查保留期／法律保留权限及已有锁状态。对象不存在时仍依据 `s3:ListBucket` 决定错误掩码。
 - **ZIP 读取：** GET、HEAD 与成员列举均按 ZIP 对象的实际标签授权。列举成员同时要求桶上的 `s3:ListBucket` 和 ZIP 上的 `s3:GetObject`。缺失的索引只在内存中构建，不再回写索引或改变 ZIP 元数据，因此读取不需要额外写权限。归档成员视图仅支持 GET、HEAD 和列举，不提供修改或删除 ZIP 内成员的操作；已获授权的 ZIP 文件上传仍可通过 `x-minio-extract: true` 显式要求持久化索引。
-- **对象锁与请求认证：** 副本写入和复制会核对目标版本的锁与标签状态，跨池合并 COMPLIANCE 保护不再依赖池顺序，并保留已授权的 GOVERNANCE 与法定保留变更。标签代理（`GET`、`PUT` 与 `DELETE`）校验每个实际存在的副本，对不可读目标失败关闭，并在复制延迟导致部分副本缺失时跳过缺失副本（仅当所有目标均不存在时返回不存在）。已认证的 unsigned-trailer 上传校验请求时间窗，桶策略允许的匿名上传继续受支持。
-- **批量删除成本：** `DeleteObjects` 中每个显式版本删除都走逐项执行的单对象路径，包括未启用 Object Lock 的桶，大批版本清理可能变慢。未指定版本 ID 的条目继续使用批量路径。
-- **存储池与恢复：** 历史版本自身复制可以在源与目标位于不同池时创建可读的新版本，覆盖加密及压缩对象。原地副本元数据更新会保留权威正文，包括该副本所在池正在退役或再平衡时；需要加密或重算校验和的复制使用活动池。恢复到期与 healing 不再仅因随时间变化的数据目录缓存标志而拆散版本仲裁。退役扫描无物理进展时停止、取消时返回错误、重新扫描此前被父键遮蔽的子键，并在核验源端清理时容忍纠删集读仲裁范围内的离线磁盘；详见[存储池退役流程](/zh/operations/deployments/baremetal-decommission-server-pool/)。
-- **IAM 与站点复制：** 服务账号策略省略或为 null 时保留 inline policy；显式 `{}` 或 `{"Statement":[]}` 清除它并恢复继承；非空策略缺少 Version 时补默认值。导入保留账号和组的禁用状态，并报告组失败；导出及复制的凭据移除派生策略声明，桶与元数据 healing、状态采集及复制 hook 均先获取站点拓扑快照并释放状态锁，再执行存储读写与对端 RPC。配套 [Console](/zh/compatibility/console/) 和 [mcli](/zh/compatibility/mcli/) 修复独立交付。
-- **批处理：** [密钥轮换](/zh/administration/batch-framework-job-keyrotate/) 在执行、重试与重新加载时保留配置的 KMS 上下文，并在更改对象密钥前拒绝非法 UTF-8。变量预检与当前固定版本的策略 evaluator 一致：不支持的 `${...}` 序列保持字面量，真正缺失的请求上下文仍然限制作业。这不意味着实现了 AWS 特殊变量的转义展开。
+- **对象锁与请求认证：** 副本写入和复制会核对目标版本的锁与标签状态，在 `renameData` 提交前校验暂存副本正文哈希、SSE-C 状态与压缩前 `ActualSize`，阻止对端时间戳清除或缩短未到期的 `COMPLIANCE` 合规保留期，要求 `X-Minio-Replication-*` 请求头纳入 SigV4 `SignedHeaders`，并在 `x-minio-force-delete` 读取桶锁元数据报错时失败关闭。暂停版本控制或前缀排除的桶在单池与多池部署下均保护受锁的存量 `null` 版本，拦截普通覆写、删除标记及被未加锁 UUID 版本遮蔽的无版本 `DELETE`。标签代理（`GET`、`PUT` 与 `DELETE`）校验每个实际存在的副本，对不可读目标失败关闭，并在复制延迟导致部分副本缺失时跳过缺失副本（仅当所有目标均不存在时返回不存在）。SigV4 请求拒绝凭据作用域日期与签名时间戳不一致、负数 `X-Amz-Decoded-Content-Length` 及截断或超长（`> 64 KiB`）的流式尾标；已认证的 unsigned-trailer 上传校验 15 分钟时间窗与 `checkUnsignedHeaders` 覆盖，桶策略允许的匿名上传继续受支持。
+- **批量删除成本：** `DeleteObjects` 中每个显式版本删除都走逐项执行的单对象路径，包括未启用 Object Lock 的桶，大批版本清理可能变慢。可能替换受锁 null 版本的无版本删除也走单对象路径，其余未指定版本 ID 的条目继续使用批量路径。
+- **存储池、元数据缓存与恢复：** 历史版本自身复制可以在源与目标位于不同池时创建可读的新版本，覆盖加密及压缩对象。原地副本元数据更新会保留权威正文，包括该副本所在池正在退役或再平衡时；需要加密或重算校验和的复制使用活动池。生命周期与恢复历史统一规范化 `2024-04-28` 前的部分自愈旧 `xl.meta` 头部（[#332](https://github.com/pgsty/silo/pull/332)）并清除随时间变化的 `xlFlagUsesDataDir` 标志位（[#344](https://github.com/pgsty/silo/issues/344)），避免拆散版本仲裁；`BucketMetadataSys.GetConfig` 防止旧缓存覆盖新配置。退役扫描无物理进展时停止、取消时返回错误、重新扫描此前被父键遮蔽的子键，并在核验源端清理时容忍纠删集读仲裁范围内的离线磁盘；详见[存储池退役流程](/zh/operations/deployments/baremetal-decommission-server-pool/)。
+- **IAM、严格策略 JSON 与站点复制：** IAM 命名策略、服务账号会话策略、STS `Policy` 参数与桶策略统一启用严格 JSON 解析（拒绝未知字段、尾部多余载荷及非对象输入）。更新服务账号时，策略省略或为 null 则保留 inline policy（含 `20261111` 前历史全拒绝空 `embedded-policy` 账号）；显式 `{}` 或 `{"Statement":[]}` 清除它并恢复继承；非空策略缺少 Version 时补默认值。IAM 导入及复制拒绝未知策略字段，同时保留受支持的历史策略语义；导入前先校验整个策略文件，已有 IAM 策略的落盘读取保持兼容。桶策略复制中的显式 null 仍表示删除。导入保留账号和组的禁用状态，并报告组失败；导出及复制的凭据移除派生策略声明，桶与元数据 healing、状态采集及复制 hook 均先获取站点拓扑快照并释放状态锁，再执行存储读写与对端 RPC。配套 [Console](/zh/compatibility/console/) 和 [mcli](/zh/compatibility/mcli/) 修复独立交付。
+- **批处理：** [密钥轮换](/zh/administration/batch-framework-job-keyrotate/) 在执行、重试与重新加载时保留配置的 KMS 上下文（更改对象密钥前拒绝非法 UTF-8），将历史 `XLV1` 对象流式重写为带明文 MD5 密封 ETag 且保留标签/过期时间的 `XLV2` 对象，并在 `SSE-S3` 转 `SSE-KMS` 时保留内部分片与分层元数据头。变量预检与当前固定版本的策略 evaluator 一致：不支持的 `${...}` 序列保持字面量，真正缺失的请求上下文仍然限制作业。这不意味着实现了 AWS 特殊变量的转义展开。
 
-下方 20261109 升级检查仍描述该正式版本。候选修复不会放宽既有的锁域、混合节点 restore 或批处理清单升级要求。
+下方 20261109 升级检查仍描述该正式版本。候选修复不会放宽既有的锁域、混合节点 restore 或批处理清单升级要求。重启前，请先确认 `.minio.sys` 在各纠删集具备健康读仲裁；多存储池集群跨版本滚动窗口期间建议排空或暂停并发 S3 写入，使跨池锁顺序与 `null` 版本对象锁检查在全部节点一致生效。 多站点混合版本窗口内避免在旧站编辑服务账号：仅修改备注也可能在旧站清除内联限制。全部站点升级后，应按明确复核过的目标策略校正账号；盲目 resync 可能传播旧站已经放宽的状态。
 
 <span id="maintenance-20261025"></span>
 <span id="post-20261026"></span>

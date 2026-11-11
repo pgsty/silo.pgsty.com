@@ -152,4 +152,4 @@ Requiring `statement.Resources.Match(args.BucketName, ...)` **and** `statement.R
 
 ## Summary {#closing}
 
-Shipped in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) (`5ff00073a` and `silo-pkg` `d8b1fa7` / `v3.12.0`), the 12 sensitive bucket-mutation actions require the policy `Resource` to match the bucket ARN itself unless `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` is explicitly set.
+Shipped in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) (`97b7d2804` and `silo-pkg` `d8b1fa7` / [`v3.11.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.11.0)), the 12 sensitive bucket-mutation actions require the policy `Resource` to match the bucket ARN itself unless `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` is explicitly set.

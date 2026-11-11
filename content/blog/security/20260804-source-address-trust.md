@@ -8,7 +8,7 @@ url: "/blog/security/source-address-trust/"
 tags: ["Security", "IAM", "Network", "Reverse Proxy", "aws:SourceIp", "Audit", "SILO"]
 ---
 
-**`SN-2026-018`** addresses client source-IP spoofing across `aws:SourceIp` IAM conditions, audit logs, bucket notification events, and admin HTTP traces in [silo-pkg `v3.12.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.0) (`62f326d`) and [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) (`00a8171cb`, [`pgsty/silo#41`](https://github.com/pgsty/silo/issues/41)): `handlers.GetSourceIP` previously trusted `X-Forwarded-For`, `X-Real-IP`, and RFC 7239 `Forwarded` from any TCP peer by default, and setting `_MINIO_API_XFF_HEADER=off` only disabled `X-Forwarded-For` while continuing to trust client-supplied `X-Real-IP` and `Forwarded` headers.
+**`SN-2026-018`** addresses client source-IP spoofing across `aws:SourceIp` IAM conditions, audit logs, bucket notification events, and admin HTTP traces in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) ([`fe6dc4780`](https://github.com/pgsty/silo/commit/fe6dc47804e9fdce2711756a9c3d9840e2d4d40a)): `handlers.GetSourceIP` previously trusted `X-Forwarded-For`, `X-Real-IP`, and RFC 7239 `Forwarded` from any TCP peer by default, and setting `_MINIO_API_XFF_HEADER=off` only disabled `X-Forwarded-For` while continuing to trust client-supplied `X-Real-IP` and `Forwarded` headers.
 
 ## Conclusions first {#summary}
 
@@ -20,7 +20,7 @@ tags: ["Security", "IAM", "Network", "Reverse Proxy", "aws:SourceIp", "Audit", "
 
 ## Every Consumer of `handlers.GetSourceIP` {#consumers}
 
-In SILO, `handlers.GetSourceIP(r)` (`silo-pkg/handlers/proxy.go`) is the single function responsible for extracting the client IP address from an incoming `*http.Request`. Four security- and observability-sensitive subsystems depend on its return value:
+In SILO, `handlers.GetSourceIP(r)` (`internal/handlers/proxy.go`) is the single function responsible for extracting the client IP address from an incoming `*http.Request`. Four security- and observability-sensitive subsystems depend on its return value:
 
 | Consumer                            | Location                                           | Security / Operational Role                                                            |
 | ----------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -30,13 +30,13 @@ In SILO, `handlers.GetSourceIP(r)` (`silo-pkg/handlers/proxy.go`) is the single 
 | Admin HTTP trace (`mc admin trace`) | `cmd/http-tracer.go`                               | Displays the client IP in live diagnostic traces.                                      |
 {.wide .expand}
 
- Note that `handlers.GetSourceIPRaw` returned the first matched header token without validating whether it was even a syntactically valid IP address (a unit test in upstream `silo-pkg` literally asserted that `X-Forwarded-For: _gazonk` returned `"_gazonk"`!). While `IpAddress` condition evaluation parses the string with `net.ParseIP`, audit logs and notification payloads received the raw string.
+ Note that `handlers.GetSourceIPRaw` returned the first matched header token without validating whether it was even a syntactically valid IP address (a unit test in upstream `internal/handlers` literally asserted that `X-Forwarded-For: _gazonk` returned `"_gazonk"`!). While `IpAddress` condition evaluation parses the string with `net.ParseIP`, audit logs and notification payloads received the raw string.
 
 ---
 
 ## Why `_MINIO_API_XFF_HEADER=off` Did Not Stop Spoofing {#the-switch}
 
-In `silo-pkg/handlers/proxy.go`, `GetSourceIPRaw` inspected three groups of headers in order:
+In `internal/handlers/proxy.go`, `GetSourceIPRaw` inspected three groups of headers in order:
 
 ```go
 var xffHeaders = []string{"X-Forwarded-For", "x-forwarded-for"}
@@ -44,7 +44,7 @@ var realIPHeaders = []string{"X-Real-IP", "x-real-ip"}
 var forwardedHeaders = []string{"Forwarded", "forwarded"}
 ```
 
-When PR [`minio/minio#20977`](https://github.com/minio/minio/pull/20977) (and `minio/pkg#306`) added `_MINIO_API_XFF_HEADER=off` in February 2025, it gated **only** the `xffHeaders` loop:
+When PR [`minio/minio#20977`](https://github.com/minio/minio/pull/20977) added `_MINIO_API_XFF_HEADER=off` in February 2025, it gated **only** the `xffHeaders` loop:
 - With `_MINIO_API_XFF_HEADER=off`, `GetSourceIPRaw` skipped `X-Forwarded-For`,
 - Then immediately checked `X-Real-IP` (`realIPHeaders`) and `Forwarded` (`forwardedHeaders`) unconditionally!
 
@@ -70,7 +70,7 @@ A common misconception is that forwarded-header spoofing only matters when SILO 
 
 ## Design of `MINIO_API_TRUSTED_PROXIES` {#design}
 
-To solve both problems cleanly, `silo-pkg v3.12.0` (`62f326d`) and Server `20260804` (`00a8171cb`) introduce `MINIO_API_TRUSTED_PROXIES`:
+To solve both problems cleanly, Server `20260804` ([`fe6dc4780`](https://github.com/pgsty/silo/commit/fe6dc47804e9fdce2711756a9c3d9840e2d4d40a)) introduces `MINIO_API_TRUSTED_PROXIES`:
 
 | Setting                                              | Peer Trust                  | Header Evaluation                                                                                                                                                                                                               |
 | ---------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -97,7 +97,7 @@ Inspecting `TestXFFDisabled` showed why: the test specifically modelled an nginx
 
 ### 3. Why `MINIO_API_TRUSTED_PROXIES` Is Env-Only (No `mc admin config` Key) {#tradeoff-config}
 
-In SILO's startup sequence, the HTTP listener and initial request routing come up before the distributed `api` subsystem configuration is loaded from erasure storage. If trusted proxies were configured via `mc admin config set api`, there would be a startup window before config load where `GetSourceIP` either failed open or failed closed, and updating the setting at runtime would require atomic reloads across `silo-pkg`. Making `MINIO_API_TRUSTED_PROXIES` an environment variable configured before listener startup eliminates any race window.
+In SILO's startup sequence, the HTTP listener and initial request routing come up before the distributed `api` subsystem configuration is loaded from erasure storage. If trusted proxies were configured via `mc admin config set api`, there would be a startup window before config load where `GetSourceIP` either failed open or failed closed, and updating the setting at runtime would require atomic reloads across `internal/handlers` and `internal/config`. Making `MINIO_API_TRUSTED_PROXIES` an environment variable configured before listener startup eliminates any race window.
 
 ### 4. Loopback Exemption: Peer vs. Chain Hop {#tradeoff-loopback}
 
@@ -135,7 +135,7 @@ In a multi-node SILO cluster (`silo server http://node{1..4}/data`), a load bala
 
 ## Bugs Caught During Multi-Pass Code Review {#review}
 
-Iterative code review of the patch across `silo-pkg` and `silo` caught nine subtle edge cases before release:
+Iterative code review of the patch across `internal/handlers`, `internal/config`, and `cmd` caught nine subtle edge cases before release:
 
 ### Second-Pass Review Findings {#review-round-two}
 

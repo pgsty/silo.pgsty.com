@@ -1,7 +1,7 @@
 ---
 title: "组件版本"
 linkTitle: "组件版本"
-description: "SILO 20261109 正式发布组件、Console 2.7.0、mcli 20261109、silo-pkg 3.16.0、KES 20261026 与升级边界。"
+description: "SILO 20261109 正式服务端基线、独立 Console 2.7.1、mcli 20261112、silo-pkg 3.16.1、KES 20261026 与升级边界。"
 url: "/zh/compatibility/versions/"
 weight: 5
 type: docs
@@ -9,7 +9,7 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-SILO **20261109** 是当前正式服务端版本，内嵌 Console 2.7.0、mcli 20261109 与 silo-pkg 3.16.0。KES 20261026 是独立、可选的外部密钥服务。正式支持维护的 PGSTY 组件组合，对原厂 MinIO/MC 尽最大努力兼容。
+SILO **20261109** 是当前正式公开的服务端版本（基于 Go 1.27.3，内嵌 Console 2.7.0、mcli 20261109 与 silo-pkg 3.16.0）；独立版 **[Console 2.7.1](/zh/blog/release/console-2.7.1/)**、**[mcli 20261112](/zh/blog/release/mcli-20261112/)** 与 **[silo-pkg 3.16.1](/zh/blog/release/pkg-3.16.1/)** 已基于 Go 1.27.4 正式发布。KES 20261026 是独立、可选的外部密钥服务。正式支持维护的 PGSTY 组件组合，对原厂 MinIO/MC 尽最大努力兼容。
 
 ## Server 20261109 {#server-20261109}
 
@@ -27,44 +27,47 @@ SILO **20261109** 是当前正式服务端版本，内嵌 Console 2.7.0、mcli 2
 | Go / 平台归档      | **Go 1.27.3**                                                                                       | Windows ZIP；Linux/macOS tar.gz（Console Windows 仅含 amd64） |
 {.wide .expand}
 
-| Docker Hub 镜像                      | 已发布标签                                              | 多架构清单摘要（Digest）                                                  |
-| ------------------------------------ | ------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `docker.io/pgsty/silo`               | `RELEASE.2026-11-09T00-00-00Z`、`latest`                | `sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d` |
-| `docker.io/pgsty/silo`（distroless） | `RELEASE.2026-11-09T00-00-00Z-distroless`、`distroless` | `sha256:fdf726815e38c2d1cb06c640e237daa83b3914e58099aecd073fef9d8e42cb00` |
-| `docker.io/pgsty/silo-console`       | `v2.7.0`、`latest`                                      | `sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892` |
-| `docker.io/pgsty/mc`                 | `RELEASE.2026-11-09T00-00-00Z`、`latest`                | `sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf` |
-| `docker.io/pgsty/kes`                | `RELEASE.2026-10-26T00-00-00Z`、`latest`                | `sha256:ea36fcdd260c606eb89e693b0949aea73b149359605273a98fcf13c8433049cd` |
+| Docker Hub 镜像                      | 已发布标签                                                                                                                        | 多架构清单摘要（Digest）                                                  |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `docker.io/pgsty/silo`               | `RELEASE.2026-11-09T00-00-00Z`、`latest`                                                                                          | `sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d` |
+| `docker.io/pgsty/silo`（distroless） | `RELEASE.2026-11-09T00-00-00Z-distroless`、`distroless`                                                                           | `sha256:fdf726815e38c2d1cb06c640e237daa83b3914e58099aecd073fef9d8e42cb00` |
+| `docker.io/pgsty/silo-console`       | `v2.7.1`、`latest`（`v2.7.0`：`sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`）                         | `sha256:2afef06f8505eadb24d657acd0f68c78bce8b148b1d9b74981454560fa3b055f` |
+| `docker.io/pgsty/mc`                 | `RELEASE.2026-11-12T00-00-00Z`、`latest`（`20261109`：`sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`） | `sha256:b532278b7a3747dbab6fe45eebb40a653efa704e6758e24e9d9ec54fc96c1800` |
+| `docker.io/pgsty/kes`                | `RELEASE.2026-10-26T00-00-00Z`、`latest`                                                                                          | `sha256:ea36fcdd260c606eb89e693b0949aea73b149359605273a98fcf13c8433049cd` |
 {.wide .expand}
 
-KES 不内嵌于 Server，独立维护版本节奏。[发布与升级说明](/zh/blog/release/silo-20261109/)记录 batch 格式边界、混合版本恢复、锁域升级与逐节点 S3 就绪检查；另见 [Server 20261109 升级检查](/zh/compatibility/server/#maintenance-20261109)与[下载页](/zh/download/)。普通对象／IAM 回退验证不代表 20261026 worker 能恢复执行绑定提交者的 v2 batch 记录。
+KES 不内嵌于 Server，独立维护版本节奏。[发布与升级说明](/zh/blog/release/silo-20261109/)记录 batch 格式边界、混合版本恢复、锁域升级与逐节点 S3 就绪检查；另见 [Server 20261109 升级检查](/zh/compatibility/server/#maintenance-20261109)、[20261109 之后的候选修复](/zh/compatibility/server/#candidate-after-20261109)与[下载页](/zh/download/)。普通对象／IAM 回退验证不代表 20261026 worker 能恢复执行绑定提交者的 v2 batch 记录。
 
 ## 独立 Console {#console}
 
 <span id="console-2-6-0"></span>
 
-最新正式发布的独立 Console 为 [2.7.0](/zh/blog/release/console-2.7.0/)，
-源码提交为 `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`。
-该版本加入十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复，以及用量后台任务、普通 HTTP 与上传修复，
-使用 Go 1.27.3、silo-pkg v3.16.0 与正式 mcli 20261109（Go 伪版本 `v0.0.0-20261109021353-e1d4cc5abfe0`）。
+最新正式发布的独立 Console 为 [2.7.1](/zh/blog/release/console-2.7.1/)，
+源码提交为 `3825ebc44451fdc8eefda3d4ec523a79dfecb236`（`v0.0.0-20261111181657-3825ebc44451`）。
+该版本在编辑元数据时保留服务账号策略继承关系、拦截各类空内联策略变体、在编辑弹窗内直接显示保存报错并执行严格策略 JSON 校验，
+使用 Go 1.27.4、[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/) 与 [mcli 20261112](/zh/blog/release/mcli-20261112/)（Go 伪版本 `v0.0.0-20261111180825-a37a9f054fba`）构建。
+[2.7.0](/zh/blog/release/console-2.7.0/)（源码 `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`）加入了十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复及用量后台任务修复；
 [2.6.0](/zh/blog/release/console-2.6.0/)（源码 `f8ab146695fd1df74e4b84128a286d552921bf00`）加入了用量扫描、保留版本统计与存储桶管理修复。
-Server 20261109 内嵌 Console 2.7.0；历史 Server 20261026 保留 Console 2.5.1。
+已公开的 Server 20261109 内嵌 Console 2.7.0（待发布的 Draft Server 20261112 内嵌 Console 2.7.1）；历史 Server 20261026 保留 Console 2.5.1。
 
-## mcli 20261109 {#mcli-20261109}
+## mcli 20261112 {#mcli-20261112}
 
-[独立客户端发布](/zh/blog/release/mcli-20261109/)使用 tag
-`RELEASE.2026-11-09T00-00-00Z`，包版本为 `20261109000000.0.0`，源码为
-[`e1d4cc5abfe00b674eb36347399e7398990be467`](https://github.com/pgsty/mc/commit/e1d4cc5abfe00b674eb36347399e7398990be467)。
-该版本使用 Go 1.27.3、silo-pkg v3.16.0 与上游 minio-go
-`v7.4.2-0.20261025165926-320af050c445` 构建。Server 20261109 与 Console 2.7.0
-已采用 mcli 20261109；Server 20261026、Console v2.6.0 及更早二进制仍保留各自原有的内嵌客户端构建。
+<span id="mcli-20261109"></span>
 
-## 共享包 v3.16.0 {#pkg-3-16-0}
+最新[独立客户端发布](/zh/blog/release/mcli-20261112/)使用标签
+`RELEASE.2026-11-12T00-00-00Z`，包版本为 `20261112000000.0.0`，源码为
+[`a37a9f054fba828a0bbbceb4e9ff247ccf09c28d`](https://github.com/pgsty/mc/commit/a37a9f054fba828a0bbbceb4e9ff247ccf09c28d)
+（`v0.0.0-20261111180825-a37a9f054fba`），基于 Go 1.27.4、[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/) 与上游 minio-go
+`v7.4.2-0.20261025165926-320af050c445` 构建，对齐各访问密钥编辑命令的显式空内联策略重置行为并启用严格策略 JSON 校验。
+Console 2.7.1 已采用 mcli 20261112；已公开的 Server 20261109 保留 [mcli 20261109](/zh/blog/release/mcli-20261109/)（`e1d4cc5abfe00b674eb36347399e7398990be467`），更早二进制仍保留各自原有的内嵌客户端构建。
 
-[silo-pkg v3.16.0](/zh/blog/release/pkg-3.16.0/) 是独立的源码库发布，要求
-Go 1.27.3。该版本更新 JOSE、网络、CPU 检测与 YAML 依赖，保持公开 API
-和策略语义兼容。Server 20261109、Console 2.7.0 与 mcli 20261109 已使用
-`github.com/pgsty/silo-pkg/v3 v3.16.0` 构建；外部 Go 调用方需选择 `v3.16.0`
-并重新构建，Server 20261026、Console v2.6.0 及下文历史应用制品仍保留各自原有的依赖版本。
+## 共享包 v3.16.1 {#pkg-3-16-1}
+
+<span id="pkg-3-16-0"></span>
+
+[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/)（`433f7eefa714a30b72ca70c4dffcd5faca25804f`）是独立的源码库发布，要求
+Go 1.27.4。该版本收紧 `ParseConfigStrict` 与 `ParseBucketPolicyConfig` 的严格 JSON 策略解码，并升级基础 `golang.org/x/*`、gRPC 与 `go-humanize` 依赖，保持公开 API 与合法策略语义兼容。Console 2.7.1 与 mcli 20261112 已使用
+`github.com/pgsty/silo-pkg/v3 v3.16.1` 构建；已公开的 Server 20261109 保留 [silo-pkg v3.16.0](/zh/blog/release/pkg-3.16.0/)（`b7aeea85e84e8888d6ab424c7123a1297711bc3f`），外部 Go 调用方需选择 `v3.16.1` 并重新构建。
 
 ## 20261026 正式组件 {#server-20261026}
 

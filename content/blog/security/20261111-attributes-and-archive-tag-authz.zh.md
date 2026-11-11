@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/20261111-attributes-and-archive-tag-authz/"
 ---
 
-**发布状态：** 主干已修复（[`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0)），将随 [`20261109`](/zh/blog/release/silo-20261109/) 之后的下一版 Server 发布\
+**发布状态：** 主干已修复（[`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0)、[`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)），将随 [`20261109`](/zh/blog/release/silo-20261109/) 之后的下一版 Server 发布\
 **安全编号：** `SN-2026-024`（[安全公告台账](/zh/about/security-advisories/#sn-2026-024)，[#342](https://github.com/pgsty/silo/issues/342)）\
 **严重程度：** 高危（High）\
 **影响范围：** **SILO Server**（`RELEASE.2026-11-09T00-00-00Z` 及更早版本）与自 `2021-06-10`（[`ba5fb2365`](https://github.com/pgsty/silo/commit/ba5fb2365cc9797fcf4952041e9cfb035b8277f8)）和 `2024-01-05`（[`9b8ba97f9`](https://github.com/pgsty/silo/commit/9b8ba97f9fc0a39ea6632443a102bd42f8067da3)）以来的上游原版 MinIO\
@@ -26,7 +26,7 @@ url: "/zh/blog/security/20261111-attributes-and-archive-tag-authz/"
   3. **ZIP 成员 `ListObjectsV2` 绕过 `s3:GetObject` 泄露归档内部结构：** `listObjectsV2InArchive`（携带 `x-minio-extract: true` 请求 `GET /bucket?list-type=2&prefix=archive.zip/`）直接复用了外层桶级 `s3:ListBucket` 鉴权结果，未检查调用方是否对 `archive.zip` 拥有 `s3:GetObject` 权限。即使策略显式配置了 `Deny s3:GetObject`，仅持有列桶权限的账号仍可读取 `.zip` 数据流并枚举包内全部文件名、未压缩字节大小与时间戳。
   4. **只读请求附带隐式元数据写入：** 当被读取的 `.zip` 对象在上传时未预建归档索引时，`readObjectZIPInfo` 会在 `GET`、`HEAD` 与 `ListObjectsV2` 请求中后台调用 `PutObjectMetadata` 将生成的索引写回 `xl.meta`，违反了只读 HTTP 动词不修改持久化元数据的边界。
 - **上游溯源：** `.zip` 在线提取扩展由上游 MinIO 于 `2021-06-10` 在提交 [`ba5fb2365`](https://github.com/pgsty/silo/commit/ba5fb2365cc9797fcf4952041e9cfb035b8277f8)（[minio/minio#12267](https://github.com/minio/minio/pull/12267)）中引入；`GetObjectAttributes` 由上游于 `2024-01-05` 在提交 [`9b8ba97f9`](https://github.com/pgsty/silo/commit/9b8ba97f9fc0a39ea6632443a102bd42f8067da3)（[minio/minio#18732](https://github.com/minio/minio/pull/18732)）中引入。
-- **修复方式：** 提交 [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) 将两类路径统一拆分为前置身份认证与读取元数据后的真实标签鉴权：对 `GetObjectAttributes` 的双动作及 `.zip` 归档的 `GET`、`HEAD`、`ListObjectsV2` 全量绑定目标版本的真实 `UserTags`，强制要求归档列举具备针对 `.zip` 对象的 `s3:GetObject` 权限，并将读取路径上的归档索引构建改为纯内存无副作用操作。
+- **修复方式：** 提交 [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) 与 [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555) 将两类路径统一拆分为前置身份认证与读取元数据后的真实标签鉴权：对 `GetObjectAttributes` 的双动作及 `.zip` 归档的 `GET`、`HEAD`、`ListObjectsV2` 全量绑定目标版本的真实 `UserTags`，强制要求归档列举具备针对 `.zip` 对象的 `s3:GetObject` 权限，并通过 `readObjectZIPInfo` 将读取路径上的归档索引构建改为纯内存无副作用操作。
 
 ---
 
@@ -64,7 +64,7 @@ url: "/zh/blog/security/20261111-attributes-and-archive-tag-authz/"
 
 ## 三、修复方案：设计思考与充分必要性 {#fix}
 
-提交 [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) 将上述全部读取路径对齐至存储后标签鉴权与只读无副作用不变量：
+提交 [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) 与 [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555) 将上述全部读取路径对齐至存储后标签鉴权与只读无副作用不变量（并与 [`89028732a`](https://github.com/pgsty/silo/commit/89028732ab2dc69d852ca8eb37cbd50fe84d9ce4) / [#294](https://github.com/pgsty/silo/pull/294) 在 `GetObject`/`HeadObject` 上保留标签条件读取的 `5xx` 存储错误保持一致）：
 
 1. **`GetObjectAttributes` 双动作真实标签鉴权（`cmd/object-handlers.go`）：**
    - 根据是否指定 `opts.VersionID` 选定 `[s3:GetObjectAttributes, s3:GetObject]` 或对应 `*Version*` 双动作，前置执行 `authenticateRequest`；
@@ -95,7 +95,7 @@ url: "/zh/blog/security/20261111-attributes-and-archive-tag-authz/"
 
 ## 升级指引与缓解建议 {#remediation}
 
-1. **升级 SILO Server** 至包含提交 [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) 的 `20261109` 后续发布版本。
+1. **升级 SILO Server** 至包含提交 [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) 与 [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555) 的 `20261109` 后续发布版本。
 2. **升级前网关层临时缓解：** 若未升级集群依赖 `s3:ExistingObjectTag/*` 的 `Deny` 规则保护敏感对象（尤其是 `.zip` 归档包），可在升级完成前于反向代理层拦截携带 `x-minio-extract` 请求头或 `?attributes` 查询参数的外部请求。
 3. **核对归档浏览角色的 IAM 策略：** 若业务应用使用了 `x-minio-extract: true` 配合 `ListObjectsV2` 在线展示 `.zip` 内部目录，升级前请确认该角色除 `s3:ListBucket` 外已同时具备目标 `.zip` 对象的 `s3:GetObject` 权限。
 

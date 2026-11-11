@@ -91,7 +91,7 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
 
 ### 来源追溯 {#provenance}
 
-**这个缺陷来自上游 MinIO。SILO 在分叉时继承了它，并没有引入它。** 分叉点是 [27742d469](https://github.com/pgsty/silo/commit/27742d469462e1561c776f88ca7a1f26816d69e2)（2025-12-03）。缺陷路径上的函数与上游 master（[7aac2a2c5](https://github.com/pgsty/silo/commit/7aac2a2c5b7c882e68c1ce017d8256be2feea27f)，2026-02-12）完全一致：`erasureServerPools.deletePrefix`、`erasureSets.deletePrefix`、`erasureSets.DeleteObject`、`erasureObjects.deletePrefix` 和 `batchObjsForDelete` 与上游相同，`erasureServerPools.DeleteObject` 和 `erasureObjects.DeleteObject` 中的 `DeletePrefix` 分支也相同。生命周期调用方对"删除全部版本"仍使用上游的选项。
+**这个缺陷来自上游 MinIO。SILO 在分叉时继承了它，并没有引入它。** 分叉点是 [27742d469](https://github.com/pgsty/silo/commit/27742d469462e1561c776f88ca7a1f26816d69e2)（2025-12-03）。缺陷路径上的函数与上游 master（[7aac2a2c5](https://github.com/minio/minio/commit/7aac2a2c5b7c882e68c1ce017d8256be2feea27f)，2026-02-12）完全一致：`erasureServerPools.deletePrefix`、`erasureSets.deletePrefix`、`erasureSets.DeleteObject`、`erasureObjects.deletePrefix` 和 `batchObjsForDelete` 与上游相同，`erasureServerPools.DeleteObject` 和 `erasureObjects.DeleteObject` 中的 `DeletePrefix` 分支也相同。生命周期调用方对"删除全部版本"仍使用上游的选项。
 
 缺陷由四个上游要素组合而成。生命周期规则第一次可能删除其他 key 的版本是 `RELEASE.2023-06-29T05-12-28Z`。第一个带有该缺陷的 SILO 版本是 `RELEASE.2025-12-03T12-00-00Z`，也就是第一个 SILO 标签。从它到 `RELEASE.2026-10-26T00-00-00Z` 的全部 18 个 SILO 版本都包含它。
 

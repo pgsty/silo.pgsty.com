@@ -13,7 +13,7 @@ upstream_modified: true
 
 MinIO 服务器端加密（SSE）在写入操作期间保护对象，使客户端能够利用服务器的处理能力在存储层保障对象安全（静态加密）。 SSE 还为与安全锁定和擦除相关的监管与合规要求提供关键能力。
 
-MinIO SSE 使用 [MinIO Key Encryption Service (KES)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) 和外部密钥管理服务（KMS）来大规模执行安全的加密操作。 MinIO 也支持客户端管理的密钥管理模式，由应用程序全权负责创建和管理供 MinIO SSE 使用的加密密钥。
+MinIO SSE 使用 [PGSTY KES](https://github.com/pgsty/kes) 和外部密钥管理服务（KMS）来大规模执行安全的加密操作。 MinIO 也支持客户端管理的密钥管理模式，由应用程序全权负责创建和管理供 MinIO SSE 使用的加密密钥。
 
 MinIO SSE 在功能和 API 上与 [AWS Server-Side Encryption](https://docs.aws.amazon.com/AmazonS3/latest/userguide/server-side-encryption.html) 兼容，并支持以下加密策略：
 
@@ -23,11 +23,11 @@ MinIO 支持使用存储在外部 <abbr title="密钥管理系统">KMS</abbr> �
 
 对于未启用自动 SSE-KMS 加密的存储桶，客户端也可以在写入操作时指定一个 <abbr title="外部密钥">EK</abbr>。
 
-MinIO 会在启用服务器端加密时对后端数据进行加密。 SSE-KMS 加密一旦启用便无法禁用。
+SILO 可通过配置的 KMS 加密后端 IAM/配置数据。可用 `mcli encrypt clear` 清除桶默认加密，但已有加密数据仍需要原密钥。在这些数据仍依赖密钥服务时，不要移除它。
 
 与 SSE-S3 和 SSE-C 相比，SSE-KMS 提供更细粒度且可定制的加密能力，因此更推荐使用这种方式，而不是其他受支持的加密方法。
 
-如需在本地（非生产）MinIO 部署中启用 SSE-KMS 的教程，请参阅 [快速开始](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms-quickstart)。 对于生产环境的 MinIO 部署，请使用以下指南之一：
+如需在本地（非生产）MinIO 部署中启用 SSE-KMS 的教程，请参阅 [快速开始](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms-quickstart)。 持久化部署请使用 [PGSTY KES 与 OpenBao](/zh/operations/server-side-encryption/configure-minio-kes/)。以下归档上游指南介绍其他继承后端，不代表这些服务已通过 SILO 集成验收：
 
 - [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
 - [Azure Key Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
@@ -42,9 +42,9 @@ MinIO 支持使用存储在外部 <abbr title="密钥管理系统">KMS</abbr> �
 
 对于未启用自动 SSE-S3 加密的存储桶，客户端也可以在写入操作中请求 SSE 加密。
 
-MinIO 会在启用服务器端加密时对后端数据进行加密。 SSE-KMS 加密一旦启用便无法禁用。
+SILO 可通过配置的 KMS 加密后端 IAM/配置数据。可用 `mcli encrypt clear` 清除桶默认加密，但已有加密数据仍需要原密钥。在这些数据仍依赖密钥服务时，不要移除它。
 
-如需在本地（非生产）MinIO 部署中启用 SSE-s3 的教程，请参阅 [快速开始](/zh/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3-quickstart)。对于生产环境的 MinIO 部署，请使用以下指南之一：
+如需在本地（非生产）MinIO 部署中启用 SSE-s3 的教程，请参阅 [快速开始](/zh/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3-quickstart)。持久化部署请使用 [PGSTY KES 与 OpenBao](/zh/operations/server-side-encryption/configure-minio-kes/)。以下归档上游指南介绍其他继承后端，不代表这些服务已通过 SILO 集成验收：
 
 - [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
 - [Azure Key Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
@@ -55,7 +55,7 @@ MinIO 会在启用服务器端加密时对后端数据进行加密。 SSE-KMS �
 - [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 {{< /tab >}}
 {{< tab label="SSE-C" value="sse-c" >}}
-客户端在对象写入操作中指定一个 <abbr title="外部密钥">EK</abbr>。 MinIO 使用指定的 <abbr title="外部密钥">EK</abbr> 执行 SSE-S3。
+客户端在对象写入操作中指定一个 <abbr title="外部密钥">EK</abbr>。 SILO 使用客户端提供的密钥执行 SSE-C，无需 KES 或服务端 KMS。
 
 SSE-C 不支持存储桶默认加密设置，并要求客户端执行所有密钥管理操作。
 {{< /tab >}}
@@ -67,15 +67,14 @@ MinIO SSE 需要启用 [网络加密（TLS）](/zh/operations/network-encryption
 
 ## 安全擦除与锁定 {#minio-encryption-sse-secure-erasure-locking}
 
-MinIO 需要访问用于 SSE 操作的加密密钥（EK）*以及* 外部密钥管理系统 （KMS）才能解密对象。你可以利用这一依赖关系，通过禁用对用于加密的 EK 或 KMS 的访问，来安全地擦除对象并锁定对其的访问。
+KES 和 SILO 可以缓存密钥材料。封存密钥存储或撤销访问权限不保证立即清除缓存；测试撤销效果时需要考虑缓存过期和仍在运行的进程。
 
-常见策略包括但不限于：
+SSE-KMS 和 SSE-S3 对象依赖其元数据记录的外部密钥（EK）：
 
-- Seal <abbr title="密钥管理系统">KMS</abbr> 使 MinIO Server 无法再访问它。这样会锁定所有由存储在 KMS 上的任意 <abbr title="外部密钥">EK</abbr> 保护的 SSE-KMS 或 SSE-S3 加密对象。只要 KMS 保持 sealed，这些加密对象就始终不可读。
-- Seal/Unmount 一个 <abbr title="外部密钥">EK</abbr>。这样会锁定所有由该 EK 保护的 SSE-KMS 或 SSE-S3 加密对象。只要 CMK(s) 处于 sealed 状态，这些加密对象就始终不可读。
-- 删除一个 <abbr title="外部密钥">EK</abbr>。这样会使所有由该 EK 保护的 SSE-KMS 或 SSE-S3 加密对象 永久不可读。删除 EK 并同时删除数据的组合方式，可能满足围绕数据安全删除的 监管要求。
+- 封存密钥存储或禁用 EK 访问，只会在可用的缓存密钥材料也不可用后阻止解密。应验证所有 SILO 与 KES 实例；仅封存后端不能证明读取已停止。
+- 永久丢失 EK 的全部可用副本（包括缓存和备份），会使仍依赖它的对象无法恢复。
 
-  删除一个 <abbr title="外部密钥">EK</abbr> 通常是不可逆的。在有意删除主密钥之前务必极其谨慎。
+应保留原密钥，直到所有需要保留的对象版本均已迁移且验证能够解密。
 
 如需了解更多信息，请参阅：
 

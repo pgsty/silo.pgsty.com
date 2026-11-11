@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/20261111-attributes-and-archive-tag-authz/"
 ---
 
-**Status:** Fixed on `main` ([`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0)); scheduled for the next post-[`20261109`](/blog/release/silo-20261109/) Server release\
+**Status:** Fixed on `main` ([`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0), [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)); scheduled for the next post-[`20261109`](/blog/release/silo-20261109/) Server release\
 **Identifier:** `SN-2026-024` ([Security Advisory Ledger](/about/security-advisories/#sn-2026-024), [#342](https://github.com/pgsty/silo/issues/342))\
 **Severity:** High\
 **Affected scope:** **SILO Server** (`RELEASE.2026-11-09T00-00-00Z` and earlier) and inherited upstream MinIO releases since `2021-06-10` ([`ba5fb2365`](https://github.com/pgsty/silo/commit/ba5fb2365cc9797fcf4952041e9cfb035b8277f8)) and `2024-01-05` ([`9b8ba97f9`](https://github.com/pgsty/silo/commit/9b8ba97f9fc0a39ea6632443a102bd42f8067da3))\
@@ -26,7 +26,7 @@ Standard `GetObject` and `HeadObject` handlers in SILO authenticate the caller f
   3. **ZIP member `ListObjectsV2` bypassed `s3:GetObject`:** `listObjectsV2InArchive` (`GET /bucket?list-type=2&prefix=archive.zip/` with `x-minio-extract: true`) relied solely on the caller's bucket-level `s3:ListBucket` check in `listObjectsV2Handler`. A principal granted `s3:ListBucket`—even under an explicit `Deny` on `s3:GetObject` for `archive.zip`—could read the `.zip` central directory from storage and enumerate every internal member filename, uncompressed byte size, and timestamp.
   4. **Read-path metadata mutation on unindexed `.zip` objects:** When a `.zip` object had not been uploaded with a prebuilt archive index (`X-Amz-Meta-Snowball-Auto-Extract`), `readObjectZIPInfo` called `PutObjectMetadata` during `GET`, `HEAD`, and `ListObjectsV2` to persist the generated index onto the stored version—mutating object metadata from read-only HTTP verbs without write authorization.
 - **Upstream provenance:** The `.zip` extraction S3 extension was introduced in upstream MinIO [`ba5fb2365`](https://github.com/pgsty/silo/commit/ba5fb2365cc9797fcf4952041e9cfb035b8277f8) (`2021-06-10`, [minio/minio#12267](https://github.com/minio/minio/pull/12267)); `GetObjectAttributes` was introduced in [`9b8ba97f9`](https://github.com/pgsty/silo/commit/9b8ba97f9fc0a39ea6632443a102bd42f8067da3) (`2024-01-05`, [minio/minio#18732](https://github.com/minio/minio/pull/18732)).
-- **Fix:** Commit [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) authenticates upfront, authorizes both `GetObjectAttributes` actions and all three `.zip` read paths (`GET`, `HEAD`, `ListObjectsV2`) against the archive/object version's stored `UserTags`, requires `s3:GetObject` on the `.zip` object before listing its internal members, and keeps read-time `.zip` index construction strictly in memory (`PutObjectMetadata` runs only on uploads that explicitly request indexing).
+- **Fix:** Commits [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) and [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555) authenticate upfront, authorize both `GetObjectAttributes` actions and all three `.zip` read paths (`GET`, `HEAD`, `ListObjectsV2`) against the archive/object version's stored `UserTags`, require `s3:GetObject` on the `.zip` object before listing its internal members, and keep read-time `.zip` index construction strictly in memory via `readObjectZIPInfo` (`PutObjectMetadata` runs only on uploads that explicitly request indexing).
 
 ---
 
@@ -64,7 +64,7 @@ Both [`ba5fb2365`](https://github.com/pgsty/silo/commit/ba5fb2365cc9797fcf495204
 
 ## 3. Solution Design: Why It Is Necessary and Sufficient {#fix}
 
-Commit [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) aligns `GetObjectAttributes` and all three `.zip` archive read operations with SILO's post-metadata tag authorization and read-only storage invariants:
+Commits [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) and [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555) align `GetObjectAttributes` and all three `.zip` archive read operations with SILO's post-metadata tag authorization and read-only storage invariants (alongside [`89028732a`](https://github.com/pgsty/silo/commit/89028732ab2dc69d852ca8eb37cbd50fe84d9ce4) / [#294](https://github.com/pgsty/silo/pull/294) preserving `5xx` storage errors on tag-conditioned `GetObject`/`HeadObject` reads):
 
 1. **`GetObjectAttributes` (`cmd/object-handlers.go`):**
    - Selects `[s3:GetObjectAttributes, s3:GetObject]` (or `[s3:GetObjectVersionAttributes, s3:GetObjectVersion]` when `opts.VersionID != ""`), runs `authenticateRequest` upfront, reads `objInfo`, and evaluates **both** required actions against `objInfo.UserTags` via `authorizeRequestWithExistingTags` (or `authorizeRequestWithUnreadTags` when `GetObjectInfo` returns an error).
@@ -95,7 +95,7 @@ Commit [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479a
 
 ## Upgrade and Mitigation Guidance {#remediation}
 
-1. **Upgrade SILO Server** to the post-`20261109` release containing [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0).
+1. **Upgrade SILO Server** to the post-`20261109` release containing [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) and [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555).
 2. **Temporary mitigation prior to upgrade:** On unpatched deployments that rely on `s3:ExistingObjectTag/*` `Deny` rules to isolate sensitive objects (especially `.zip` archives), block incoming client requests carrying the `x-minio-extract` HTTP header or `?attributes` query parameter at the reverse proxy until the server upgrade is complete.
 3. **Review archive-listing IAM roles:** If an internal application intentionally uses `ListObjectsV2` with `x-minio-extract: true` to browse `.zip` contents, ensure its IAM policy includes `s3:GetObject` (and satisfies any tag conditions) on those `.zip` objects in addition to `s3:ListBucket`.
 

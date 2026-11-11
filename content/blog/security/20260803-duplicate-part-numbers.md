@@ -142,4 +142,4 @@ Three independent review passes verified the handler predicate, error-code prece
 
 ## Summary {#closing}
 
-Shipped in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) (`5df7b5466` and `2602177ef`), `CompleteMultipartUploadHandler` enforces strict part-number monotonicity (`PartNumber[i-1] < PartNumber[i]`) and `ReadParts` safely rejects empty part-number slices.
+Shipped in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) (`22c1e41fd` and `2602177ef`), `CompleteMultipartUploadHandler` enforces strict part-number monotonicity (`PartNumber[i-1] < PartNumber[i]`) and `ReadParts` safely rejects empty part-number slices.

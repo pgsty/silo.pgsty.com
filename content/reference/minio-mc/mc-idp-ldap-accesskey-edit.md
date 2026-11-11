@@ -121,7 +121,7 @@ A human-readable name to use for the account.
 
 File path to the JSON-formatted policy to use for the account.
 
-If not specified, the account uses the same policy as the authenticated user.
+The new policy overwrites any previously attached policy. Omitting `--policy` preserves the existing inline policy; to remove an attached inline policy and revert the access key to inheriting the authenticated user's policies, pass a file containing an empty policy document (`{}` or `{"Version":"2012-10-17","Statement":[]}`).
 
 ##### `--secret-key` {#mc.idp.ldap.accesskey.edit.-secret-key}
 

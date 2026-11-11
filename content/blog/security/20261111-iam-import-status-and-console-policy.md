@@ -10,11 +10,11 @@ draft: false
 url: "/blog/security/20261111-iam-import-status-and-console-policy/"
 ---
 
-**Status:** Fixed on `main` across Server ([`1d714834c`](https://github.com/pgsty/silo/commit/1d714834c5457d0485f5ebd9e4b0aaff8a454eed)) and Console ([`1be8a74bf`](https://github.com/pgsty/silo-console/commit/1be8a74bfb86ba3f417204551099fd8a3788f0e2), [`a1a84cab4`](https://github.com/pgsty/silo-console/commit/a1a84cab4d96814af6572f7dce40ad537aa2f81e), [`1fdb279fd`](https://github.com/pgsty/silo-console/commit/1fdb279fd98845b66d7218b2159b434fe76351eb)); scheduled for the next coordinated Server and Console release\
+**Status:** Shipped in **[SILO Console 2.7.1](/blog/release/console-2.7.1/)** ([`1be8a74bf`](https://github.com/pgsty/silo-console/commit/1be8a74bfb86ba3f417204551099fd8a3788f0e2), [`a1a84cab4`](https://github.com/pgsty/silo-console/commit/a1a84cab4d96814af6572f7dce40ad537aa2f81e), [`1fdb279fd`](https://github.com/pgsty/silo-console/commit/1fdb279fd98845b66d7218b2159b434fe76351eb), [`3825ebc44`](https://github.com/pgsty/silo-console/commit/3825ebc44451fdc8eefda3d4ec523a79dfecb236)) and fixed on Server `main` ([`1d714834c`](https://github.com/pgsty/silo/commit/1d714834c5457d0485f5ebd9e4b0aaff8a454eed), [`34ba7cc1f`](https://github.com/pgsty/silo/commit/34ba7cc1ff3ef8f55888933921ab1e69e2182bf8), pending Server publication)\
 **Identifier:** `SN-2026-025` ([Security Advisory Ledger](/about/security-advisories/#sn-2026-025), [#339](https://github.com/pgsty/silo/issues/339), [#345](https://github.com/pgsty/silo/issues/345))\
 **Severity:** High\
 **Affected scope:** **SILO Server** (`RELEASE.2026-11-09T00-00-00Z` and earlier) and inherited upstream MinIO since `2022-06-23` ([`580d9db85`](https://github.com/pgsty/silo/commit/580d9db85e04f1b63cc2909af50f0ed08afa965f)); **SILO Console** (`v2.7.0` and earlier, standalone and embedded) and inherited upstream MinIO Console since `2024-02-29` ([`0afea6399`](https://github.com/pgsty/silo-console/commit/0afea639940920f5124369132faa1cb4efef195d))\
-**Client & UI notes:** Pair the repaired Server and Console together (`mcli` [`d7262c2a`](https://github.com/pgsty/mc/commit/d7262c2a5fbdf2b9503cc0283f1d37ae8da41baf) also aligns explicit empty-policy resets on `accesskey edit`)
+**Client & UI notes:** Pair the repaired Server and **[Console 2.7.1](/blog/release/console-2.7.1/)** together (**[mcli 20261112](/blog/release/mcli-20261112/)** [`d7262c2a`](https://github.com/pgsty/mc/commit/d7262c2a5fbdf2b9503cc0283f1d37ae8da41baf) also aligns explicit empty-policy resets on `accesskey edit`)
 
 Following the audit of service-account policy updates in [`SN-2026-021`](/blog/security/20261110-svcacct-inline-policy-preservation/), we reviewed the full lifecycle of service accounts and IAM groups across backup/restore (`ExportIAM` / `ImportIAM`), the Web Console, and expiring credentials. That review uncovered two inherited privilege-state defects:
 
@@ -103,7 +103,7 @@ In upstream Console ([`0afea6399`](https://github.com/pgsty/silo-console/commit/
 
 ## Remediation and Audit Guidance {#remediation}
 
-1. **Upgrade SILO Server, SILO Console, and `mcli` together** in the next post-`20261109` release (or build from current `main`: Server [`1d714834c`](https://github.com/pgsty/silo/commit/1d714834c5457d0485f5ebd9e4b0aaff8a454eed), Console [`1fdb279fd`](https://github.com/pgsty/silo-console/commit/1fdb279fd98845b66d7218b2159b434fe76351eb), `mcli` [`d7262c2a`](https://github.com/pgsty/mc/commit/d7262c2a5fbdf2b9503cc0283f1d37ae8da41baf)).
+1. **Upgrade SILO Server, [SILO Console 2.7.1](/blog/release/console-2.7.1/), and [mcli 20261112](/blog/release/mcli-20261112/) together** when the post-`20261109` Server release is published (Server `main`: [`1d714834c`](https://github.com/pgsty/silo/commit/1d714834c5457d0485f5ebd9e4b0aaff8a454eed), [`34ba7cc1f`](https://github.com/pgsty/silo/commit/34ba7cc1ff3ef8f55888933921ab1e69e2182bf8); standalone Console `v2.7.1`: [`3825ebc44`](https://github.com/pgsty/silo-console/commit/3825ebc44451fdc8eefda3d4ec523a79dfecb236); `mcli 20261112`: [`a37a9f05`](https://github.com/pgsty/mc/commit/a37a9f054fba828a0bbbceb4e9ff247ccf09c28d)).
 2. **Audit clusters populated or restored via `mcli admin cluster iam import`:** If you previously ran `iam import` from an export bundle containing disabled service accounts or disabled groups, inspect `svcaccts.json` and `groups.json` in that archive and re-disable any unintended active entries:
    ```shell
    mcli admin user svcacct disable myminio/ <access-key>

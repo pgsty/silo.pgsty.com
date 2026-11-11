@@ -142,4 +142,4 @@ S3 规范只要求 `CompleteMultipartUpload` 中的分片号严格递增（`1 <=
 
 ## 总结 {#closing}
 
-随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（`5df7b5466` 与 `2602177ef`）发布后，`CompleteMultipartUploadHandler` 严格校验分片号单调递增（`PartNumber[i-1] < PartNumber[i]`），同时 `ReadParts` 对空分片切片执行安全早退保护。
+随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（`22c1e41fd` 与 `2602177ef`）发布后，`CompleteMultipartUploadHandler` 严格校验分片号单调递增（`PartNumber[i-1] < PartNumber[i]`），同时 `ReadParts` 对空分片切片执行安全早退保护。

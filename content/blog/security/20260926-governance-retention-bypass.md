@@ -47,7 +47,7 @@ Under the AWS S3 Object Lock specification, `PutObjectRetention` must enforce tw
 
 ## Reproduction and Verification {#verification}
 
-The three `SN-2026-015` failures can be reproduced directly against pre-`20261018` builds (verified against baseline `b0a540190`):
+The three `SN-2026-015` failures can be reproduced directly against pre-`20261018` builds (verified against baseline `bcb5fc956`, the parent of `3196480da`):
 
 ### Reproduction 1: Clearing an Active Governance Lock Without `s3:BypassGovernanceRetention` (F2) {#reproduction-1-clearing-an-active}
 
@@ -116,7 +116,7 @@ Tracing `git log` shows how three separate changes over five years combined to c
 
 Our repair enforces five explicit invariants across `PutObjectRetention` (`0d3ba5d4c`) and object write paths (`14042b5aa`):
 1. **Invariant 1 (Mandatory `s3:PutObjectRetention`)**: Every `PutObjectRetention` request must satisfy `s3:PutObjectRetention` (including all policy conditions such as `s3:object-lock-remaining-retention-days`, `s3:object-lock-retention-mode`, and `s3:object-lock-retain-until-date`), regardless of whether `x-amz-bypass-governance-retention` is present.
-2. **Invariant 2 (Additional `s3:BypassGovernanceRetention` on governance weakening)**: If the target version has an active (unexpired) `GOVERNANCE` lock and the request clears retention (`Mode == ""`) or shortens `RetainUntilDate` (`!RetainUntilDate.After(existing.RetainUntilDate)`), the request must **additionally** carry `x-amz-bypass-governance-retention: true` and satisfy `s3:BypassGovernanceRetention` (including its `s3:ExistingObjectTag/<key>` conditions).
+2. **Invariant 2 (Additional `s3:BypassGovernanceRetention` on governance weakening)**: If the target version has an active (unexpired) `GOVERNANCE` lock and the request clears retention (`Mode == ""`) or shortens `RetainUntilDate` (`!RetainUntilDate.After(existing.RetainUntilDate)`), the request must **additionally** carry `x-amz-bypass-governance-retention: true` and satisfy `s3:BypassGovernanceRetention` (including the condition keys supported for that action).
 3. **Invariant 3 (`COMPLIANCE` immutability)**: An active (unexpired) `COMPLIANCE` lock can never be cleared, shortened, or downgraded to `GOVERNANCE` by any principal.
 4. **Invariant 4 (No caller-specified version overwrite)**: Non-replication S3 clients cannot supply `?versionId=` on `PutObject`, `CopyObject`, or `PutObjectExtract` to overwrite an existing version ID.
 5. **Invariant 5 (In-place `null`-version write-lock enforcement)**: Any write path that replaces an existing `null` version in place (`PutObject` on a suspended-versioning bucket, directory object `key/`, or `CompleteMultipartUpload`) must enforce existing WORM retention and legal-hold checks on that `null` version.
@@ -144,7 +144,7 @@ In `PutObjectRetentionHandler` and `enforceRetentionBypassForPut`:
 
 During design review we evaluated and rejected five simpler-looking patches:
 1. **Changing only `byPass || retSet` to `byPass && retSet` inside `isPutRetentionAllowed`**: Would fix F2 and F3, but would still leave **F1** open on unlocked objects (where `isPutRetentionAllowed` was bypassed) and would wrongly require `s3:BypassGovernanceRetention` when a user with `s3:PutObjectRetention` extends a lock while happening to pass `x-amz-bypass-governance-retention: true`.
-2. **Adding a `checkRequestAuthType(..., PutObjectRetentionAction)` call at the top of `PutObjectRetentionHandler`**: At handler entry, the XML body (`<Retention>`) has not been parsed yet and the existing object's tags have not been read from disk, so policy conditions on `s3:object-lock-remaining-retention-days`, `s3:object-lock-retain-until-date`, `s3:object-lock-retention-mode`, and `s3:ExistingObjectTag/<key>` would all fail!
+2. **Adding a `checkRequestAuthType(..., PutObjectRetentionAction)` call at the top of `PutObjectRetentionHandler`**: At handler entry, the XML body (`<Retention>`) has not been parsed yet, so retention conditions such as `s3:object-lock-remaining-retention-days`, `s3:object-lock-retain-until-date`, and `s3:object-lock-retention-mode` do not yet have their required values.
 3. **Requiring `s3:BypassGovernanceRetention` whenever `x-amz-bypass-governance-retention: true` is present on the request**: S3 only requires `s3:BypassGovernanceRetention` when the operation actually **needs** governance bypass (clearing or shortening an active `GOVERNANCE` lock), not when locking an unlocked object or extending an existing lock.
 4. **Blocking `<Retention/>` empty XML payloads**: Clearing an active `GOVERNANCE` lock via `<Retention/>` is a documented MinIO/SILO extension used by `mcli retention clear`; it must remain supported when the caller holds **both** `s3:PutObjectRetention` and `s3:BypassGovernanceRetention` and sends `x-amz-bypass-governance-retention: true`.
 5. **Enforcing `SN-2026-016` `?versionId=` rejection only on Object-Lock-enabled buckets**: Allowing arbitrary clients to overwrite historical versions in place via `?versionId=` violates S3 versioning immutability on **all** versioned buckets, not just Object Lock buckets.
@@ -152,7 +152,7 @@ During design review we evaluated and rejected five simpler-looking patches:
 ### Implementation Notes {#notes}
 
 - **`ParseObjectRetention` and empty `<Retention/>` (`s3:object-lock-remaining-retention-days`)**: When a caller sends `<Retention/>` to clear governance retention, `retDate` is the zero `time.Time{}`. Previously, `getRetentionDays` computed a negative integer from `time.Until(zeroTime)` (~`-106751` days due to `time.Duration` 290-year saturation!). Commit `0d3ba5d4c` normalizes zero `retDate` to `0` days and computes future remaining days using non-saturating calendar/seconds arithmetic so dates beyond year 2316 do not overflow `time.Duration`.
-- **`s3:ExistingObjectTag/<key>` propagation**: Both the `s3:PutObjectRetention` and `s3:BypassGovernanceRetention` checks receive the target version's stored tags so tag-based IAM policies evaluate accurately.
+- **Condition-key boundary**: `s3:PutObjectRetention` and `s3:BypassGovernanceRetention` evaluate their supported retention and version conditions. The maintained policy schema does not support `s3:ExistingObjectTag/<key>` for these actions; do not use tag conditions as their access-control boundary.
 
 ---
 

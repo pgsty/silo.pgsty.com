@@ -15,13 +15,13 @@ MinIO SSE uses the [PGSTY KES](https://github.com/pgsty/kes) and an external Key
 
 MinIO SSE-S3 en/decrypts objects using an External Key (EK) managed by a Key Management System (KMS). You must specify the <abbr title="External Key">EK</abbr> using the [`MINIO_KMS_KES_KEY_NAME`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME) environment variable when starting up the MinIO server. MinIO uses the same EK for *all* SSE-S3 cryptographic operations.
 
-You can enable bucket-default SSE-S3 encryption using the [`mc encrypt set`](/reference/minio-mc/mc-encrypt-set/#command-mc.encrypt.set) command:
+You can enable bucket-default SSE-S3 encryption using the [`mcli encrypt set`](/reference/minio-mc/mc-encrypt-set/#command-mc.encrypt.set) command:
 
 ```shell
-mc encrypt set sse-s3 play/mybucket
+mcli encrypt set sse-s3 mysilo/mybucket
 ```
 
-- Replace `play/mybucket` with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) and bucket on which you want to enable automatic SSE-S3 encryption.
+- Replace `mysilo/mybucket` with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) and bucket on which you want to enable automatic SSE-S3 encryption.
 
 MinIO SSE-S3 is functionally compatible with AWS S3 [Server-Side Encryption with Amazon S3-Managed Keys](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingServerSideEncryption.html) using KES as the key service. The following archived upstream integration guides describe inherited backends; the maintained integration is [SILO + PGSTY KES + OpenBao KV v2](/operations/server-side-encryption/configure-minio-kes/):
 
@@ -118,7 +118,7 @@ MinIO uses the key name specified to
     <tr>
       <td><p>Generate the Data Encryption Key (DEK)</p></td>
       <td><p>MinIO generates a Data Encryption Key (DEK) using the EK.
-Specifically, <a href="https://github.com/minio/kes">MinIO Key Encryption Service (KES)</a> requests a new cryptographic key from the KMS using the EK as the “root” key.</p><p>KES returns both the plain-text <em>and</em> an EK-encrypted representation of the DEK.
+Specifically, <a href="https://github.com/pgsty/kes">PGSTY Key Encryption Service (KES)</a> requests a new cryptographic key from the KMS using the EK as the “root” key.</p><p>KES returns both the plain-text <em>and</em> an EK-encrypted representation of the DEK.
 MinIO stores the encrypted representation as part of the object metadata.</p></td>
     </tr>
     <tr>

@@ -10,11 +10,11 @@ draft: false
 url: "/zh/blog/security/20261111-iam-import-status-and-console-policy/"
 ---
 
-**发布状态：** Server 主干（[`1d714834c`](https://github.com/pgsty/silo/commit/1d714834c5457d0485f5ebd9e4b0aaff8a454eed)）与 Console 主干（[`1be8a74bf`](https://github.com/pgsty/silo-console/commit/1be8a74bfb86ba3f417204551099fd8a3788f0e2)、[`a1a84cab4`](https://github.com/pgsty/silo-console/commit/a1a84cab4d96814af6572f7dce40ad537aa2f81e)、[`1fdb279fd`](https://github.com/pgsty/silo-console/commit/1fdb279fd98845b66d7218b2159b434fe76351eb)）均已修复，将随下一轮协同版本发布\
+**发布状态：** 已随 **[SILO Console 2.7.1](/zh/blog/release/console-2.7.1/)** 发布（[`1be8a74bf`](https://github.com/pgsty/silo-console/commit/1be8a74bfb86ba3f417204551099fd8a3788f0e2)、[`a1a84cab4`](https://github.com/pgsty/silo-console/commit/a1a84cab4d96814af6572f7dce40ad537aa2f81e)、[`1fdb279fd`](https://github.com/pgsty/silo-console/commit/1fdb279fd98845b66d7218b2159b434fe76351eb)、[`3825ebc44`](https://github.com/pgsty/silo-console/commit/3825ebc44451fdc8eefda3d4ec523a79dfecb236)），Server 主干（[`1d714834c`](https://github.com/pgsty/silo/commit/1d714834c5457d0485f5ebd9e4b0aaff8a454eed)、[`34ba7cc1f`](https://github.com/pgsty/silo/commit/34ba7cc1ff3ef8f55888933921ab1e69e2182bf8)）已修复，待服务端正式发布\
 **安全编号：** `SN-2026-025`（[安全公告台账](/zh/about/security-advisories/#sn-2026-025)，[#339](https://github.com/pgsty/silo/issues/339)，[#345](https://github.com/pgsty/silo/issues/345)）\
 **严重程度：** 高危（High）\
 **影响范围：** **SILO Server**（`RELEASE.2026-11-09T00-00-00Z` 及更早版本）与自 `2022-06-23`（[`580d9db85`](https://github.com/pgsty/silo/commit/580d9db85e04f1b63cc2909af50f0ed08afa965f)）以来的上游原版 MinIO；**SILO Console**（独立版与内嵌版 `v2.7.0` 及更早版本）与自 `2024-02-29`（[`0afea6399`](https://github.com/pgsty/silo-console/commit/0afea639940920f5124369132faa1cb4efef195d)）以来的上游原版 MinIO Console\
-**客户端与控制台配套：** 需协同升级配套的 Server 与 Console（`mcli` [`d7262c2a`](https://github.com/pgsty/mc/commit/d7262c2a5fbdf2b9503cc0283f1d37ae8da41baf) 同步对齐了 `accesskey edit` 传入显式空策略文档重置继承的能力）
+**客户端与控制台配套：** 需协同升级配套的 Server 与 **[Console 2.7.1](/zh/blog/release/console-2.7.1/)**（**[mcli 20261112](/zh/blog/release/mcli-20261112/)** [`d7262c2a`](https://github.com/pgsty/mc/commit/d7262c2a5fbdf2b9503cc0283f1d37ae8da41baf) 同步对齐了 `accesskey edit` 传入显式空策略文档重置继承的能力）
 
 继 [`SN-2026-021`](/zh/blog/security/20261110-svcacct-inline-policy-preservation/) 排查服务账号策略更新链路后，我们进一步对 IAM 备份恢复（`ExportIAM` / `ImportIAM`）、Web 控制台（Console）编辑表单与带过期时间的服务账号开展了端到端联动审查，确认了另外两处继承自上游的凭据状态与权限边界缺陷：
 
@@ -103,7 +103,7 @@ url: "/zh/blog/security/20261111-iam-import-status-and-console-policy/"
 
 ## 升级与排查建议 {#remediation}
 
-1. **协同升级 SILO Server、SILO Console 与 `mcli`** 至 `20261109` 之后的下一轮配套版本（或基于当前各仓库 `main` 构建：Server [`1d714834c`](https://github.com/pgsty/silo/commit/1d714834c5457d0485f5ebd9e4b0aaff8a454eed)、Console [`1fdb279fd`](https://github.com/pgsty/silo-console/commit/1fdb279fd98845b66d7218b2159b434fe76351eb)、`mcli` [`d7262c2a`](https://github.com/pgsty/mc/commit/d7262c2a5fbdf2b9503cc0283f1d37ae8da41baf)）。
+1. **在 `20261109` 之后的下一版 Server 正式发布时协同升级 SILO Server、[SILO Console 2.7.1](/zh/blog/release/console-2.7.1/) 与 [mcli 20261112](/zh/blog/release/mcli-20261112/)**（Server 主干：[`1d714834c`](https://github.com/pgsty/silo/commit/1d714834c5457d0485f5ebd9e4b0aaff8a454eed)、[`34ba7cc1f`](https://github.com/pgsty/silo/commit/34ba7cc1ff3ef8f55888933921ab1e69e2182bf8)；已发布独立 Console `v2.7.1`：[`3825ebc44`](https://github.com/pgsty/silo-console/commit/3825ebc44451fdc8eefda3d4ec523a79dfecb236)；已发布 `mcli 20261112`：[`a37a9f05`](https://github.com/pgsty/mc/commit/a37a9f054fba828a0bbbceb4e9ff247ccf09c28d)）。
 2. **核查曾执行过 `mcli admin cluster iam import` 的集群：** 若集群此前曾从包含禁用服务账号或禁用组的备份包执行过 `iam import`，请对照当时备份包内的 `svcaccts.json` 与 `groups.json` 检查并重新禁用不应启用的条目：
    ```shell
    mcli admin user svcacct disable myminio/ <access-key>

@@ -61,7 +61,7 @@ tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 #### 精确 Git 提交溯源
 
 1. **2019-11 至 2020-03 的正确初始设计**：
-   - [`ca96560d5`](https://github.com/minio/minio/commit/ca96560d5)（2019-11-20，Poorna Krishnamoorthy）与 [`f931fc7bf`](https://github.com/minio/minio/commit/f931fc7bf)（2019-11-25）、[#9030](https://github.com/minio/minio/pull/9030)（[`97cbac604`](https://github.com/minio/minio/commit/97cbac604)，2020-03-04）：`PutObjectRetentionHandler` 在入口通过 `checkRequestAuthType` 强制校验 `s3:PutObjectRetention`，并单独向 IAM 求值 `s3:BypassGovernanceRetention` 后将**授权结果布尔值**传入 `enforceRetentionBypassForPut`。请求头从不替代 IAM 授权。
+   - [`ca96560d5`](https://github.com/minio/minio/commit/ca96560d5)（2019-11-20，Poorna Krishnamoorthy）与 [`f931fc7bf`](https://github.com/minio/minio/commit/f931fc7bf)（2019-11-25）、[#9030](https://github.com/minio/minio/pull/9030)（[`9fc7537f2`](https://github.com/minio/minio/commit/9fc7537f2a21128dafad034184d5224886e044cc)，2020-03-04）：`PutObjectRetentionHandler` 在入口通过 `checkRequestAuthType` 强制校验 `s3:PutObjectRetention`，并单独向 IAM 求值 `s3:BypassGovernanceRetention` 后将**授权结果布尔值**传入 `enforceRetentionBypassForPut`。请求头从不替代 IAM 授权。
 2. **2020-04 引入核心缺陷（上游 [#9259](https://github.com/minio/minio/pull/9259)，[`43a3778b4`](https://github.com/minio/minio/commit/43a3778b45)，2020-04-06，Harshavardhana）**：
    - 为支持来自 XML 请求体的三个锁条件键（`s3:object-lock-mode`、`s3:object-lock-retain-until-date`、`s3:object-lock-remaining-retention-days`），该提交删掉了 handler 入口的 `checkRequestAuthType`，将鉴权下沉到 `enforceRetentionBypassForPut` 内部的新函数 `isPutRetentionAllowed`，一举引入三处错误：
      - `enforceRetentionBypassForPut` 直接读取原始请求头 `byPassSet := IsObjectLockGovernanceBypassSet(r.Header)`，并用 `if !byPassSet` 包裹防缩短守卫；
@@ -480,7 +480,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 
 在设计评审期间，我们针对写路径防护评估并实际构造测试检验了以下四套候选方案：
 
-| 评估维度                                                                                                      | 候选一：仅保留 HTTP 入口与预检守卫<br>（已否决）                                     | 候选二：凭分段上传“服务端生成版本标记”跳过写锁 UUID 查重<br>（已否决）       | 候选三：`fe3935476` 完整写锁复检<br>（无预检 Fail-Closed） | **最终落地方案**：`fe3935476` 完整写锁复检 + 预检 Fail-Closed         |
+| 评估维度                                                                                                      | 候选一：仅保留 HTTP 入口与预检守卫<br>（已否决）                                     | 候选二：凭分段上传“服务端生成版本标记”跳过写锁 UUID 查重<br>（已否决）       | 候选三：`3196480da` 完整写锁复检<br>（无预检 Fail-Closed） | **最终落地方案**：`3196480da` 完整写锁复检 + 预检 Fail-Closed         |
 | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------- |
 | **`SN-2026-015` 保留期鉴权（F1 / F2 / F3 / 清锁 0 天计算）**                                                  | 通过                                                                                 | 通过                                                                         | 通过                                                       | **通过**                                                              |
 | **慢速请求体 `PUT dir/` 竞态覆写 `COMPLIANCE`（`TestPlanReviewSlowDirectoryPut`）**                           | **失败（P1）**：暂停请求体即可覆写已提交的 `COMPLIANCE` 锁                           | 通过                                                                         | 通过                                                       | **通过**                                                              |
@@ -492,4 +492,4 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 
 ### 最终结论 {#conclusion}
 
-采用**`fe3935476` 完整写锁防线 + 预检 Fail-Closed 加固**作为最终落地实现，并将慢速目录写入（`TestPlanReviewSlowDirectoryPut`）、预检读故障（`TestPlanReviewPreflightReadFailure`）、遗留分段上传（`TestPlanReviewLegacyMPUCompliance`）及恢复后分段上传碰撞（`TestRecoveredMultipartUploadAfterReplica`）四组复现用例全部纳入 `cmd/object-retention-overwrite_test.go` 回归测试集。
+采用**`3196480da` 完整写锁防线 + 预检 Fail-Closed 加固**作为最终落地实现，并将慢速目录写入（`TestPlanReviewSlowDirectoryPut`）、预检读故障（`TestPlanReviewPreflightReadFailure`）、遗留分段上传（`TestPlanReviewLegacyMPUCompliance`）及恢复后分段上传碰撞（`TestRecoveredMultipartUploadAfterReplica`）四组复现用例全部纳入 `cmd/object-retention-overwrite_test.go` 回归测试集。

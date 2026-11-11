@@ -6,13 +6,16 @@ This repository contains the bilingual documentation for **Silo**, a community f
 
 ## Release state and publication
 
-Current releases: **SILO Server and mcli 20261109**, **SILO Console v2.7.0**,
-**silo-pkg v3.16.0**, and **KES 20261026**. All use Go 1.27.3.
+Current releases: **SILO Server 20261109** (Go 1.27.3), standalone **SILO Console v2.7.1**,
+**mcli 20261112**, **silo-pkg v3.16.1** (Go 1.27.4), and **KES 20261026** (Go 1.27.3).
 Server 20261109 embeds Console 2.7.0, mcli 20261109 and pkg v3.16.0.
 KES remains a separate, optional external key service.
 
 | Release notes                        | English                                                | 简体中文                                             |
 | ------------------------------------ | ------------------------------------------------------ | ---------------------------------------------------- |
+| Console 2.7.1                        | [Release notes](content/blog/release/console-2.7.1.md) | [发布说明](content/blog/release/console-2.7.1.zh.md) |
+| mcli 20261112                        | [Release notes](content/blog/release/mcli-20261112.md) | [发布说明](content/blog/release/mcli-20261112.zh.md) |
+| silo-pkg 3.16.1                      | [Release notes](content/blog/release/pkg-3.16.1.md)    | [发布说明](content/blog/release/pkg-3.16.1.zh.md)    |
 | Server 20261109                      | [Release notes](content/blog/release/silo-20261109.md) | [发布说明](content/blog/release/silo-20261109.zh.md) |
 | Console 2.7.0                        | [Release notes](content/blog/release/console-2.7.0.md) | [发布说明](content/blog/release/console-2.7.0.zh.md) |
 | Console 2.6.0                        | [Release notes](content/blog/release/console-2.6.0.md) | [发布说明](content/blog/release/console-2.6.0.zh.md) |

@@ -20,7 +20,7 @@ This record covers [issue #261](https://github.com/pgsty/silo/issues/261) and [P
 
 The report is real. A successful degraded overwrite can leave two EC layouts for one unversioned object: a newer copy on the drives that were online and an older copy on the drives that were offline. GET and ListObjectsV2 can choose the newer readable majority. Decommission and rebalance use an all-versions walk, where the metadata merge can choose the older layout as its reference and then count only that layout. If it is below quorum, the object disappears from the migration list. The migration reports success, and removing the old pool loses the object.
 
-PR #262 ([5eb6433f0](https://github.com/pgsty/silo/commit/5eb6433f0)) described the right repair. It removes one overly narrow condition from the existing mixed-EC recount, keeps the recount limited to ordinary single null versions, and adds tests for quorum, stream order, migration, and excluded metadata shapes. That fix merged through #267 ([a7310d59f](https://github.com/pgsty/silo/commit/a7310d59fe307ae7fc4b57dc190b5e0c3de1a56a)), which also added end-to-end pool-removal regression coverage, and shipped in [SILO Server 20261109](/blog/release/silo-20261109/).
+PR #262 described the right repair. It removes one overly narrow condition from the existing mixed-EC recount, keeps the recount limited to ordinary single null versions, and adds tests for quorum, stream order, migration, and excluded metadata shapes. That fix merged through #267 ([a7310d59f](https://github.com/pgsty/silo/commit/a7310d59fe307ae7fc4b57dc190b5e0c3de1a56a)), which also added end-to-end pool-removal regression coverage, and shipped in [SILO Server 20261109](/blog/release/silo-20261109/).
 
 ## When it happens {#trigger}
 
@@ -111,6 +111,5 @@ The patch selects a readable group; it does not heal the old group. Operators sh
 - Issue: [#261](https://github.com/pgsty/silo/issues/261)
 - PR: [#262](https://github.com/pgsty/silo/pull/262)
 - Merged maintainer PR: [#267](https://github.com/pgsty/silo/pull/267)
-- Merge commit: [a7310d59f](https://github.com/pgsty/silo/commit/a7310d59fe307ae7fc4b57dc190b5e0c3de1a56a)
-- Fix commit: [5eb6433f0](https://github.com/pgsty/silo/commit/5eb6433f0)
+- Fix commit: [a7310d59f](https://github.com/pgsty/silo/commit/a7310d59fe307ae7fc4b57dc190b5e0c3de1a56a)
 - Earlier mixed-EC listing repair: [e90cb2067](https://github.com/pgsty/silo/commit/e90cb2067)

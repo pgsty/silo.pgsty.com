@@ -8,7 +8,7 @@ url: "/zh/blog/security/source-address-trust/"
 tags: ["Security", "IAM", "Network", "Reverse Proxy", "aws:SourceIp", "Audit", "SILO"]
 ---
 
-**`SN-2026-018`** 修复了 [silo-pkg `v3.12.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.0)（提交 `62f326d`）与 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（`00a8171cb`，[`pgsty/silo#41`](https://github.com/pgsty/silo/issues/41)）中影响 `aws:SourceIp` IAM 条件求值、审计日志、桶事件通知及管理端 HTTP 追踪的客户端源 IP 欺骗问题：`handlers.GetSourceIP` 此前默认无条件信任任意 TCP 对端发来的 `X-Forwarded-For`、`X-Real-IP` 与 RFC 7239 `Forwarded` 请求头；即便管理员显式设置了 `_MINIO_API_XFF_HEADER=off`，该函数也只是跳过了 `X-Forwarded-For`，随后立刻落入并无条件采信客户端伪造的 `X-Real-IP` 与 `Forwarded`。
+**`SN-2026-018`** 修复了 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（[`fe6dc4780`](https://github.com/pgsty/silo/commit/fe6dc47804e9fdce2711756a9c3d9840e2d4d40a)）中影响 `aws:SourceIp` IAM 条件求值、审计日志、桶事件通知及管理端 HTTP 追踪的客户端源 IP 欺骗问题：`handlers.GetSourceIP` 此前默认无条件信任任意 TCP 对端发来的 `X-Forwarded-For`、`X-Real-IP` 与 RFC 7239 `Forwarded` 请求头；即便管理员显式设置了 `_MINIO_API_XFF_HEADER=off`，该函数也只是跳过了 `X-Forwarded-For`，随后立刻落入并无条件采信客户端伪造的 `X-Real-IP` 与 `Forwarded`。
 
 ## 结论先行 {#summary}
 
@@ -20,7 +20,7 @@ tags: ["Security", "IAM", "Network", "Reverse Proxy", "aws:SourceIp", "Audit", "
 
 ## `handlers.GetSourceIP` 的四个核心消费方 {#consumers}
 
-在 SILO 中，`handlers.GetSourceIP(r)`（位于 `silo-pkg/handlers/proxy.go`）是从入站 `*http.Request` 提取客户端 IP 地址的唯一入口。四个与安全及可观测性密切相关的子系统直接依赖其返回值：
+在 SILO 中，`handlers.GetSourceIP(r)`（位于 `internal/handlers/proxy.go`）是从入站 `*http.Request` 提取客户端 IP 地址的唯一入口。四个与安全及可观测性密切相关的子系统直接依赖其返回值：
 
 | 消费方                              | 代码位置                                           | 安全与运维职责                                                     |
 | ----------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------ |
@@ -30,13 +30,13 @@ tags: ["Security", "IAM", "Network", "Reverse Proxy", "aws:SourceIp", "Audit", "
 | 管理端 HTTP 追踪 (`mc admin trace`) | `cmd/http-tracer.go`                               | 在实时诊断追踪输出中展示客户端源 IP。                              |
 {.wide .expand}
 
-值得一提的是，旧版 `handlers.GetSourceIPRaw` 在提取出第一个匹配的请求头字段后，甚至不会校验它是不是一个语法合法的 IP 地址（上游 `silo-pkg` 的单元测试里 literally 有一条断言验证传入 `X-Forwarded-For: _gazonk` 会原样返回 `"_gazonk"`！）。虽然 `IpAddress` 条件算子内部会用 `net.ParseIP` 解析，但审计日志和事件通知都会被直接注入未校验的原始字符串。
+值得一提的是，旧版 `handlers.GetSourceIPRaw` 在提取出第一个匹配的请求头字段后，甚至不会校验它是不是一个语法合法的 IP 地址（上游 `internal/handlers` 的单元测试里 literally 有一条断言验证传入 `X-Forwarded-For: _gazonk` 会原样返回 `"_gazonk"`！）。虽然 `IpAddress` 条件算子内部会用 `net.ParseIP` 解析，但审计日志和事件通知都会被直接注入未校验的原始字符串。
 
 ---
 
 ## 为什么 `_MINIO_API_XFF_HEADER=off` 防不住源 IP 伪造 {#the-switch}
 
-在 `silo-pkg/handlers/proxy.go` 中，`GetSourceIPRaw` 原本按顺序依次检查三组请求头：
+在 `internal/handlers/proxy.go` 中，`GetSourceIPRaw` 原本按顺序依次检查三组请求头：
 
 ```go
 var xffHeaders = []string{"X-Forwarded-For", "x-forwarded-for"}
@@ -44,7 +44,7 @@ var realIPHeaders = []string{"X-Real-IP", "x-real-ip"}
 var forwardedHeaders = []string{"Forwarded", "forwarded"}
 ```
 
-2025 年 2 月上游 PR [`minio/minio#20977`](https://github.com/minio/minio/pull/20977)（及 `minio/pkg#306`）引入 `_MINIO_API_XFF_HEADER=off` 开关时，**仅仅**用它包住了第一组 `xffHeaders` 循环：
+2025 年 2 月上游 PR [`minio/minio#20977`](https://github.com/minio/minio/pull/20977) 引入 `_MINIO_API_XFF_HEADER=off` 开关时，**仅仅**用它包住了第一组 `xffHeaders` 循环：
 - 当 `_MINIO_API_XFF_HEADER=off` 时，`GetSourceIPRaw` 跳过 `X-Forwarded-For`；
 - 紧接着下一行，它便毫无条件地继续读取 `X-Real-IP`（`realIPHeaders`）和 `Forwarded`（`forwardedHeaders`）！
 
@@ -70,7 +70,7 @@ var forwardedHeaders = []string{"Forwarded", "forwarded"}
 
 ## `MINIO_API_TRUSTED_PROXIES` 的设计方案 {#design}
 
-为了同时解决上述两类问题，`silo-pkg v3.12.0`（`62f326d`）与 Server `20260804`（`00a8171cb`）引入了 `MINIO_API_TRUSTED_PROXIES` 环境变量：
+为了同时解决上述两类问题，Server `20260804`（[`fe6dc4780`](https://github.com/pgsty/silo/commit/fe6dc47804e9fdce2711756a9c3d9840e2d4d40a)）引入了 `MINIO_API_TRUSTED_PROXIES` 环境变量：
 
 | 配置值                                               | 对端信任策略               | 转发头解析行为                                                                                                                                                                       |
 | ---------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -135,7 +135,7 @@ SILO 内置的 FTP 与 SFTP 服务端（`cmd/ftp-server.go`、`cmd/sftp-server.g
 
 ## 多轮代码审查抓出的 9 个边界缺陷 {#review}
 
-在补丁合入前，我们跨 `silo-pkg` 与 `silo` 进行了三轮代码审查，先后抓出并修复了 9 个隐蔽的边界问题：
+在补丁合入前，我们跨 `internal/handlers`、`internal/config` 与 `cmd` 进行了三轮代码审查，先后抓出并修复了 9 个隐蔽的边界问题：
 
 ### 第二轮审查发现 {#review-round-two}
 

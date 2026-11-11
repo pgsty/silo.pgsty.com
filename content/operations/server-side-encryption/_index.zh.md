@@ -4,7 +4,7 @@ url: "/zh/operations/server-side-encryption/"
 weight: 60
 icon: fa-solid fa-lock
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/server-side-encryption.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="sse"></a>
@@ -12,11 +12,11 @@ upstream_modified: false
 
 MinIO Server-Side Encryption (SSE) 在对象写入过程中为其提供保护， 使客户端能够利用服务端的处理能力， 在存储层实现对象静态加密（encryption-at-rest）。 SSE 还为围绕安全锁定和擦除的监管与合规要求提供关键能力。
 
-MinIO SSE 使用 [MinIO Key Encryption Service (KES)](https://github.com/minio/kes) 和外部 Key Management Service (KMS)， 以大规模执行安全的密码学操作。 MinIO 还支持由客户端管理密钥的模式， 在这种模式下，应用程序完全负责创建和管理供 MinIO SSE 使用的加密密钥。
+MinIO SSE 使用 [PGSTY KES](https://github.com/pgsty/kes) 和外部 Key Management Service (KMS)， 以大规模执行安全的密码学操作。 MinIO 还支持由客户端管理密钥的模式， 在这种模式下，应用程序完全负责创建和管理供 MinIO SSE 使用的加密密钥。
 
-MinIO 支持将以下 <abbr title="Key Management System">KMS</abbr> 作为中心密钥存储：
+正式维护的集成是 [SILO + PGSTY KES + OpenBao KV v2](/zh/operations/server-side-encryption/configure-minio-kes/)。其他继承的 KES 后端需要分别验证，以下链接介绍这些集成：
 
-- [HashiCorp KeyVault](/zh/operations/server-side-encryption/configure-minio-kes/#minio-sse-vault)
+- [OpenBao / HashiCorp Vault](/zh/operations/server-side-encryption/configure-minio-kes/#minio-sse-vault)
 - [AWS SecretsManager](/zh/operations/server-side-encryption/configure-minio-kes/#minio-sse-aws)
 - [Google Cloud SecretManager](/zh/operations/server-side-encryption/configure-minio-kes/#minio-sse-gcp)
 - [Azure Key Vault](/zh/operations/server-side-encryption/configure-minio-kes/#minio-sse-azure)
@@ -35,7 +35,7 @@ MinIO 支持使用存储在外部 <abbr title="Key Management System">KMS</abbr>
 
 对于未启用自动 SSE-KMS 加密的存储桶， 客户端也可以在写入操作中指定 <abbr title="External Key">EK</abbr>。
 
-启用服务端加密时，MinIO 也会加密后端数据。 SSE-KMS 一旦启用便无法禁用。
+SILO 可通过配置的 KMS 加密后端 IAM/配置数据。可用 `mcli encrypt clear` 清除桶默认加密，但已有加密数据仍需要原密钥。在这些数据仍依赖密钥服务时，不要移除它。
 
 相比 SSE-S3 和 SSE-C， SSE-KMS 提供更细粒度、可定制性更强的加密能力， 因此推荐优先使用。
 
@@ -46,12 +46,12 @@ MinIO 支持使用存储在外部 <abbr title="Key Management System">KMS</abbr>
 
 对于未启用自动 SSE-S3 加密的存储桶， 客户端也可以在写入操作中请求使用 SSE 加密。
 
-启用服务端加密时，MinIO 也会加密后端数据。 SSE-KMS 一旦启用便无法禁用。
+SILO 可通过配置的 KMS 加密后端 IAM/配置数据。可用 `mcli encrypt clear` 清除桶默认加密，但已有加密数据仍需要原密钥。在这些数据仍依赖密钥服务时，不要移除它。
 
 关于如何在本地（非生产）MinIO 部署中启用 SSE-S3， 请参见 [快速开始](/zh/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3-quickstart)。
 {{< /tab >}}
 {{< tab label="SSE-C" value="sse-c" >}}
-客户端在对象写入操作中指定 <abbr title="External Key">EK</abbr>。 MinIO 使用指定的 <abbr title="External Key">EK</abbr> 执行 SSE-S3。
+客户端在对象写入操作中指定 <abbr title="External Key">EK</abbr>。 SILO 使用客户端提供的密钥执行 SSE-C，无需 KES 或服务端 KMS。
 
 SSE-C 不支持存储桶默认加密设置， 并要求客户端自行执行全部密钥管理操作。
 {{< /tab >}}

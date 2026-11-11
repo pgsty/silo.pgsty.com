@@ -10,20 +10,20 @@ icon: fa-solid fa-terminal
 
 `mcli` 是 Silo 构建的 MinIO 客户端（`mc`）。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。
 
-[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/)、[20260903](/zh/blog/release/mcli-20260903/)、[20260913](/zh/blog/release/mcli-20260913/)、[20260916](/zh/blog/release/mcli-20260916/)、[20261018](/zh/blog/release/mcli-20261018/) 与 [20261026](/zh/blog/release/silo-20261026/#mcli)。最新版本为 [20261109](/zh/blog/release/mcli-20261109/)；历史说明保留各自比较基线。
+[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/)、[20260903](/zh/blog/release/mcli-20260903/)、[20260913](/zh/blog/release/mcli-20260913/)、[20260916](/zh/blog/release/mcli-20260916/)、[20261018](/zh/blog/release/mcli-20261018/)、[20261026](/zh/blog/release/silo-20261026/#mcli) 与 [20261109](/zh/blog/release/mcli-20261109/)。最新版本为 [20261112](/zh/blog/release/mcli-20261112/)；历史说明保留各自比较基线。
 
 > [!TIP]
-> **当前正式版：** [mcli 20261109](/zh/blog/release/mcli-20261109/)，标签 `RELEASE.2026-11-09T00-00-00Z`，包版本 `20261109000000.0.0`，源码 `e1d4cc5abfe0`，Docker Hub `pgsty/mc:RELEASE.2026-11-09T00-00-00Z` 与 `latest`（`sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`）。Windows 使用 ZIP；Linux/macOS 使用 tar.gz，提供 Linux RPM/DEB/APK。
+> **当前正式版：** [mcli 20261112](/zh/blog/release/mcli-20261112/)，标签 `RELEASE.2026-11-12T00-00-00Z`，包版本 `20261112000000.0.0`，源码 `a37a9f054fba`，Docker Hub `pgsty/mc:RELEASE.2026-11-12T00-00-00Z` 与 `latest`（`sha256:b532278b7a3747dbab6fe45eebb40a653efa704e6758e24e9d9ec54fc96c1800`）。Windows 使用 ZIP；Linux/macOS 使用 tar.gz，提供 Linux RPM/DEB/APK。
 
-## 服务账号策略编辑候选修复（未发布） {#candidate-policy-edit}
+<a id="candidate-policy-edit" data-td-print-local></a><span id="next-release"></span><span id="current-release"></span>
 
-下一 mcli 候选版本的 `admin user svcacct edit --policy` 与 `idp ldap accesskey edit --policy` 接受显式空策略文档，例如 `{}` 或 `{"Statement":[]}`。配合 [Server 修复](/zh/compatibility/server/) 后，这会清除 inline policy 并恢复继承。省略 `--policy` 会保留已有策略；创建账号与写入命名策略仍拒绝空策略。
+## 当前版本变化（20261112） {#release-20261112}
 
-此改动不包含在 mcli 20261109 中。重置行为需要配套发布修复后的客户端与 Server；只替换客户端二进制无法修复旧版 Server。
+[mcli 20261112](/zh/blog/release/mcli-20261112/)（`a37a9f054fba`，Go `1.27.4`，[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/)）的 `admin user svcacct edit --policy`、`admin accesskey edit --policy`、`idp ldap accesskey edit --policy` 与 `idp openid accesskey edit --policy` 均接受显式空策略文档，例如 `{}` 或 `{"Statement":[]}`（[#78](https://github.com/pgsty/mc/issues/78)；`admin user svcacct set` 此前已支持空策略文档），并对客户端侧 IAM 与桶策略命令启用严格 JSON 解码（拒绝未知字段、尾部多余载荷、空 `Principal: {}` 及未实现的 `NotPrincipal`）。配合 [`20261109` 之后的 Server 修复](/zh/compatibility/server/#candidate-after-20261109)后，显式空策略会清除 inline policy 并恢复继承，省略 `--policy` 则保留已有策略；创建账号与写入命名策略仍拒绝空策略。
 
-<span id="next-release"></span><span id="current-release"></span>
+[Console 2.7.1](/zh/blog/release/console-2.7.1/) 已直接采用该正式提交（`v0.0.0-20261111180825-a37a9f054fba`）。已公开的 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 仍内置 `mcli 20261109`；只替换客户端二进制无法修改旧版 Server 的服务端行为。
 
-## 当前版本变化 {#release-20261109}
+## 继承自 20261109 的变化 {#release-20261109}
 
 [20261109 发布说明](/zh/blog/release/mcli-20261109/) 覆盖 [pgsty/mc#74](https://github.com/pgsty/mc/pull/74)、[#76](https://github.com/pgsty/mc/pull/76) 和 [#77](https://github.com/pgsty/mc/pull/77) 的修复。完整变更见源码的[更新日志](https://github.com/pgsty/mc/blob/RELEASE.2026-11-09T00-00-00Z/CHANGELOG.md)。[SILO Server 20261109](/zh/blog/release/silo-20261109/) 与 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 均直接链接该正式版本（`v0.0.0-20261109021353-e1d4cc5abfe0`）；经典 `pgsty/silo:RELEASE.2026-11-09T00-00-00Z` 镜像内置 `mcli 20261109` 并在 `/licenses/mcli` 下包含其法律声明（经典与 `-distroless` 服务端镜像均在 `/licenses/` 下附带服务端法律声明）。
 

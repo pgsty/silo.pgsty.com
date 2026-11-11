@@ -152,4 +152,4 @@ return statement.Resources.Match(resource, args.ConditionValues)
 
 ## 总结 {#closing}
 
-随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（`5ff00073a` 及 `silo-pkg` `d8b1fa7` / `v3.12.0`）发布后，12 项高危桶级变更操作默认要求策略 `Resource` 同时匹配桶级 ARN（除非显式开启 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on`）。
+随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（`97b7d2804` 及 `silo-pkg` `d8b1fa7` / [`v3.11.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.11.0)）发布后，12 项高危桶级变更操作默认要求策略 `Resource` 同时匹配桶级 ARN（除非显式开启 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on`）。

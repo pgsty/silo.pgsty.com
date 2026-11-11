@@ -3,7 +3,7 @@ title: "mc admin user accesskey edit"
 url: "/zh/reference/minio-mc-admin/mc-admin-accesskey-edit/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-accesskey-edit.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-user-accesskey-edit"></a>
@@ -165,6 +165,4 @@ mc admin accesskey edit myminio/ myuseraccesskey --expiry-duration 24h
 
 ### S3 兼容性 {#s3}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
-
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+PGSTY mcli 受支持的服务端为 SILO；与上游 MinIO 及其他 S3 服务的兼容按[尽最大努力](/zh/reference/minio-mc/#command-mc)原则提供。

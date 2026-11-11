@@ -7,6 +7,7 @@ server:
   date: "2026-11-09"
   published: true
   go_version: "1.27.3"
+  embedded_console: v2.7.0
   windows_archive_format: zip
   source: d998292387ccf1d2907749e0fb1575ef5fb93fda
 published_server:
@@ -15,26 +16,27 @@ published_server:
   date: "2026-11-09"
   published: true
   go_version: "1.27.3"
+  embedded_console: v2.7.0
   windows_archive_format: zip
   source: d998292387ccf1d2907749e0fb1575ef5fb93fda
 client:
-  tag: RELEASE.2026-11-09T00-00-00Z
-  go_version: "1.27.3"
-  build: 20261109000000.0.0
+  tag: RELEASE.2026-11-12T00-00-00Z
+  go_version: "1.27.4"
+  build: 20261112000000.0.0
   windows_archive_format: zip
-  date: "2026-11-09"
-  source: e1d4cc5abfe00b674eb36347399e7398990be467
+  date: "2026-11-12"
+  source: a37a9f054fba828a0bbbceb4e9ff247ccf09c28d
 console:
-  tag: v2.7.0
-  build: 2.7.0
+  tag: v2.7.1
+  build: 2.7.1
   windows_archive_format: zip
-  source: 4e91ae506e706ccdecb512b1d8b5ab4d9871d505
-  notes: "blog/release/console-2.7.0/"
+  source: 3825ebc44451fdc8eefda3d4ec523a79dfecb236
+  notes: "blog/release/console-2.7.1/"
 pkg:
-  tag: v3.16.0
-  source: b7aeea85e84e8888d6ab424c7123a1297711bc3f
-  go_version: "1.27.3"
-  notes: blog/release/pkg-3.16.0/
+  tag: v3.16.1
+  source: 433f7eefa714a30b72ca70c4dffcd5faca25804f
+  go_version: "1.27.4"
+  notes: blog/release/pkg-3.16.1/
 kes:
   tag: RELEASE.2026-10-26T00-00-00Z
   build: 20261026000000.0.0

@@ -79,13 +79,13 @@ The next examples use `SSE_KEY_HEX` in the same shell. Store the key securely be
 MinIO supports the following AWS S3 headers for specifying SSE-C encryption:
 
 - `X-Amz-Server-Side-Encryption-Customer-Algorithm` set to `AES256`.
-- `X-Amz-Server-Side-Encryption-Customer-Key` set to the encryption key value.
+- `X-Amz-Server-Side-Encryption-Customer-Key` set to standard padded base64 of the raw 32-byte key; the CLI or SDK constructs this HTTP header.
 - `X-Amz-Server-Side-Encryption-Customer-Key-MD5` to the 128-bit MD5 digest of the encryption key.
 
 The MinIO [`mc`](/reference/minio-mc/#command-mc) commandline tool S3-compatible SDKs include specific syntax for setting headers. Certain [`mc`](/reference/minio-mc/#command-mc) commands like [`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp) include specific arguments for enabling SSE-C encryption:
 
 ```shell
-mc cp ~/data/mydata.json ALIAS/BUCKET/mydata.json \
+mcli cp ~/data/mydata.json ALIAS/BUCKET/mydata.json \
    --enc-c "ALIAS/BUCKET/=${SSE_KEY_HEX}"
 ```
 
@@ -105,7 +105,7 @@ When source and destination use different SSE-C keys, provide both header sets: 
 The MinIO [`mc`](/reference/minio-mc/#command-mc) commandline tool S3-compatible SDKs include specific syntax for setting headers. Certain [`mc`](/reference/minio-mc/#command-mc) commands like [`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp) include specific arguments for enabling SSE-C encryption:
 
 ```shell
-mc cp SOURCE/BUCKET/mydata.json TARGET/BUCKET/mydata.json  \
+mcli cp SOURCE/BUCKET/mydata.json TARGET/BUCKET/mydata.json  \
 --enc-c "SOURCE/BUCKET/=${SSE_KEY_HEX},TARGET/BUCKET/=${SSE_KEY_HEX}"
 ```
 
