@@ -13,6 +13,15 @@ cascade:
 
 Design records document the engineering decisions behind PGSTY SILO: root causes, S3 and IAM protocol invariants, trade-offs against rejected alternatives, operational limits, and regression coverage.
 
+## November 11: Pre-Release Audit Repairs {#november-11-pre-release-audit}
+
+All server design records in this section are merged on `main` and scheduled for the next post-[SILO Server 20261109](/blog/release/silo-20261109/) release.
+
+- [Site Replication Healing: Lock-Free Snapshots to Prevent Re-Entrant RWMutex Deadlocks](/blog/design/site-replication-lock-snapshots/) ([#341](https://github.com/pgsty/silo/issues/341)): Why `healIAMSystem` re-acquiring `siteReplicationSys.Lock.RLock()` inside six active read-lock scopes permanently deadlocks IAM healing and configuration writes when a writer queues on Go's `sync.RWMutex`, and why snapshotting in-memory peer state before cluster storage I/O is necessary and sufficient.
+- [Pool Decommission: Monotonic Physical Progress, Quorum-Safe Offline Drives, and Corrupted Metadata Guards](/blog/design/pool-decommission-physical-progress/) ([#293](https://github.com/pgsty/silo/issues/293), [#340](https://github.com/pgsty/silo/issues/340)): Why logical `Walk` counts underreport multi-version objects and hang decommission at `100%`, why `checkPoolFullyEmpty` failed on dead drives within erasure tolerance, and how quorum-tolerant physical sweeps keep strict corruption safety on online drives.
+- [Multi-Pool CopyObject: Cross-Pool Historical Version Self-Copy, Moving-Pool Authority, and Compression Indexes](/blog/design/multi-pool-copy-placement/) ([#343](https://github.com/pgsty/silo/issues/343)): Why rolling back to a historical version in another server pool failed with `404 NoSuchVersion`, why `prepareCopyObject` must separate authoritative in-place updates on moving pools from active-pool stream rewrites before encryption/compression transforms, and why pooled rewrites forward `IndexCB`.
+- [Batch Key Rotation: Persisting KMS Associated-Data Context and Guarding UTF-8 Round-Trips](/blog/design/batch-keyrotate-kms-context/) ([#346](https://github.com/pgsty/silo/issues/346)): Why a value-receiver `Validate()` and unpersisted `msg:"-"` field silently dropped `encryption.context` on every SSE-KMS batch key rotation since 2023, why stateless decoding from persisted job options survives retries and restarts, and why invalid UTF-8 is rejected before sealing KMS keys.
+
 ## November 10: Found in Release Review {#november-10-found-in-release-review}
 
 - [Lifecycle History: One Version Under the Headers of Two Releases](/blog/design/lifecycle-history-old-headers/) ([#332](https://github.com/pgsty/silo/pull/332)): Why lifecycle expiry of data written by a MinIO release before 2024-04-28 is refused for good once some drives of its erasure set were replaced, and why taking two release-dependent header fields out of the revision key is the minimum complete repair.

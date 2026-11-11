@@ -13,6 +13,15 @@ cascade:
 
 设计归档记录 PGSTY SILO 的核心工程决策：缺陷根因、S3 与 IAM 协议不变量、备选方案取舍、运维边界与回归测试索引。
 
+## 2026-11-11 发布前审查修复 {#november-11-pre-release-audit}
+
+本节所有服务端设计记录对应的修复均已合入 `main` 主干，待随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 之后的下一版发布。
+
+- [站点复制 IAM 自愈：以锁内快照替代重入读锁，消除 RWMutex 永久死锁](/zh/blog/design/site-replication-lock-snapshots/)（[#341](https://github.com/pgsty/silo/issues/341)）：解释 `healIAMSystem` 在持有 `siteReplicationSys.Lock.RLock()` 期间跨越六条路径重入获取同一读锁，为何一旦遇上排队的配置写者就会触发 Go `sync.RWMutex` 永久互锁，以及先拷贝内存对端快照、释放锁后再访问底层存储为何既必要又充分。
+- [存储池退役：物理单调进度统计、纠删容错离线盘放行与损坏元数据拦截](/zh/blog/design/pool-decommission-physical-progress/)（[#293](https://github.com/pgsty/silo/issues/293)、[#340](https://github.com/pgsty/silo/issues/340)）：解释逻辑 `Walk` 计数为何漏算历史版本而使退役长期卡在 `100%`、收尾校验为何被容错范围内的坏盘卡死，以及如何在容忍离线坏盘的同时严守在线盘残留与损坏元数据安全门禁。
+- [多存储池 CopyObject：跨池历史版本回滚复制、迁移池权威副本绑定与压缩索引保留](/zh/blog/design/multi-pool-copy-placement/)（[#343](https://github.com/pgsty/silo/issues/343)）：解释将跨池历史版本复制回同一键名为何会误报 `404 NoSuchVersion`，为什么必须在加密与压缩变换前通过 `prepareCopyObject` 严格区分迁移池原地权威更新与活跃池流式重写，以及跨池重写如何透传 S2 压缩寻址回调 `IndexCB`。
+- [批处理密钥轮换：持久化恢复 KMS 加密上下文与 UTF-8 往返完整性防护](/zh/blog/design/batch-keyrotate-kms-context/)（[#346](https://github.com/pgsty/silo/issues/346)）：解释值接收者 `Validate()` 与非持久化 `msg:"-"` 字段为何让自 2023 年以来的所有 SSE-KMS 批量密钥轮换静默丢失 `encryption.context`，无状态解码为何能跨重试与重启生效，以及为何必须在生成 KMS 密钥前拦截非法 UTF-8 字节。
+
 ## 2026-11-10 发布复查中发现 {#november-10-found-in-release-review}
 
 - [生命周期版本历史：同一个版本，两个发行版写的头部](/zh/blog/design/lifecycle-history-old-headers/)（[#332](https://github.com/pgsty/silo/pull/332)）：2024-04-28 之前的 MinIO 写入的数据，在纠删集里换过一部分盘之后，生命周期过期为什么会被永久拒绝，以及为什么把两个随写入版本而变的头部字段从修订标识里拿掉就是最小而完整的修复。
