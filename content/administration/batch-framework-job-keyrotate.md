@@ -25,7 +25,7 @@ The YAML configuration supports filters to restrict key rotation to a specific s
 
 ## Candidate KMS context repair (unreleased) {#candidate-context}
 
-In the candidate after Server 20261109, `encryption.context` is decoded from the saved job configuration for execution, retry and restart. It accepts a base64-encoded JSON object of string keys and string values, such as the encoding of `{"tenant":"acme"}`. An omitted value or the base64 encoding of `{}` or JSON `null` means an empty context; malformed base64, invalid JSON and non-string values are rejected.
+In the candidate after Server 20261109, `encryption.context` is decoded from the saved job configuration for execution, retry and restart. It accepts a base64-encoded JSON object of string keys and string values, such as the encoding of `{"tenant":"acme"}`. An omitted value or the base64 encoding of `{}` or JSON `null` means an empty context. A null member value inside the object decodes to an empty string; use explicit string values to avoid ambiguity. Malformed base64, invalid JSON and values that cannot decode as strings (such as numbers or arrays) are rejected.
 
 Rotation uses this context as KMS associated data and stores it with the object. Validation-probe fields are not added to the object's context. Temporary KMS errors remain eligible for the job's retry handling. This repair is not included in Server 20261109; see [candidate compatibility notes](/compatibility/server/).
 
