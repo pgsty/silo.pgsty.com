@@ -18,7 +18,7 @@ icon: fa-solid fa-server
 以下修复已为下一次 SILO 配套发布准备，**不包含在已发布的 Server 20261109、Console v2.7.0 或 mcli 20261109 制品中**。目前尚未分配新组件版本；候选 Server 源码仍固定依赖此前已发布的 Console 和 mcli，因此交付客户端与界面修复还需要选定并发布对应组件。
 
 - **读取授权：** `GetObjectAttributes` 使用目标版本的实际标签，同时检查 Attributes 与 GetObject 权限；显式提供 `versionId` 时使用对应的版本动作。对象不存在时仍依据 `s3:ListBucket` 决定错误掩码；已获授权但无法读取元数据的请求保留存储错误。
-- **ZIP 读取：** GET、HEAD 与成员列举均按 ZIP 对象的实际标签授权。列举成员同时要求桶上的 `s3:ListBucket` 和 ZIP 上的 `s3:GetObject`。缺失的索引只在内存中构建，不再回写索引或改变 ZIP 元数据，因此读取不需要额外写权限。
+- **ZIP 读取：** GET、HEAD 与成员列举均按 ZIP 对象的实际标签授权。列举成员同时要求桶上的 `s3:ListBucket` 和 ZIP 上的 `s3:GetObject`。缺失的索引只在内存中构建，不再回写索引或改变 ZIP 元数据，因此读取不需要额外写权限。归档成员视图仅支持 GET、HEAD 和列举，不提供修改或删除 ZIP 内成员的操作；已获授权的 ZIP 文件上传仍可通过 `x-minio-extract: true` 显式要求持久化索引。
 - **对象锁与请求认证：** 副本写入和复制会核对目标版本的锁与标签状态，跨池合并 COMPLIANCE 保护不再依赖池顺序，并保留已授权的 GOVERNANCE 与法定保留变更。标签代理校验每个实际访问的目标；已认证的 unsigned-trailer 上传校验请求时间窗，桶策略允许的匿名上传继续受支持。
 - **批量删除成本：** `DeleteObjects` 中每个显式版本删除都走逐项执行的单对象路径，包括未启用 Object Lock 的桶，大批版本清理可能变慢。未指定版本 ID 的条目继续使用批量路径。
 - **存储池与恢复：** 历史版本自身复制可以在源与目标位于不同池时创建可读的新版本，覆盖加密及压缩对象。恢复到期与 healing 不再仅因随时间变化的数据目录缓存标志而拆散版本仲裁。退役扫描无物理进展时停止、取消时返回错误，并重新扫描此前被父键遮蔽的子键；详见[存储池退役流程](/zh/operations/deployments/baremetal-decommission-server-pool/)。
