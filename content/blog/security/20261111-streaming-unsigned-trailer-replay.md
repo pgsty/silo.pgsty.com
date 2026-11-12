@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/20261111-streaming-unsigned-trailer-replay/"
 ---
 
-**Status:** Fixed on `main` ([`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697), [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)); scheduled for the next post-[`20261109`](/blog/release/silo-20261109/) Server release\
+**Status:** Shipped in **[SILO 20261112](/blog/release/silo-20261112/)** ([`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697), [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555))\
 **Identifier:** `SN-2026-023` ([Security Advisory Ledger](/about/security-advisories/#sn-2026-023), [#338](https://github.com/pgsty/silo/issues/338))\
 **Severity:** High\
 **Affected scope:** **SILO Server** (`RELEASE.2026-11-09T00-00-00Z` and earlier) and inherited upstream MinIO releases since `2023-05-05` ([`76913a9fd`](https://github.com/pgsty/silo/commit/76913a9fd5c6e5c2dbd4e8c7faf56ed9e9e24091))\
@@ -107,7 +107,7 @@ Commits [`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712
 
 ## Upgrade and Policy Hardening Guidance {#remediation}
 
-1. **Upgrade SILO Server** to the post-`20261109` release containing [`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697) and [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555).
+1. **Upgrade SILO Server** to **[SILO 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`) or later (commits [`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697) and [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)).
 2. **Always terminate S3 traffic over TLS** so `Authorization` headers and `STREAMING-UNSIGNED-PAYLOAD-TRAILER` chunk streams cannot be captured or modified in transit, and ensure HTTP reverse proxies or debug loggers redact the `Authorization` header.
 3. **Optional policy hardening (disabling unsigned-trailer payloads):** Add an IAM or bucket-policy `Deny` for `s3:PutObject` with `StringEquals: {"s3:x-amz-content-sha256": "STREAMING-UNSIGNED-PAYLOAD-TRAILER"}`. The mode token is a payload condition value; authenticated trailer requests have `s3:authType = "REST-HEADER"`. Verify the intended policy with your upload clients.
 

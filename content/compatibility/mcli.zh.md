@@ -19,9 +19,9 @@ icon: fa-solid fa-terminal
 
 ## 当前版本变化（20261112） {#release-20261112}
 
-[mcli 20261112](/zh/blog/release/mcli-20261112/)（`a37a9f054fba`，Go `1.27.4`，[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/)）的 `admin user svcacct edit --policy`、`admin accesskey edit --policy`、`idp ldap accesskey edit --policy` 与 `idp openid accesskey edit --policy` 均接受显式空策略文档，例如 `{}` 或 `{"Statement":[]}`（[#78](https://github.com/pgsty/mc/issues/78)；`admin user svcacct set` 此前已支持空策略文档），并对客户端侧 IAM 与桶策略命令启用严格 JSON 解码（拒绝未知字段、尾部多余载荷、空 `Principal: {}` 及未实现的 `NotPrincipal`）。配合 [`20261109` 之后的 Server 修复](/zh/compatibility/server/#candidate-after-20261109)后，显式空策略会清除 inline policy 并恢复继承，省略 `--policy` 则保留已有策略；创建账号与写入命名策略仍拒绝空策略。
+[mcli 20261112](/zh/blog/release/mcli-20261112/)（`a37a9f054fba`，Go `1.27.4`，[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/)）的 `admin user svcacct edit --policy`、`admin accesskey edit --policy`、`idp ldap accesskey edit --policy` 与 `idp openid accesskey edit --policy` 均接受显式空策略文档，例如 `{}` 或 `{"Statement":[]}`（[#78](https://github.com/pgsty/mc/issues/78)；`admin user svcacct set` 此前已支持空策略文档），并对客户端侧 IAM 与桶策略命令启用严格 JSON 解码（拒绝未知字段、尾部多余载荷、空 `Principal: {}` 及未实现的 `NotPrincipal`）。配合 [SILO Server 20261112](/zh/compatibility/server/#maintenance-20261112) 后，显式空策略会清除 inline policy 并恢复继承，省略 `--policy` 则保留已有策略；创建账号与写入命名策略仍拒绝空策略。
 
-[Console 2.7.1](/zh/blog/release/console-2.7.1/) 已直接采用该正式提交（`v0.0.0-20261111180825-a37a9f054fba`）。已公开的 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 仍内置 `mcli 20261109`；只替换客户端二进制无法修改旧版 Server 的服务端行为。
+[SILO Server 20261112](/zh/blog/release/silo-20261112/)、[Console 2.7.2](/zh/blog/release/console-2.7.2/) 与 [Console 2.7.1](/zh/blog/release/console-2.7.1/) 均直接采用该正式提交（`v0.0.0-20261111180825-a37a9f054fba`），经典 `pgsty/silo:RELEASE.2026-11-12T00-00-00Z` 镜像内置 `mcli 20261112`；只替换客户端二进制无法修改旧版 Server（`20261109` 及更早版本）的服务端行为。
 
 ## 继承自 20261109 的变化 {#release-20261109}
 

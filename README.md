@@ -6,13 +6,15 @@ This repository contains the bilingual documentation for **Silo**, a community f
 
 ## Release state and publication
 
-Current releases: **SILO Server 20261109** (Go 1.27.3), standalone **SILO Console v2.7.1**,
+Current releases: **SILO Server 20261112** (Go 1.27.4), **SILO Console v2.7.2**,
 **mcli 20261112**, **silo-pkg v3.16.1** (Go 1.27.4), and **KES 20261026** (Go 1.27.3).
-Server 20261109 embeds Console 2.7.0, mcli 20261109 and pkg v3.16.0.
+Server 20261112 embeds Console 2.7.2, mcli 20261112 and silo-pkg v3.16.1.
 KES remains a separate, optional external key service.
 
 | Release notes                        | English                                                | 简体中文                                             |
 | ------------------------------------ | ------------------------------------------------------ | ---------------------------------------------------- |
+| Server 20261112                      | [Release notes](content/blog/release/silo-20261112.md) | [发布说明](content/blog/release/silo-20261112.zh.md) |
+| Console 2.7.2                        | [Release notes](content/blog/release/console-2.7.2.md) | [发布说明](content/blog/release/console-2.7.2.zh.md) |
 | Console 2.7.1                        | [Release notes](content/blog/release/console-2.7.1.md) | [发布说明](content/blog/release/console-2.7.1.zh.md) |
 | mcli 20261112                        | [Release notes](content/blog/release/mcli-20261112.md) | [发布说明](content/blog/release/mcli-20261112.zh.md) |
 | silo-pkg 3.16.1                      | [Release notes](content/blog/release/pkg-3.16.1.md)    | [发布说明](content/blog/release/pkg-3.16.1.zh.md)    |
@@ -28,10 +30,12 @@ KES remains a separate, optional external key service.
 See the [component matrix](content/compatibility/versions.md) for exact sources,
 upgrade order and compatibility boundaries.
 
-Server 20261109 adds lifecycle, restore, Object Lock and batch authorization
-repairs. Read its upgrade notes before mixing versions or rolling back batch
-jobs. Console 2.7.0 is published independently and embedded in this Server
-release; older Server binaries retain their original UI and dependencies.
+Server 20261112 adds `SN-2026-020` through `SN-2026-025` security repairs,
+strict policy JSON decoding, Object Lock `null`-version and replica hardening,
+and multi-pool / compressed encrypted `Range` repairs. Read its upgrade notes
+before mixing versions during multi-pool or multi-site rollouts. Console 2.7.2
+is published independently and embedded in this Server release; older Server
+binaries retain their original UI and dependencies.
 
 `data/releases.yaml` drives the homepage and download templates.
 `server.published: true` enables public asset links; `published_server` records

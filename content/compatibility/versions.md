@@ -1,7 +1,7 @@
 ---
 title: "Component Versions"
 linkTitle: "Component Versions"
-description: "SILO 20261109 Server baseline, standalone Console 2.7.1, mcli 20261112, silo-pkg 3.16.1, KES 20261026, and upgrade boundaries."
+description: "SILO 20261112 Server baseline, Console 2.7.2, mcli 20261112, silo-pkg 3.16.1, KES 20261026, and upgrade boundaries."
 url: "/compatibility/versions/"
 weight: 5
 type: docs
@@ -9,11 +9,36 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-SILO **20261109** is the current published Server release (embedding Console 2.7.0, mcli 20261109, and silo-pkg 3.16.0 on Go 1.27.3), while standalone **[Console 2.7.1](/blog/release/console-2.7.1/)**, **[mcli 20261112](/blog/release/mcli-20261112/)**, and **[silo-pkg 3.16.1](/blog/release/pkg-3.16.1/)** are published on Go 1.27.4. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
+SILO **20261112** is the current published Server release, built with **Go 1.27.4** and embedding **[Console 2.7.2](/blog/release/console-2.7.2/)**, **[mcli 20261112](/blog/release/mcli-20261112/)**, and **[silo-pkg 3.16.1](/blog/release/pkg-3.16.1/)**. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
 
-## Server 20261109 {#server-20261109}
+## Server 20261112 {#server-20261112}
 
 <span id="published"></span>
+
+| Component                       | Released version / Go module                                                                        | Fixed source                                                    |
+| ------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Server                          | `RELEASE.2026-11-12T00-00-00Z` (package `20261112000000.0.0`, published `2026-11-12T05:17:26Z`)     | `44e848fedf8cec3d8c0da4b1aa8422390a2b7a8b`                      |
+| Embedded and standalone Console | `v2.7.2` (`v0.0.0-20261112031746-0e7953ff59c4`)                                                     | `0e7953ff59c4a1eb77c7d203b265e6783ff18d01`                      |
+| mcli / MC module                | `RELEASE.2026-11-12T00-00-00Z` (`v0.0.0-20261111180825-a37a9f054fba`, package `20261112000000.0.0`) | `a37a9f054fba828a0bbbceb4e9ff247ccf09c28d`                      |
+| Shared package                  | `github.com/pgsty/silo-pkg/v3 v3.16.1`                                                              | `433f7eefa714a30b72ca70c4dffcd5faca25804f`                      |
+| Upstream S3 SDK                 | `github.com/minio/minio-go/v7 v7.4.2-0.20261025165926-320af050c445`                                 | `320af050c445` (verified upstream commit)                       |
+| Optional KES                    | `RELEASE.2026-10-26T00-00-00Z` (package `20261026000000.0.0`)                                       | `e9b4f1acebc11d61b42f876da8df48f548750cc9`                      |
+| Helm chart                      | `helm/silo 7.0.5`                                                                                   | `44e848fedf8cec3d8c0da4b1aa8422390a2b7a8b`                      |
+| Go / platform archives          | **Go 1.27.4**                                                                                       | Windows ZIP; Linux/macOS tar.gz (Console Windows is amd64 only) |
+{.wide .expand}
+
+| Docker Hub image                    | Published tags                                                                                           | Multi-platform manifest digest                                            |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `docker.io/pgsty/silo`              | `RELEASE.2026-11-12T00-00-00Z`, `latest`                                                                 | `sha256:c20d112390b9a9ce8c11b8af95ad35bcaa62f4759663c09c936cd8d2b511f329` |
+| `docker.io/pgsty/silo` (distroless) | `RELEASE.2026-11-12T00-00-00Z-distroless`, `distroless`                                                  | `sha256:a72e17773bdeb151999f9bf9d3bd842fb03850a577b730ab8c63343bb1f468fd` |
+| `docker.io/pgsty/silo-console`      | `v2.7.2`, `latest` (`v2.7.1`: `sha256:2afef06f8505eadb24d657acd0f68c78bce8b148b1d9b74981454560fa3b055f`) | `sha256:41ea21e782475e230fc19f59da6c96373387da2974c3cffea0bd4eebf604cb47` |
+| `docker.io/pgsty/mc`                | `RELEASE.2026-11-12T00-00-00Z`, `latest`                                                                 | `sha256:b532278b7a3747dbab6fe45eebb40a653efa704e6758e24e9d9ec54fc96c1800` |
+| `docker.io/pgsty/kes`               | `RELEASE.2026-10-26T00-00-00Z`, `latest`                                                                 | `sha256:ea36fcdd260c606eb89e693b0949aea73b149359605273a98fcf13c8433049cd` |
+{.wide .expand}
+
+KES is not embedded in Server and maintains an independent release cycle. [20261112 release and upgrade notes](/blog/release/silo-20261112/) and [Server 20261112 upgrade checks](/compatibility/server/#maintenance-20261112) cover `.minio.sys` quorum verification, mixed-version multi-pool write draining, multi-site service-account edit freezes, strict policy JSON decoding, and per-node S3 readiness checks; the [20261109 upgrade boundaries](/blog/release/silo-20261109/#upgrade) continue to apply when upgrading from `20261026` or earlier.
+
+## Server 20261109 {#server-20261109}
 
 | Component                       | Released version / Go module                                                                        | Fixed source                                                    |
 | ------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
@@ -27,23 +52,16 @@ SILO **20261109** is the current published Server release (embedding Console 2.7
 | Go / platform archives          | **Go 1.27.3**                                                                                       | Windows ZIP; Linux/macOS tar.gz (Console Windows is amd64 only) |
 {.wide .expand}
 
-| Docker Hub image                    | Published tags                                                                                                                   | Multi-platform manifest digest                                            |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `docker.io/pgsty/silo`              | `RELEASE.2026-11-09T00-00-00Z`, `latest`                                                                                         | `sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d` |
-| `docker.io/pgsty/silo` (distroless) | `RELEASE.2026-11-09T00-00-00Z-distroless`, `distroless`                                                                          | `sha256:fdf726815e38c2d1cb06c640e237daa83b3914e58099aecd073fef9d8e42cb00` |
-| `docker.io/pgsty/silo-console`      | `v2.7.1`, `latest` (`v2.7.0`: `sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`)                         | `sha256:2afef06f8505eadb24d657acd0f68c78bce8b148b1d9b74981454560fa3b055f` |
-| `docker.io/pgsty/mc`                | `RELEASE.2026-11-12T00-00-00Z`, `latest` (`20261109`: `sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`) | `sha256:b532278b7a3747dbab6fe45eebb40a653efa704e6758e24e9d9ec54fc96c1800` |
-| `docker.io/pgsty/kes`               | `RELEASE.2026-10-26T00-00-00Z`, `latest`                                                                                         | `sha256:ea36fcdd260c606eb89e693b0949aea73b149359605273a98fcf13c8433049cd` |
-{.wide .expand}
-
-KES is not embedded in Server and maintains an independent release cycle. [Release and upgrade notes](/blog/release/silo-20261109/) cover batch format boundaries, mixed-version restore, lock-domain rollout, and per-node S3 readiness checks; see [Server 20261109 upgrade checks](/compatibility/server/#maintenance-20261109), [post-20261109 Server candidate notes](/compatibility/server/#candidate-after-20261109), and [Downloads](/download/). Ordinary object/IAM rollback checks do not allow 20261026 workers to resume submitter-bound v2 batch records.
+Historical 20261109 Docker Hub digests: `pgsty/silo:RELEASE.2026-11-09T00-00-00Z` (`sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d`), `pgsty/silo:RELEASE.2026-11-09T00-00-00Z-distroless` (`sha256:fdf726815e38c2d1cb06c640e237daa83b3914e58099aecd073fef9d8e42cb00`), `pgsty/silo-console:v2.7.0` (`sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`), and `pgsty/mc:RELEASE.2026-11-09T00-00-00Z` (`sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`). See [20261109 release notes](/blog/release/silo-20261109/) and [Server 20261109 upgrade checks](/compatibility/server/#maintenance-20261109).
 
 ## Standalone Console {#console}
 
 <span id="console-2-6-0"></span>
 
-The latest published standalone Console is [2.7.1](/blog/release/console-2.7.1/),
-from source `3825ebc44451fdc8eefda3d4ec523a79dfecb236` (`v0.0.0-20261111181657-3825ebc44451`).
+The latest published standalone and embedded Console is [2.7.2](/blog/release/console-2.7.2/),
+from source `0e7953ff59c4a1eb77c7d203b265e6783ff18d01` (`v0.0.0-20261112031746-0e7953ff59c4`),
+synchronizing release metadata and optimized embedded assets for [SILO Server 20261112](/blog/release/silo-20261112/)
+on top of [2.7.1](/blog/release/console-2.7.1/) (`3825ebc44451fdc8eefda3d4ec523a79dfecb236`).
 It preserves service-account policy inheritance on metadata edits, blocks empty
 inline-policy variants, renders save errors inside the edit modal, preserves the
 request host (or `CONSOLE_SECURE_TLS_HOST`) on `--host 0.0.0.0` HTTP-to-HTTPS
@@ -56,8 +74,8 @@ container CA/temporary-directory fixes, and usage-worker, plain-HTTP and upload
 fixes; [2.6.0](/blog/release/console-2.6.0/) (source
 `f8ab146695fd1df74e4b84128a286d552921bf00`) added usage scans, retained-version
 totals and bucket-administration fixes.
-Published Server 20261109 embeds Console 2.7.0 (prepared Draft Server 20261112
-embeds Console 2.7.1); historical Server 20261026 retains Console 2.5.1.
+Published Server 20261112 embeds Console 2.7.2; historical Server 20261109 embeds
+Console 2.7.0 and Server 20261026 retains Console 2.5.1.
 
 ## mcli 20261112 {#mcli-20261112}
 
@@ -70,7 +88,7 @@ The latest [standalone client release](/blog/release/mcli-20261112/) uses tag
 [silo-pkg v3.16.1](/blog/release/pkg-3.16.1/) and upstream minio-go
 `v7.4.2-0.20261025165926-320af050c445`, aligning explicit empty inline-policy
 resets across access-key edit commands and enforcing strict policy JSON decoding.
-Console 2.7.1 adopts mcli 20261112; published Server 20261109 retains
+Server 20261112 and Console 2.7.2 adopt mcli 20261112; historical Server 20261109 retains
 [mcli 20261109](/blog/release/mcli-20261109/) (`e1d4cc5abfe00b674eb36347399e7398990be467`),
 and older binaries retain their original embedded client builds.
 
@@ -82,8 +100,8 @@ and older binaries retain their original embedded client builds.
 is a separate source-only release requiring Go 1.27.4. It hardens strict JSON
 policy decoding in `ParseConfigStrict` and `ParseBucketPolicyConfig` and updates
 base `golang.org/x/*`, gRPC, and `go-humanize` dependencies while preserving
-public APIs and valid policy semantics. Console 2.7.1 and mcli 20261112 build
-with `github.com/pgsty/silo-pkg/v3 v3.16.1`; published Server 20261109 retains
+public APIs and valid policy semantics. Server 20261112, Console 2.7.2, and mcli 20261112 build
+with `github.com/pgsty/silo-pkg/v3 v3.16.1`; historical Server 20261109 retains
 [silo-pkg v3.16.0](/blog/release/pkg-3.16.0/) (`b7aeea85e84e8888d6ab424c7123a1297711bc3f`),
 and external Go consumers must select `v3.16.1` and rebuild.
 

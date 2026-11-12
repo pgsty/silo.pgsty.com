@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/20261110-svcacct-inline-policy-preservation/"
 ---
 
-**Status:** Fixed on `main` ([`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27), merged via [PR #331](https://github.com/pgsty/silo/pull/331) as [`244de7ecc`](https://github.com/pgsty/silo/commit/244de7ecc1ce33f4f3e7ec452395993eb2449f11)); scheduled for the post-[`20261109`](/blog/release/silo-20261109/) Server hotfix release\
+**Status:** Shipped in **[SILO Server 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`, [`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27), merged via [PR #331](https://github.com/pgsty/silo/pull/331) as [`244de7ecc`](https://github.com/pgsty/silo/commit/244de7ecc1ce33f4f3e7ec452395993eb2449f11))\
 **Identifier:** `SN-2026-021` ([Security Advisory Ledger](/about/security-advisories/#sn-2026-021))\
 **Severity:** High\
 **Affected scope:** **SILO Server** (`RELEASE.2026-11-09T00-00-00Z` and earlier) and inherited upstream MinIO releases since `2022-05`\
@@ -218,7 +218,7 @@ During adversarial code review of [PR #331](https://github.com/pgsty/silo/pull/3
 
 ## Remediation and Operator Guidance {#remediation}
 
-1. **Upgrade every SILO Server node and replication peer** to the post-`20261109` hotfix release containing [`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27) (or build from `main` at [`244de7ecc`](https://github.com/pgsty/silo/commit/244de7ecc1ce33f4f3e7ec452395993eb2449f11) or later). In a multi-site replication deployment, an unpatched peer site will still strip the inline policy when it receives a policy-less update until that peer is also upgraded.
+1. **Upgrade every SILO Server node and replication peer** to **[SILO Server 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`, containing [`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27) and embedded **[Console 2.7.2](/blog/release/console-2.7.2/)**). In a multi-site replication deployment, an unpatched peer site will still strip the inline policy when it receives a policy-less update until that peer is also upgraded.
 2. **Audit existing service accounts on every site after upgrading:** Because the fix cannot recover inline policies that were erased prior to the upgrade, inspect all service accounts across each site and check whether accounts that were intended to be restricted now report `Policy: implied`:
    ```shell
    mcli admin user svcacct list myminio/ <username>

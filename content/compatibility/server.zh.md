@@ -13,9 +13,11 @@ icon: fa-solid fa-server
 > [!WARNING]
 > **替换 MinIO 部署前请先阅读本页。** 二进制、软件包、服务账号、systemd 单元、默认本地配置目录、容器路径、Helm 资源名、内嵌控制台、更新行为、若干授权判定及部分错误响应已经改变；数据盘和 `MINIO_*` 配置命名空间没有随产品改名。
 
-## 20261109 之后的候选改动（未发布） {#candidate-after-20261109}
+<a id="candidate-after-20261109"></a>
 
-以下修复已在 `pgsty/silo` `main`（[`43122f76f175`](https://github.com/pgsty/silo/commit/43122f76f1751659c129079cd344fb9b17166d49)，Go `1.27.4`，Helm chart `7.0.5`）完成准备，待下一版 SILO Server 公开后交付，**不包含在已公开发布的 Server 20261109（`d998292387cc`）制品中**。配套的独立 [Console v2.7.1](/zh/blog/release/console-2.7.1/)、[mcli 20261112](/zh/blog/release/mcli-20261112/) 与 [silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/) 已正式发布并锁定于 `43122f76f175`；服务端行为变更须在相应 Server 正式发布并部署后生效。
+## Server 20261112 升级检查 {#maintenance-20261112}
+
+[Server 20261112 正式版](/zh/blog/release/silo-20261112/)（`RELEASE.2026-11-12T00-00-00Z`，包版本 `20261112000000.0.0`，源码 [`44e848fedf8c`](https://github.com/pgsty/silo/commit/44e848fedf8cec3d8c0da4b1aa8422390a2b7a8b)）已正式发布，基于 Go `1.27.4` 构建，内嵌 [Console v2.7.2](/zh/blog/release/console-2.7.2/)、[mcli 20261112](/zh/blog/release/mcli-20261112/)、[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/) 并配套 Helm chart `7.0.5`（KES 保持 `20261026`）。单独升级独立 Console 或 `mcli` 不会把这些服务端修复带入旧版 Server 二进制。
 
 - **读写标签与版本鉴权：** `GetObjectAttributes` 使用目标版本的实际标签，同时检查 Attributes 与 GetObject 权限；`GetObject`/`HeadObject` 在带标签条件读取未达读仲裁时保留 `5xx` 存储错误（[#293](https://github.com/pgsty/silo/issues/293)、[#294](https://github.com/pgsty/silo/pull/294)）。`GET`/`HEAD` 响应（含指定版本读取、STS 会话、预签名/匿名请求与双活复制代理）仅在调用方具备未被显式拒绝的 `s3:GetObjectTagging` / `s3:GetObjectVersionTagging` 或已签名 `s3:ReplicateTags` 权限时才返回 `x-amz-tagging-count` 与 `X-Amz-Tagging`（`X-Amz-Tagging-Directive: ACCESS`），否则均予以省略。`CopyObject`、`UploadPartCopy` 与 `SelectObjectContent` 按源对象的实际标签鉴权；`CopyObject` 使用 `COPY` 标签指令时，目的端请求标签条件以实际复制的标签为准。标签接口将鉴权绑定到存储标签和请求版本。普通元数据列举检查当前对象权限，版本列举逐版本检查。GET 与标签操作显式提供 `versionId` 时，版本动作的显式拒绝优先；没有此类拒绝时，SILO 保留历史基础动作授权。这一兼容行为不同于 AWS 要求单独授予版本动作的规则。对象锁变更继续检查保留期／法律保留权限及已有锁状态。对象不存在时仍依据 `s3:ListBucket` 决定错误掩码。
 - **ZIP 读取：** GET、HEAD 与成员列举均按 ZIP 对象的实际标签授权。列举成员同时要求桶上的 `s3:ListBucket` 和 ZIP 上的 `s3:GetObject`。缺失的索引只在内存中构建，不再回写索引或改变 ZIP 元数据，因此读取不需要额外写权限。归档成员视图仅支持 GET、HEAD 和列举，不提供修改或删除 ZIP 内成员的操作；已获授权的 ZIP 文件上传仍可通过 `x-minio-extract: true` 显式要求持久化索引。
@@ -25,7 +27,7 @@ icon: fa-solid fa-server
 - **IAM、严格策略 JSON 与站点复制：** IAM 命名策略、服务账号会话策略、STS `Policy` 参数与桶策略统一启用严格 JSON 解析（拒绝未知字段、尾部多余载荷及非对象输入）。更新服务账号时，策略省略或为 null 则保留 inline policy（含 `20261111` 前历史全拒绝空 `embedded-policy` 账号）；显式 `{}` 或 `{"Statement":[]}` 清除它并恢复继承；非空策略缺少 Version 时补默认值。IAM 导入及复制拒绝未知策略字段，同时保留受支持的历史策略语义；导入前先校验整个策略文件，已有 IAM 策略的落盘读取保持兼容。桶策略复制中的显式 null 仍表示删除。导入保留账号和组的禁用状态，并报告组失败；导出及复制的凭据移除派生策略声明，桶与元数据 healing、状态采集及复制 hook 均先获取站点拓扑快照并释放状态锁，再执行存储读写与对端 RPC。配套 [Console](/zh/compatibility/console/) 和 [mcli](/zh/compatibility/mcli/) 修复独立交付。
 - **SSE-KMS 加密上下文与批处理：** `PutObject`、`CopyObject`、`CreateMultipartUpload` 与浏览器表单 `POST` 上传收到空值、畸形 Base64/UTF-8/JSON、尾部多余 token 或非字符串/非 `null` 成员值的 `X-Amz-Server-Side-Encryption-Context` 请求头时，统一返回 `400 InvalidArgument`（不再返回 `500 InternalError`）。批处理[密钥轮换](/zh/administration/batch-framework-job-keyrotate/)在执行、重试与重新加载时保留配置的 KMS 上下文（更改对象密钥前拒绝非法 UTF-8），将历史 `XLV1` 对象流式重写为带明文 MD5 密封 ETag 且保留标签/过期时间的 `XLV2` 对象，并在 `SSE-S3` 转 `SSE-KMS` 时保留内部分片与分层元数据头。变量预检与当前固定版本的策略 evaluator 一致：不支持的 `${...}` 序列保持字面量，真正缺失的请求上下文仍然限制作业。这不意味着实现了 AWS 特殊变量的转义展开。
 
-下方 20261109 升级检查仍描述该正式版本。候选修复不会放宽既有的锁域、混合节点 restore 或批处理清单升级要求。重启前，请先确认 `.minio.sys` 在各纠删集具备健康读仲裁；多存储池集群跨版本滚动窗口期间建议排空或暂停并发 S3 写入，使跨池锁顺序与 `null` 版本对象锁检查在全部节点一致生效。 多站点混合版本窗口内避免在旧站编辑服务账号：仅修改备注也可能在旧站清除内联限制。全部站点升级后，应按明确复核过的目标策略校正账号；盲目 resync 可能传播旧站已经放宽的状态。
+从 `20261026` 及更早版本升级时，下方 20261109 升级检查继续适用；Server 20261112 不会放宽既有的锁域、混合节点 restore 或批处理清单升级要求。重启前，请先确认 `.minio.sys` 在各纠删集具备健康读仲裁；多存储池集群跨版本滚动窗口期间建议排空或暂停并发 S3 写入，使跨池锁顺序与 `null` 版本对象锁检查在全部节点一致生效。多站点混合版本窗口内避免在旧站编辑服务账号：仅修改备注也可能在旧站清除内联限制。全部站点升级后，应按明确复核过的目标策略校正账号；盲目 resync 可能传播旧站已经放宽的状态。以 `--reuse-values` 升级 Helm chart `7.0.5` 时，须显式传入 `--set image.tag=RELEASE.2026-11-12T00-00-00Z`。
 
 <span id="maintenance-20261025"></span>
 <span id="post-20261026"></span>

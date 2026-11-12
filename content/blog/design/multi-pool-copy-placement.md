@@ -14,7 +14,7 @@ url: "/blog/design/multi-pool-copy-placement/"
 
 This record covers an upstream-inherited multi-pool `CopyObject` failure family across `cmd/erasure-server-pool.go` and `cmd/object-handlers.go`, tracked under [#343](https://github.com/pgsty/silo/issues/343).
 
-**Status:** Merged to `main` in [`a8824b341`](https://github.com/pgsty/silo/commit/a8824b341fce071cdd48356caaed37d76580c39e), [`e36ea51d9`](https://github.com/pgsty/silo/commit/e36ea51d9c3a28df7d60f1d105226b1d0049342e), and [`cd3e46a2b`](https://github.com/pgsty/silo/commit/cd3e46a2b7dee00b64c323d35ebdd32aab0fe644); scheduled for the next post-[`20261109`](/blog/release/silo-20261109/) Server release. `SILO Server 20261109` and earlier—as well as upstream MinIO releases since `2020-08-03`—are affected.
+**Status:** Shipped in **[SILO 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`; commits [`a8824b341`](https://github.com/pgsty/silo/commit/a8824b341fce071cdd48356caaed37d76580c39e), [`e36ea51d9`](https://github.com/pgsty/silo/commit/e36ea51d9c3a28df7d60f1d105226b1d0049342e), and [`cd3e46a2b`](https://github.com/pgsty/silo/commit/cd3e46a2b7dee00b64c323d35ebdd32aab0fe644)). `SILO Server 20261109` and earlier—as well as upstream MinIO releases since `2020-08-03`—are affected.
 
 ## Short Answer {#tldr}
 
@@ -97,4 +97,4 @@ Commits [`a8824b341`](https://github.com/pgsty/silo/commit/a8824b341fce071cdd483
 
 ## Verification {#verification}
 
-`cmd/object-copy-pools_test.go` verifies cross-pool historical version self-copies across plaintext, SSE-S3, SSE-KMS (with associated-data encryption context), SSE-C, and multi-block S2 compression (`Parts[0].Index` preserved), as well as moving-pool (`decommissioning` / `rebalancing`) authority preservation against stale duplicate copies and timestamp ties. See also [Multi-Pool Object Consistency](/blog/design/multi-pool-object-consistency/) and [Candidate Server Compatibility Notes](/compatibility/server/#candidate-after-20261109).
+`cmd/object-copy-pools_test.go` verifies cross-pool historical version self-copies across plaintext, SSE-S3, SSE-KMS (with associated-data encryption context), SSE-C, and multi-block S2 compression (`Parts[0].Index` preserved), as well as moving-pool (`decommissioning` / `rebalancing`) authority preservation against stale duplicate copies and timestamp ties. See also [Multi-Pool Object Consistency](/blog/design/multi-pool-object-consistency/) and [Server Compatibility Notes](/compatibility/server/#candidate-after-20261109).

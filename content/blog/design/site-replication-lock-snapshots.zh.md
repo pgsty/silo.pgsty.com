@@ -14,7 +14,7 @@ url: "/zh/blog/design/site-replication-lock-snapshots/"
 
 本文记录 `SiteReplicationSys`（`cmd/site-replication.go`、`cmd/iam-revision.go`、`cmd/site-replication-metadata.go`）中一组继承自上游 MinIO 的递归读锁死锁与共享 Map 数据竞争缺陷及其修复设计，对应 [#341](https://github.com/pgsty/silo/issues/341)。
 
-**状态：** 已通过提交 [`745fbf043`](https://github.com/pgsty/silo/commit/745fbf04376454a3052afb7204856b90cd394f9b)、[`2f228284f`](https://github.com/pgsty/silo/commit/2f228284f31ded34ff34442b239a7e1589caa778) 与 [`ef6efd312`](https://github.com/pgsty/silo/commit/ef6efd3120737506f9dd706e2c8564647b2c5685) 合入 `main`，将随 [`20261109`](/zh/blog/release/silo-20261109/) 之后的下一版 Server 发布。`SILO Server 20261109` 及更早版本，以及自 `2022-04-24` 以来的上游原版 MinIO 均受影响。
+**状态：** 已随 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`；提交 [`745fbf043`](https://github.com/pgsty/silo/commit/745fbf04376454a3052afb7204856b90cd394f9b)、[`2f228284f`](https://github.com/pgsty/silo/commit/2f228284f31ded34ff34442b239a7e1589caa778) 与 [`ef6efd312`](https://github.com/pgsty/silo/commit/ef6efd3120737506f9dd706e2c8564647b2c5685)）发布。`SILO Server 20261109` 及更早版本，以及自 `2022-04-24` 以来的上游原版 MinIO 均受影响。
 
 ## 简短回答 {#tldr}
 
@@ -102,4 +102,4 @@ Go 标准库的 `sync.RWMutex` 严禁同一协程重入获取读锁：一旦任�
 
 ## 验证 {#verification}
 
-`cmd/site-replication-status_test.go` 与 `cmd/iam-svcacct-replication-snapshot_test.go` 在开启 `-race` 的条件下，使用确定性写锁探针逐一卡入 `healIAMSystem`、五个 IAM 自愈辅助函数、桶自愈、状态采集、并发拓扑变更与请求取消路径，确认全部零死锁、零数据竞争通过。另见 [Server 候选兼容性说明](/zh/compatibility/server/#candidate-after-20261109)与 [IAM 策略重载锁粒度设计（`#251`）](/zh/blog/design/iam-policy-cancellation/)。
+`cmd/site-replication-status_test.go` 与 `cmd/iam-svcacct-replication-snapshot_test.go` 在开启 `-race` 的条件下，使用确定性写锁探针逐一卡入 `healIAMSystem`、五个 IAM 自愈辅助函数、桶自愈、状态采集、并发拓扑变更与请求取消路径，确认全部零死锁、零数据竞争通过。另见 [Server 兼容性说明](/zh/compatibility/server/#candidate-after-20261109)与 [IAM 策略重载锁粒度设计（`#251`）](/zh/blog/design/iam-policy-cancellation/)。

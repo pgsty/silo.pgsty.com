@@ -2,27 +2,27 @@
 # Keep the Windows format tied to each published version. Switch a component
 # to zip only when its new Windows assets have been published and verified.
 server:
-  tag: RELEASE.2026-11-09T00-00-00Z
-  build: 20261109000000.0.0
-  date: "2026-11-09"
+  tag: RELEASE.2026-11-12T00-00-00Z
+  build: 20261112000000.0.0
+  date: "2026-11-12"
   published: true
-  go_version: "1.27.3"
-  embedded_console: v2.7.0
-  embedded_mcli: RELEASE.2026-11-09T00-00-00Z
-  helm_chart: "7.0.4"
+  go_version: "1.27.4"
+  embedded_console: v2.7.2
+  embedded_mcli: RELEASE.2026-11-12T00-00-00Z
+  helm_chart: "7.0.5"
   windows_archive_format: zip
-  source: d998292387ccf1d2907749e0fb1575ef5fb93fda
+  source: 44e848fedf8cec3d8c0da4b1aa8422390a2b7a8b
 published_server:
-  tag: RELEASE.2026-11-09T00-00-00Z
-  build: 20261109000000.0.0
-  date: "2026-11-09"
+  tag: RELEASE.2026-11-12T00-00-00Z
+  build: 20261112000000.0.0
+  date: "2026-11-12"
   published: true
-  go_version: "1.27.3"
-  embedded_console: v2.7.0
-  embedded_mcli: RELEASE.2026-11-09T00-00-00Z
-  helm_chart: "7.0.4"
+  go_version: "1.27.4"
+  embedded_console: v2.7.2
+  embedded_mcli: RELEASE.2026-11-12T00-00-00Z
+  helm_chart: "7.0.5"
   windows_archive_format: zip
-  source: d998292387ccf1d2907749e0fb1575ef5fb93fda
+  source: 44e848fedf8cec3d8c0da4b1aa8422390a2b7a8b
 client:
   tag: RELEASE.2026-11-12T00-00-00Z
   go_version: "1.27.4"
@@ -31,11 +31,11 @@ client:
   date: "2026-11-12"
   source: a37a9f054fba828a0bbbceb4e9ff247ccf09c28d
 console:
-  tag: v2.7.1
-  build: 2.7.1
+  tag: v2.7.2
+  build: 2.7.2
   windows_archive_format: zip
-  source: 3825ebc44451fdc8eefda3d4ec523a79dfecb236
-  notes: "blog/release/console-2.7.1/"
+  source: 0e7953ff59c4a1eb77c7d203b265e6783ff18d01
+  notes: "blog/release/console-2.7.2/"
 pkg:
   tag: v3.16.1
   source: 433f7eefa714a30b72ca70c4dffcd5faca25804f

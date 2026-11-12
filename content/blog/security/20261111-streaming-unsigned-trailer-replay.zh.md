@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/20261111-streaming-unsigned-trailer-replay/"
 ---
 
-**发布状态：** 主干已修复（[`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697)、[`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)），将随 [`20261109`](/zh/blog/release/silo-20261109/) 之后的下一版 Server 发布\
+**发布状态：** 已随 **[SILO 20261112](/zh/blog/release/silo-20261112/)** 发布（[`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697)、[`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)）\
 **安全编号：** `SN-2026-023`（[安全公告台账](/zh/about/security-advisories/#sn-2026-023)，[#338](https://github.com/pgsty/silo/issues/338)）\
 **严重程度：** 高危（High）\
 **影响范围：** **SILO Server**（`RELEASE.2026-11-09T00-00-00Z` 及更早版本）与自 `2023-05-05`（[`76913a9fd`](https://github.com/pgsty/silo/commit/76913a9fd5c6e5c2dbd4e8c7faf56ed9e9e24091)）以来的上游原版 MinIO\
@@ -107,7 +107,7 @@ case authTypeSigned, authTypeStreamingSigned, authTypeStreamingSignedTrailer:
 
 ## 升级与加固建议 {#remediation}
 
-1. **升级 SILO Server** 至包含提交 [`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697) 与 [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555) 的 `20261109` 后续发布版本。
+1. **升级 SILO Server** 至 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`）或更高版本（包含提交 [`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697) 与 [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)）。
 2. **强制启用 HTTPS 并脱敏访问日志：** 确保 S3 接入层全程使用 TLS，且反向代理与调试日志不落盘明文 `Authorization` 请求头。
 3. **可选策略加固（禁用无签名尾标载荷）：** 在 IAM 或桶策略中为 `s3:PutObject` 添加 `Deny`，条件为 `StringEquals: {"s3:x-amz-content-sha256": "STREAMING-UNSIGNED-PAYLOAD-TRAILER"}`。模式标记属于载荷条件值；已认证尾标请求的 `s3:authType = "REST-HEADER"`。请用实际上传客户端验证策略效果。
 

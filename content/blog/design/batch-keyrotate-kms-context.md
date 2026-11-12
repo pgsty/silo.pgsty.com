@@ -14,7 +14,7 @@ url: "/blog/design/batch-keyrotate-kms-context/"
 
 This record covers an upstream-inherited SSE-KMS associated-data bug in `cmd/batch-rotate.go`, tracked under [#346](https://github.com/pgsty/silo/issues/346).
 
-**Status:** Merged to `main` in [`467ce760e`](https://github.com/pgsty/silo/commit/467ce760ed2d77099e8c89cd57514b830acf8780) and [`4a9bdb540`](https://github.com/pgsty/silo/commit/4a9bdb54072dbd7e95dd303a190cda7237ce4fcd); scheduled for the next post-[`20261109`](/blog/release/silo-20261109/) Server release. `SILO Server 20261109` and earlier—as well as all upstream MinIO releases since `RELEASE.2023-04-07T05-28-58Z`—are affected.
+**Status:** Shipped in **[SILO 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`; commits [`467ce760e`](https://github.com/pgsty/silo/commit/467ce760ed2d77099e8c89cd57514b830acf8780) and [`4a9bdb540`](https://github.com/pgsty/silo/commit/4a9bdb54072dbd7e95dd303a190cda7237ce4fcd)). `SILO Server 20261109` and earlier—as well as all upstream MinIO releases since `RELEASE.2023-04-07T05-28-58Z`—are affected.
 
 ## Short Answer {#tldr}
 
@@ -117,4 +117,4 @@ Commits [`467ce760e`](https://github.com/pgsty/silo/commit/467ce760ed2d77099e8c8
 
 ## Verification {#verification}
 
-`cmd/batch-rotate-context_test.go` verifies SSE-KMS context preservation across direct execution, `.minio.sys` manifest reload, transient KMS retry recovery, probe-key isolation (`"MinIO batch API"` absent from object metadata), malformed-UTF-8 key collision and value rejection, valid Unicode preservation, and end-to-end authenticated readback against the built-in KMS. See also [Batch Key Rotation Administration](/administration/batch-framework-job-keyrotate/#candidate-context) and [Candidate Server Compatibility Notes](/compatibility/server/#candidate-after-20261109).
+`cmd/batch-rotate-context_test.go` verifies SSE-KMS context preservation across direct execution, `.minio.sys` manifest reload, transient KMS retry recovery, probe-key isolation (`"MinIO batch API"` absent from object metadata), malformed-UTF-8 key collision and value rejection, valid Unicode preservation, and end-to-end authenticated readback against the built-in KMS. See also [Batch Key Rotation Administration](/administration/batch-framework-job-keyrotate/#candidate-context) and [Server Compatibility Notes](/compatibility/server/#candidate-after-20261109).

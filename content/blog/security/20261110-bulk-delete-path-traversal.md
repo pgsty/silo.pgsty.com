@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/20261110-bulk-delete-path-traversal/"
 ---
 
-**Status:** Fixed on `main` ([`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)); scheduled for the post-[`20261109`](/blog/release/silo-20261109/) Server hotfix release\
+**Status:** Shipped in **[SILO Server 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`, [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d))\
 **Identifier:** `SN-2026-020` ([Security Advisory Ledger](/about/security-advisories/#sn-2026-020))\
 **Severity:** Critical\
 **Affected scope:** Single-pool **SILO Server** deployments (`RELEASE.2026-11-09T00-00-00Z` and earlier) and inherited upstream MinIO releases; multi-pool deployments (`2+` pools) are unaffected on SILO `20261026`+\
@@ -174,7 +174,7 @@ if slices.ContainsFunc(derrs, func(err error) bool { return err != nil }) {
 
 ## Remediation and Mitigation {#remediation}
 
-1. **Upgrade SILO Server** on single-pool deployments to the post-`20261109` hotfix release containing [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d) (or build from `main` at `a18293d0c` or later). Updating `silo-console` or `mcli` alone does not remediate the server issue.
+1. **Upgrade SILO Server** on single-pool deployments to **[SILO Server 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`, containing [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)). Updating `silo-console` or `mcli` alone does not remediate the server issue.
 2. **Temporary mitigation prior to upgrade:** No configuration toggle disables this code path on unpatched single-pool servers. Until upgraded, revoke `s3:DeleteObject` and `s3:DeleteObjectVersion` from untrusted principals on single-pool deployments, or isolate untrusted tenants onto separate instances. Multi-pool deployments (`2+` server pools) on [SILO Server 20261026](/blog/release/silo-20261026/) or [20261109](/blog/release/silo-20261109/) are unaffected.
 3. **Post-upgrade audit:** Where untrusted principals held delete permissions on a versioned bucket in an unpatched single-pool deployment, check buckets (`mcli ls --versions`) and `.minio.sys/buckets/<bucket>/.metadata.bin` for unexpected delete markers.
 

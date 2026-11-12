@@ -26,11 +26,11 @@ YAML 配置支持按创建日期、标签、元数据或 kms key 进行过滤，
 
 <a id="id3" data-td-print-local></a>
 
-## KMS 上下文候选修复（未发布） {#candidate-context}
+## SILO 20261112 KMS 上下文修复 {#candidate-context}
 
-Server 20261109 之后的候选版本在执行、重试及重启恢复时，都会从保存的作业配置解码 `encryption.context`。该字段接受键和值均为字符串的 JSON 对象的 base64 编码，例如 `{"tenant":"acme"}` 的编码。省略该字段，或编码内容为 `{}`、JSON `null`，均表示空上下文。对象内成员值为 null 时会解码为空字符串，建议显式使用字符串值以避免歧义。非法 base64、非法 UTF-8、无效 JSON，以及无法解码为字符串的值（例如数字或数组）会被拒绝。
+[SILO 20261112](/zh/blog/release/silo-20261112/)（`RELEASE.2026-11-12T00-00-00Z`）及更高版本在执行、重试及重启恢复时，都会从保存的作业配置解码 `encryption.context`。该字段接受键和值均为字符串的 JSON 对象的 base64 编码，例如 `{"tenant":"acme"}` 的编码。省略该字段，或编码内容为 `{}`、JSON `null`，均表示空上下文。对象内成员值为 null 时会解码为空字符串，建议显式使用字符串值以避免歧义。非法 base64、非法 UTF-8、无效 JSON，以及无法解码为字符串的值（例如数字或数组）会被拒绝。
 
-轮换使用该上下文作为 KMS associated data，并随对象保存；校验探针字段不会加入对象上下文。临时 KMS 故障继续按作业的重试规则处理。此修复不包含在 Server 20261109 中，发布边界见[候选兼容性说明](/zh/compatibility/server/)。
+轮换使用该上下文作为 KMS associated data，并随对象保存；校验探针字段不会加入对象上下文。临时 KMS 故障继续按作业的重试规则处理。此修复不包含在 Server 20261109 中，发布边界见 [Server 兼容性说明](/zh/compatibility/server/#candidate-after-20261109)。
 
 <a id="minio-batch-framework-keyrotate-job-ref" data-td-print-local></a>
 

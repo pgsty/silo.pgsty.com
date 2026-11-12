@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/20261110-svcacct-inline-policy-preservation/"
 ---
 
-**发布状态：** 主干已修复（[`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27)，经 [PR #331](https://github.com/pgsty/silo/pull/331) 合入为 [`244de7ecc`](https://github.com/pgsty/silo/commit/244de7ecc1ce33f4f3e7ec452395993eb2449f11)），将随 [`20261109`](/zh/blog/release/silo-20261109/) 之后的 Server 热修版本发布\
+**发布状态：** 已随 **[SILO Server 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，[`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27)，经 [PR #331](https://github.com/pgsty/silo/pull/331) 合入为 [`244de7ecc`](https://github.com/pgsty/silo/commit/244de7ecc1ce33f4f3e7ec452395993eb2449f11)）发布\
 **安全编号：** `SN-2026-021`（[安全公告台账](/zh/about/security-advisories/#sn-2026-021)）\
 **严重程度：** 高危（High）\
 **影响范围：** **SILO Server**（`RELEASE.2026-11-09T00-00-00Z` 及更早版本）与自 `2022-05` 以来的上游原版 MinIO\
@@ -217,7 +217,7 @@ if _, ok := m.Lookup(policy.SessionPolicyName); ok && reset {
 
 ## 升级指引与排查建议 {#remediation}
 
-1. **升级全部 SILO Server 节点与复制站点：** 请将所有节点升级至包含提交 [`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27) 的 `20261109` 后续热修版本（或基于 [`244de7ecc`](https://github.com/pgsty/silo/commit/244de7ecc1ce33f4f3e7ec452395993eb2449f11) 及之后的 `main` 主干构建）。在多站点复制部署中，未升级的对端站点在收到不带策略的更新时仍会清空内联策略，因此必须完成全站点协同升级。
+1. **升级全部 SILO Server 节点与复制站点：** 请将所有节点升级至 **[SILO Server 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，包含提交 [`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27) 及内嵌 **[Console 2.7.2](/zh/blog/release/console-2.7.2/)**）。在多站点复制部署中，未升级的对端站点在收到不带策略的更新时仍会清空内联策略，因此必须完成全站点协同升级。
 2. **升级后逐站排查存量服务账号：** 由于代码修复无法恢复升级前已被抹除的内联策略，请在全部站点升级完成后，逐站检查所有服务账号，核对本应受限的账号是否显示为 `Policy: implied`：
    ```shell
    mcli admin user svcacct list myminio/ <username>

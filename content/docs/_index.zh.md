@@ -1,7 +1,7 @@
 ---
 title: "PGSTY SILO 文档"
 linkTitle: "文档"
-description: "SILO 20261109、Console 2.7.0、mcli 20261109、silo-pkg 3.16.0 与 KES 20261026 双语文档总入口。"
+description: "SILO 20261112、Console 2.7.2、mcli 20261112、silo-pkg 3.16.1 与 KES 20261026 双语文档总入口。"
 url: "/zh/docs/"
 weight: 1
 type: docs

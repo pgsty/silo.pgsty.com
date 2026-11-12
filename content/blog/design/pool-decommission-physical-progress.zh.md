@@ -12,9 +12,9 @@ draft: false
 url: "/zh/blog/design/pool-decommission-physical-progress/"
 ---
 
-本文记录 `cmd/erasure-server-pool-decom.go`、`cmd/erasure-server-pool-rebalance.go` 与 `cmd/erasure-server-pool-migration.go` 中三项继承自上游 MinIO 的存储池迁移与退役缺陷及其修复设计（[#293](https://github.com/pgsty/silo/issues/293)、[#340](https://github.com/pgsty/silo/issues/340)），作为 [11 月 1 日存储池迁移完整性审查](/zh/blog/design/pool-migration-integrity-review/)的延续。
+本文记录 `cmd/erasure-server-pool-decom.go`、`cmd/erasure-server-pool-rebalance.go` 与 `cmd/erasure-server-pool-migration.go` 中三项继承自上游 MinIO 的存储池迁移与退役缺陷及其修复设计（[#334](https://github.com/pgsty/silo/issues/334)、[PR #335](https://github.com/pgsty/silo/pull/335)、[#340](https://github.com/pgsty/silo/issues/340)），作为 [11 月 1 日存储池迁移完整性审查](/zh/blog/design/pool-migration-integrity-review/)的延续。
 
-**状态：** 已通过提交 [`5dc4bd6a1`](https://github.com/pgsty/silo/commit/5dc4bd6a1d286608783529ba871e5eadd76a03c9) 与 [`8587e061b`](https://github.com/pgsty/silo/commit/8587e061bb7a407e6c98f7020f6475a96500e700) 合入 `main`，将随 [`20261109`](/zh/blog/release/silo-20261109/) 之后的下一版 Server 发布。
+**状态：** 已随 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`；提交 [`ce5d19107`](https://github.com/pgsty/silo/commit/ce5d19107707c44973c75f7999fbf2fa8606d142)、[`5dc4bd6a1`](https://github.com/pgsty/silo/commit/5dc4bd6a1d286608783529ba871e5eadd76a03c9)、[`322cd8d2c`](https://github.com/pgsty/silo/commit/322cd8d2c1ac0574aae9534473e58620ea3666e2) 与 [`8587e061b`](https://github.com/pgsty/silo/commit/8587e061bb7a407e6c98f7020f6475a96500e700)）发布。
 
 ## 简短回答 {#tldr}
 
@@ -22,7 +22,7 @@ url: "/zh/blog/design/pool-decommission-physical-progress/"
 
 继承自上游 MinIO 的实现在这两端同时存在缺陷：
 
-1. **同名父对象遮蔽下层子键（`#293`）：** 在底层磁盘上，名为 `a/b` 的对象存为 `<bucket>/a/b/xl.meta`，而名为 `a/b/c` 的子对象存为同一目录下的 `<bucket>/a/b/c/xl.meta`。列举扫描器遇到 `a/b/xl.meta` 时会将 `a/b` 当作叶子对象返回，不再向下递归 `a/b/c`。单趟退役迁走并删掉源端 `a/b/xl.meta` 后直接进入收尾检查，导致 `a/b/c` 被遗留在待下线池中。
+1. **同名父对象遮蔽下层子键（`#334`）：** 在底层磁盘上，名为 `a/b` 的对象存为 `<bucket>/a/b/xl.meta`，而名为 `a/b/c` 的子对象存为同一目录下的 `<bucket>/a/b/c/xl.meta`。列举扫描器遇到 `a/b/xl.meta` 时会将 `a/b` 当作叶子对象返回，不再向下递归 `a/b/c`。单趟退役迁走并删掉源端 `a/b/xl.meta` 后直接进入收尾检查，导致 `a/b/c` 被遗留在待下线池中。
 2. **并发删除兄弟版本导致已迁移副本滞留源池（`#340`）：** 退役与再平衡均要求 `已迁移版本数 == len(fivs.Versions)` 才清理源池版本。只要业务客户端或生命周期在迁移期间并发删除了同一对象名下的某一个兄弟版本，等式即告失败，**其余已成功复制到目标池的所有版本都会原封不动滞留在源池**。
 3. **收尾清空检查的仲裁盲区与坏盘死结：** 上游 `checkAfterDecomBucket` 依赖普通仲裁列举，可能放过在线盘上损坏或分裂的残留 `xl.meta`；但如果改为机械要求“所有槽位磁盘 100% 在线且为空”，一旦老旧存储池中已有 `1`–`2` 块硬盘物理损坏（`errDiskNotFound`，这恰恰是生产环境发起硬件池退役的最常见原因），退役就会永远卡在最后一步报错退出。
 
@@ -32,7 +32,7 @@ url: "/zh/blog/design/pool-decommission-physical-progress/"
 
 | 方面         | 评估                                                                                                                                                                                                                                                                                                               |
 | :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **问题性质** | 单趟目录遍历遮蔽子键（`#293`）、全有或全无的兄弟版本清理门禁（`#340`），以及收尾物理清空核验与坏盘容错失衡；均继承自上游 MinIO。                                                                                                                                                                                   |
+| **问题性质** | 单趟目录遍历遮蔽子键（`#334`）、全有或全无的兄弟版本清理门禁（`#340`），以及收尾物理清空核验与坏盘容错失衡；均继承自上游 MinIO。                                                                                                                                                                                   |
 | **上游来源** | 父子键遮蔽源自上游 `listObjectsToDecommission` 单趟扫描模型；兄弟版本全等门禁 `decommissioned == len(fivs.Versions)` 由上游提交 [`9af6c6cee`](https://github.com/pgsty/silo/commit/9af6c6ceeff5d63dc90c8e0fe356c4d91f8e6795)（`2023-06-21`，[minio/minio#17482](https://github.com/minio/minio/pull/17482)）引入。 |
 | **影响范围** | 运行上游 MinIO 或 SILO Server `20261109` 及更早版本、执行 `decommission` 或 `rebalance` 的多存储池（`2+` pools）集群。                                                                                                                                                                                             |
 | **故障表现** | 池退役在最终检查阶段报错失败、遗留深层子键或重复滞留已迁移版本；带坏盘的老池无法正常走完退役流程。                                                                                                                                                                                                                 |
@@ -42,7 +42,7 @@ url: "/zh/blog/design/pool-decommission-physical-progress/"
 
 ## 一、上游溯源与根因分析 {#root-cause}
 
-### 1.1 同名父对象的目录遮蔽效应（`#293`） {#nested-keys}
+### 1.1 同名父对象的目录遮蔽效应（`#334`） {#nested-keys}
 
 S3 的扁平键空间允许同一个桶内同时存在对象 `logs/2026` 与对象 `logs/2026/11.gz`。但在 `xlStorage` 文件系统布局中，两者共享同一棵目录树：
 

@@ -131,13 +131,13 @@ Remove the pool from configuration and retire it only after its status is `Compl
 
 ## Behavior {#behavior}
 
-### Candidate repair after 20261109 (unreleased) {#candidate-progress}
+### SILO 20261112 Multi-Pass Drain and Progress Accounting {#candidate-progress}
 
-Server 20261109 can leave a child key behind when a physical listing first encounters its parent as an object ([#334](https://github.com/pgsty/silo/issues/334), [PR #335](https://github.com/pgsty/silo/pull/335)). The next candidate rescans the bucket after verified source removals expose more keys. This resolves the historical listing limitation without treating a logical NotFound response as proof that the source disks are empty.
+Server 20261109 can leave a child key behind when a physical listing first encounters its parent as an object ([#334](https://github.com/pgsty/silo/issues/334), [PR #335](https://github.com/pgsty/silo/pull/335)). [SILO 20261112](/blog/release/silo-20261112/) (`RELEASE.2026-11-12T00-00-00Z`) rescans the bucket after verified source removals expose more keys. This resolves the historical listing limitation without treating a logical NotFound response as proof that the source disks are empty.
 
 Decommission and rebalance clean up successfully migrated versions even when a sibling version is concurrently deleted. Confirmed source removal, including safe free-version cleanup, counts as progress; unreadable or conflicting metadata does not. Source-removal and final empty verification check every online drive and tolerate offline drives within the erasure set's read quorum, while still rejecting online metadata remnants, corrupt metadata, directory errors, and drive outages beyond parity. A scan with no physical progress stops instead of spinning; remaining physical metadata prevents completion with an error, and cancellation is returned as an error. Inspect the reported metadata or drive problem before restarting a failed attempt.
 
-The final physical-empty check remains required. A free-version record that still owns remote-tier cleanup cannot be discarded merely to finish draining the pool; unresolved tier ownership still prevents completion. These changes are not in the 20261109 artifacts. See [candidate compatibility notes](/compatibility/server/) for the release boundary.
+The final physical-empty check remains required. A free-version record that still owns remote-tier cleanup cannot be discarded merely to finish draining the pool; unresolved tier ownership still prevents completion. These changes are shipped in [SILO 20261112](/blog/release/silo-20261112/) (not in the 20261109 artifacts). See [Server compatibility notes](/compatibility/server/#candidate-after-20261109) for the release boundary.
 
 ### Final Listing Check {#final-listing-check}
 

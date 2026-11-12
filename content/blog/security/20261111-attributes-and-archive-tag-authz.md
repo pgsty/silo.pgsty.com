@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/20261111-attributes-and-archive-tag-authz/"
 ---
 
-**Status:** Fixed on `main` ([`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0), [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)); scheduled for the next post-[`20261109`](/blog/release/silo-20261109/) Server release\
+**Status:** Shipped in **[SILO 20261112](/blog/release/silo-20261112/)** ([`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0), [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555))\
 **Identifier:** `SN-2026-024` ([Security Advisory Ledger](/about/security-advisories/#sn-2026-024), [#342](https://github.com/pgsty/silo/issues/342))\
 **Severity:** High\
 **Affected scope:** **SILO Server** (`RELEASE.2026-11-09T00-00-00Z` and earlier) and inherited upstream MinIO releases since `2021-06-10` ([`ba5fb2365`](https://github.com/pgsty/silo/commit/ba5fb2365cc9797fcf4952041e9cfb035b8277f8)) and `2024-01-05` ([`9b8ba97f9`](https://github.com/pgsty/silo/commit/9b8ba97f9fc0a39ea6632443a102bd42f8067da3))\
@@ -95,8 +95,8 @@ Commits [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479
 
 ## Upgrade and Mitigation Guidance {#remediation}
 
-1. **Upgrade SILO Server** to the post-`20261109` release containing [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) and [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555).
+1. **Upgrade SILO Server** to **[SILO 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`) or later (commits [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) and [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)).
 2. **Temporary mitigation prior to upgrade:** On unpatched deployments that rely on `s3:ExistingObjectTag/*` `Deny` rules to isolate sensitive objects (especially `.zip` archives), block incoming client requests carrying the `x-minio-extract` HTTP header or `?attributes` query parameter at the reverse proxy until the server upgrade is complete.
 3. **Review archive-listing IAM roles:** If an internal application intentionally uses `ListObjectsV2` with `x-minio-extract: true` to browse `.zip` contents, ensure its IAM policy includes `s3:GetObject` (and satisfies any tag conditions) on those `.zip` objects in addition to `s3:ListBucket`.
 
-See the [Security Advisory Ledger](/about/security-advisories/#sn-2026-024), [Candidate Server Compatibility Notes](/compatibility/server/#candidate-after-20261109), and [SN-2026-022 (Active-Active Tagging Proxy Auth)](/blog/security/20261111-tagging-replication-proxy-auth/).
+See the [Security Advisory Ledger](/about/security-advisories/#sn-2026-024), [Server Compatibility Notes](/compatibility/server/#candidate-after-20261109), and [SN-2026-022 (Active-Active Tagging Proxy Auth)](/blog/security/20261111-tagging-replication-proxy-auth/).

@@ -15,10 +15,10 @@ cascade:
 
 ## 2026-11-11 发布前审查修复 {#november-11-pre-release-audit}
 
-本节所有服务端设计记录对应的修复均已合入 `main` 主干，待随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 之后的下一版发布。
+本节所有服务端设计记录对应的修复均已随 [SILO Server 20261112](/zh/blog/release/silo-20261112/)（`RELEASE.2026-11-12T00-00-00Z`）发布。
 
 - [站点复制 IAM 自愈：以锁内快照替代重入读锁，消除 RWMutex 永久死锁](/zh/blog/design/site-replication-lock-snapshots/)（[#341](https://github.com/pgsty/silo/issues/341)）：解释 `healIAMSystem` 在持有 `siteReplicationSys.Lock.RLock()` 期间跨越六条路径重入获取同一读锁，为何一旦遇上排队的配置写者就会触发 Go `sync.RWMutex` 永久互锁，以及先拷贝内存对端快照、释放锁后再访问底层存储为何既必要又充分。
-- [存储池退役：物理单调进度统计、纠删容错离线盘放行与损坏元数据拦截](/zh/blog/design/pool-decommission-physical-progress/)（[#293](https://github.com/pgsty/silo/issues/293)、[#340](https://github.com/pgsty/silo/issues/340)）：解释同名父对象（`a/b`）遮蔽子键（`a/b/c`）为何导致退役收尾卡住、并发删除同键兄弟版本为何遗留已迁出版本的源端残片，以及 `checkAfterDecomBucket` 如何在容忍纠删读仲裁范围内离线盘的同时，严守在线盘残留与损坏 `xl.meta` 元数据的安全门禁。
+- [存储池退役：物理单调进度统计、纠删容错离线盘放行与损坏元数据拦截](/zh/blog/design/pool-decommission-physical-progress/)（[#334](https://github.com/pgsty/silo/issues/334)、[PR #335](https://github.com/pgsty/silo/pull/335)、[#340](https://github.com/pgsty/silo/issues/340)）：解释同名父对象（`a/b`）遮蔽子键（`a/b/c`）为何导致退役收尾卡住、并发删除同键兄弟版本为何遗留已迁出版本的源端残片，以及 `checkAfterDecomBucket` 如何在容忍纠删读仲裁范围内离线盘的同时，严守在线盘残留与损坏 `xl.meta` 元数据的安全门禁。
 - [多存储池 CopyObject：跨池历史版本回滚复制、迁移池权威副本绑定与压缩索引保留](/zh/blog/design/multi-pool-copy-placement/)（[#343](https://github.com/pgsty/silo/issues/343)）：解释将跨池历史版本复制回同一键名为何会误报 `404 NoSuchVersion`，为什么必须在加密与压缩变换前通过 `prepareCopyObject` 严格区分迁移池原地权威更新与活跃池流式重写，以及跨池重写如何透传 S2 压缩寻址回调 `IndexCB`。
 - [批处理密钥轮换：持久化恢复 KMS 加密上下文与 UTF-8 往返完整性防护](/zh/blog/design/batch-keyrotate-kms-context/)（[#346](https://github.com/pgsty/silo/issues/346)）：解释值接收者 `Validate()` 与非持久化 `msg:"-"` 字段为何让自 2023 年以来的所有 SSE-KMS 批量密钥轮换静默丢失 `encryption.context`，无状态解码为何能跨重试与重启生效，以及为何必须在生成 KMS 密钥前拦截非法 UTF-8 字节。
 

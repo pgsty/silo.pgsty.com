@@ -1,7 +1,7 @@
 ---
 title: "PGSTY SILO Documentation"
 linkTitle: "Docs"
-description: "Documentation entry point for SILO 20261109, Console 2.7.0, mcli 20261109, silo-pkg 3.16.0, and KES 20261026."
+description: "Documentation entry point for SILO 20261112, Console 2.7.2, mcli 20261112, silo-pkg 3.16.1, and KES 20261026."
 url: "/docs/"
 weight: 1
 type: docs

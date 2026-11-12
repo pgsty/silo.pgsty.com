@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/20261111-tagging-replication-proxy-auth/"
 ---
 
-**发布状态：** 主干已修复（[`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697)、[`67a90dfef`](https://github.com/pgsty/silo/commit/67a90dfef458d3e5228e849711118bc162abed30)、[`293ab78b4`](https://github.com/pgsty/silo/commit/293ab78b4cc505c3ab8170a4b2b4b29c04ad74f9)；配套的代理 `GET`/`HEAD` 标签条件鉴权及 `x-amz-tagging-count` / `X-Amz-Object-Lock-*` 响应头裁剪见 [`c39605d4f`](https://github.com/pgsty/silo/commit/c39605d4f8a384096685ee3ea3a97802d9c8071c) 与 [`ea37a7e8b`](https://github.com/pgsty/silo/commit/ea37a7e8b05fddb32c8578c3e959d956dee3e2b0)），将随 [`20261109`](/zh/blog/release/silo-20261109/) 之后的下一版 Server 发布\
+**发布状态：** 已随 **[SILO 20261112](/zh/blog/release/silo-20261112/)** 发布（[`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697)、[`67a90dfef`](https://github.com/pgsty/silo/commit/67a90dfef458d3e5228e849711118bc162abed30)、[`293ab78b4`](https://github.com/pgsty/silo/commit/293ab78b4cc505c3ab8170a4b2b4b29c04ad74f9)；配套的代理 `GET`/`HEAD` 标签条件鉴权及 `x-amz-tagging-count` / `X-Amz-Object-Lock-*` 响应头裁剪见 [`c39605d4f`](https://github.com/pgsty/silo/commit/c39605d4f8a384096685ee3ea3a97802d9c8071c) 与 [`ea37a7e8b`](https://github.com/pgsty/silo/commit/ea37a7e8b05fddb32c8578c3e959d956dee3e2b0)）\
 **安全编号：** `SN-2026-022`（[安全公告台账](/zh/about/security-advisories/#sn-2026-022)，[#337](https://github.com/pgsty/silo/issues/337)）\
 **严重程度：** 严重（Critical）\
 **影响范围：** **SILO Server**（`RELEASE.2026-11-09T00-00-00Z` 及更早版本）与自 `2024-01-12`（[`b2b26d9c9`](https://github.com/pgsty/silo/commit/b2b26d9c958a82fbd9f7e0dc70fc2133838576d0)）以来的上游原版 MinIO\
@@ -122,8 +122,8 @@ S3 与 SILO 支持通过 `s3:ExistingObjectTag/<key>` 条件键在对象标签�
 
 ## 升级指引与缓解建议 {#remediation}
 
-1. **全站点协同升级 SILO Server：** 请将双活复制拓扑中的所有节点升级至包含 [`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697)、[`67a90dfef`](https://github.com/pgsty/silo/commit/67a90dfef458d3e5228e849711118bc162abed30) 与 [`293ab78b4`](https://github.com/pgsty/silo/commit/293ab78b4cc505c3ab8170a4b2b4b29c04ad74f9) 的 `20261109` 后续版本。任意未升级的站点若暴露在客户端流量下，仍可能使用其复制凭据代发未认证的 `DELETE ?tagging`。
+1. **全站点协同升级 SILO Server：** 请将双活复制拓扑中的所有节点升级至 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`）或更高版本（包含 [`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697)、[`67a90dfef`](https://github.com/pgsty/silo/commit/67a90dfef458d3e5228e849711118bc162abed30) 与 [`293ab78b4`](https://github.com/pgsty/silo/commit/293ab78b4cc505c3ab8170a4b2b4b29c04ad74f9)）。任意未升级的站点若暴露在客户端流量下，仍可能使用其复制凭据代发未认证的 `DELETE ?tagging`。
 2. **升级前网关层临时缓解：** 若短期内无法完成升级且 S3 端口面向不可信网络开放，可在反向代理或负载均衡层拦截同时不含 `Authorization` 请求头与 `X-Amz-Signature` 查询参数的 `DELETE ...?tagging` 请求。
 3. **升级后审计：** 在双活复制桶上依赖对象标签实施权限隔离（`s3:ExistingObjectTag/*`）的集群，建议升级后核查审计日志中是否存在异常的 `DeleteObjectTagging` / `PutObjectTagging` 记录并比对各站点标签一致性。
 
-更多信息请参阅[安全公告台账](/zh/about/security-advisories/#sn-2026-022)、[Server 候选兼容性说明](/zh/compatibility/server/#candidate-after-20261109)以及关联公告 [SN-2026-024（`GetObjectAttributes` 与 ZIP 归档标签鉴权）](/zh/blog/security/20261111-attributes-and-archive-tag-authz/)。
+更多信息请参阅[安全公告台账](/zh/about/security-advisories/#sn-2026-022)、[Server 兼容性说明](/zh/compatibility/server/#candidate-after-20261109)以及关联公告 [SN-2026-024（`GetObjectAttributes` 与 ZIP 归档标签鉴权）](/zh/blog/security/20261111-attributes-and-archive-tag-authz/)。

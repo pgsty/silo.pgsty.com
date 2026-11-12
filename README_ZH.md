@@ -6,10 +6,12 @@
 
 ## 当前版本
 
-当前版本为 **SILO Server 20261109**（Go 1.27.3）、独立版 **SILO Console v2.7.1**、**mcli 20261112**、**silo-pkg v3.16.1**（Go 1.27.4）与 **KES 20261026**（Go 1.27.3）。Server 20261109 内嵌 Console 2.7.0、mcli 20261109 与 pkg v3.16.0；KES 保持独立、可选的外部密钥服务。
+当前版本为 **SILO Server 20261112**（Go 1.27.4）、**SILO Console v2.7.2**、**mcli 20261112**、**silo-pkg v3.16.1**（Go 1.27.4）与 **KES 20261026**（Go 1.27.3）。Server 20261112 内嵌 Console 2.7.2、mcli 20261112 与 silo-pkg v3.16.1；KES 保持独立、可选的外部密钥服务。
 
 | 发布说明                      | English                                                | 简体中文                                             |
 | ----------------------------- | ------------------------------------------------------ | ---------------------------------------------------- |
+| Server 20261112               | [Release notes](content/blog/release/silo-20261112.md) | [发布说明](content/blog/release/silo-20261112.zh.md) |
+| Console 2.7.2                 | [Release notes](content/blog/release/console-2.7.2.md) | [发布说明](content/blog/release/console-2.7.2.zh.md) |
 | Console 2.7.1                 | [Release notes](content/blog/release/console-2.7.1.md) | [发布说明](content/blog/release/console-2.7.1.zh.md) |
 | mcli 20261112                 | [Release notes](content/blog/release/mcli-20261112.md) | [发布说明](content/blog/release/mcli-20261112.zh.md) |
 | silo-pkg 3.16.1               | [Release notes](content/blog/release/pkg-3.16.1.md)    | [发布说明](content/blog/release/pkg-3.16.1.zh.md)    |
@@ -24,7 +26,7 @@
 
 精确源码版本、升级顺序与兼容性边界见[组件矩阵](content/compatibility/versions.zh.md)。
 
-Server 20261109 交付生命周期、恢复、Object Lock 与批处理授权修复。混合版本或回退 batch 作业前，请先阅读升级说明。Console 2.7.0 已独立发布，也内嵌于本次 Server；旧 Server 二进制仍保留各自原有的界面与依赖。
+Server 20261112 交付 `SN-2026-020` 至 `SN-2026-025` 安全修复、严格策略 JSON 校验、Object Lock `null` 版本与副本保护，以及多存储池和压缩加密区间读取修复。多池或多站点混合版本升级前请先阅读升级说明。Console 2.7.2 已独立发布，也内嵌于本次 Server；旧 Server 二进制仍保留各自原有的界面与依赖。
 
 `data/releases.yaml` 驱动首页与下载页。`server.published: true` 启用公开制品下载链接，`published_server` 记录当前公开版本。准备后续候选版本时保持 false，直到相应 Server 制品与 Docker 镜像公开且完成核验。`windows_archive_format` 跟随各组件实际发布制品：当前 Windows 归档统一为 ZIP，Linux/macOS 保持 tar.gz；历史下载链接保留原格式。制品发布与具体生产集群部署分别验收。
 

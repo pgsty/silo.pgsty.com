@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/20261110-bulk-delete-path-traversal/"
 ---
 
-**发布状态：** 主干已修复（[`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)），将随 [`20261109`](/zh/blog/release/silo-20261109/) 之后的 Server 热修版本发布\
+**发布状态：** 已随 **[SILO Server 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，[`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)）发布\
 **安全编号：** `SN-2026-020`（[安全公告台账](/zh/about/security-advisories/#sn-2026-020)）\
 **严重程度：** 严重（Critical）\
 **影响范围：** 单存储池（Single-Pool）部署的 **SILO Server**（`RELEASE.2026-11-09T00-00-00Z` 及更早版本）与上游原版 MinIO；多存储池（`2` 个及以上存储池）部署自 SILO `20261026` 起不受影响\
@@ -174,7 +174,7 @@ if slices.ContainsFunc(derrs, func(err error) bool { return err != nil }) {
 
 ## 升级指引与临时缓解措施 {#remediation}
 
-1. **升级 SILO Server：** 单存储池部署请升级至包含提交 [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d) 的 `20261109` 后续热修版本（或基于 `a18293d0c` 及之后的 `main` 源码构建）。单独升级 `silo-console` 或 `mcli` 无法修复服务端问题。
+1. **升级 SILO Server：** 单存储池部署请升级至 **[SILO Server 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，包含提交 [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)）。单独升级 `silo-console` 或 `mcli` 无法修复服务端问题。
 2. **升级前临时缓解：** 未修复的单存储池服务端无配置项可关闭该代码路径。完成升级前，请在单存储池集群上收回不可信或半可信多租户主体的 `s3:DeleteObject` 与 `s3:DeleteObjectVersion` 权限（或将不可信租户隔离至独立实例）。运行 [SILO Server 20261026](/zh/blog/release/silo-20261026/) 或 [20261109](/zh/blog/release/silo-20261109/) 的多存储池（`2` 个及以上存储池）集群不受影响。
 3. **升级后核查：** 若未修复的单存储池集群此前曾向半可信主体授予开启版本控制桶的删除权限，建议升级后通过 `mcli ls --versions` 检查业务桶，并核查磁盘上 `.minio.sys/buckets/<bucket>/.metadata.bin` 是否存在异常删除标记。
 

@@ -12,9 +12,9 @@ draft: false
 url: "/blog/design/pool-decommission-physical-progress/"
 ---
 
-This record covers three upstream-inherited pool migration and retirement defects across `cmd/erasure-server-pool-decom.go`, `cmd/erasure-server-pool-rebalance.go`, and `cmd/erasure-server-pool-migration.go` ([#293](https://github.com/pgsty/silo/issues/293), [#340](https://github.com/pgsty/silo/issues/340)), continuing the [November 1 Pool Migration Integrity Review](/blog/design/pool-migration-integrity-review/).
+This record covers three upstream-inherited pool migration and retirement defects across `cmd/erasure-server-pool-decom.go`, `cmd/erasure-server-pool-rebalance.go`, and `cmd/erasure-server-pool-migration.go` ([#334](https://github.com/pgsty/silo/issues/334), [PR #335](https://github.com/pgsty/silo/pull/335), [#340](https://github.com/pgsty/silo/issues/340)), continuing the [November 1 Pool Migration Integrity Review](/blog/design/pool-migration-integrity-review/).
 
-**Status:** Merged to `main` in [`5dc4bd6a1`](https://github.com/pgsty/silo/commit/5dc4bd6a1d286608783529ba871e5eadd76a03c9) and [`8587e061b`](https://github.com/pgsty/silo/commit/8587e061bb7a407e6c98f7020f6475a96500e700); scheduled for the next post-[`20261109`](/blog/release/silo-20261109/) Server release.
+**Status:** Shipped in **[SILO 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`; commits [`ce5d19107`](https://github.com/pgsty/silo/commit/ce5d19107707c44973c75f7999fbf2fa8606d142), [`5dc4bd6a1`](https://github.com/pgsty/silo/commit/5dc4bd6a1d286608783529ba871e5eadd76a03c9), [`322cd8d2c`](https://github.com/pgsty/silo/commit/322cd8d2c1ac0574aae9534473e58620ea3666e2), and [`8587e061b`](https://github.com/pgsty/silo/commit/8587e061bb7a407e6c98f7020f6475a96500e700)).
 
 ## Short Answer {#tldr}
 
@@ -22,7 +22,7 @@ Retiring a storage pool (`mcli admin decommission start`) must satisfy two oppos
 
 Inherited from upstream MinIO, the migration engine violated both sides:
 
-1. **Parent objects hid nested child keys (`#293`):** On disk, an object named `a/b` stores `<bucket>/a/b/xl.meta`, while a child object `a/b/c` stores `<bucket>/a/b/c/xl.meta` inside the same directory. When the scanner saw `xl.meta` at `a/b`, it yielded `a/b` as a leaf object without descending into `a/b/c`. A single-pass decommission migrated and removed `a/b/xl.meta`, leaving `a/b/c` behind on the retiring pool.
+1. **Parent objects hid nested child keys (`#334`):** On disk, an object named `a/b` stores `<bucket>/a/b/xl.meta`, while a child object `a/b/c` stores `<bucket>/a/b/c/xl.meta` inside the same directory. When the scanner saw `xl.meta` at `a/b`, it yielded `a/b` as a leaf object without descending into `a/b/c`. A single-pass decommission migrated and removed `a/b/xl.meta`, leaving `a/b/c` behind on the retiring pool.
 2. **Concurrent sibling-version deletes stranded migrated versions (`#340`):** Both decommission and rebalance cleaned up source versions only when `migratedCount == len(fivs.Versions)`. If a client or lifecycle worker deleted one sibling version while the other versions of that key were being copied to a destination pool, the equality check failed and **none** of the already-copied versions were removed from the source pool.
 3. **Quorum-only final empty check vs. failed drives:** Upstream's `checkAfterDecomBucket` relied on standard quorum listing, which could report a bucket empty even when corrupt or split `xl.meta` files remained on online drives. Conversely, checking drives directly without tolerating `errDiskNotFound` within the erasure set's read quorum would block operators from retiring an aging pool that already has a dead drive—the primary operational reason pools are decommissioned.
 
@@ -32,7 +32,7 @@ The repair introduces bounded rescans driven strictly by **verified physical ver
 
 | Aspect              | Assessment                                                                                                                                                                                                                                                                                                                                                  |
 | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Nature**          | Incomplete single-pass tree walk (`#293`), all-or-nothing sibling cleanup gate (`#340`), and quorum-vs-physical completion verification. Inherited from upstream MinIO.                                                                                                                                                                                     |
+| **Nature**          | Incomplete single-pass tree walk (`#334`), all-or-nothing sibling cleanup gate (`#340`), and quorum-vs-physical completion verification. Inherited from upstream MinIO.                                                                                                                                                                                     |
 | **Upstream origin** | Nested parent/child walk limitation in `listObjectsToDecommission` (`minio/minio` pool decommission baseline) and sibling-count gate `decommissioned == len(fivs.Versions)` in [`9af6c6cee`](https://github.com/pgsty/silo/commit/9af6c6ceeff5d63dc90c8e0fe356c4d91f8e6795) (`2023-06-21`, [minio/minio#17482](https://github.com/minio/minio/pull/17482)). |
 | **Affected scope**  | Multi-pool (`2+` server pools) deployments running `decommission` or `rebalance` on upstream MinIO and SILO Server `20261109` and earlier.                                                                                                                                                                                                                  |
 | **Impact**          | Decommission fails at final check or leaves hidden child objects / migrated duplicates on the draining pool; concurrent deletes force repeated manual decom restarts.                                                                                                                                                                                       |
@@ -42,7 +42,7 @@ The repair introduces bounded rescans driven strictly by **verified physical ver
 
 ## 1. Upstream Provenance and Root Causes {#root-cause}
 
-### 1.1 Parent Object Occluding Child Prefixes (`#293`) {#nested-keys}
+### 1.1 Parent Object Occluding Child Prefixes (`#334`) {#nested-keys}
 
 S3 has a flat key namespace where both `logs/2026` (an object) and `logs/2026/11.gz` (another object) may coexist in the same bucket. On `xlStorage`, both map onto a single POSIX directory tree:
 

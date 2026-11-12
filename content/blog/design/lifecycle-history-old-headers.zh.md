@@ -14,7 +14,7 @@ url: "/zh/blog/design/lifecycle-history-old-headers/"
 
 本记录说明维护者复查 `RELEASE.2026-11-09T00-00-00Z`（[d99829238](https://github.com/pgsty/silo/commit/d998292387ccf1d2907749e0fb1575ef5fb93fda)）时发现的一个缺陷。它由该版本中的 [9f7b49369](https://github.com/pgsty/silo/commit/9f7b49369d4cbc1a5506af4bff05df05c8c8b6d3) 引入，这个提交是多池生命周期修复（[#278](https://github.com/pgsty/silo/issues/278)）的一部分。修复见 [PR #332](https://github.com/pgsty/silo/pull/332)，没有单独的 GitHub issue。
 
-**状态：**已通过 [PR #332](https://github.com/pgsty/silo/pull/332) 合并到 main，提交为 [36c8d1683](https://github.com/pgsty/silo/commit/36c8d1683a6498bbfeb526ce58ae7bdac9f1c373)；合并前在第二轮对抗评审中获得通过，第一轮评审改动了修复方案，见[评审记录](#review)。后续提交 [b5d97e3e1](https://github.com/pgsty/silo/commit/b5d97e3e1fe9eb93711221e8db6fd263a1a9b61a)（[#344](https://github.com/pgsty/silo/issues/344)）进一步从 `revisionKey` 中清除了随时间变化的 `xlFlagUsesDataDir` 标志位（见[遗留限制](#limits)）。尚未发布：`RELEASE.2026-11-09T00-00-00Z` 受影响。
+**状态：**已通过 [PR #332](https://github.com/pgsty/silo/pull/332) 合并到 main，提交为 [36c8d1683](https://github.com/pgsty/silo/commit/36c8d1683a6498bbfeb526ce58ae7bdac9f1c373)；合并前在第二轮对抗评审中获得通过，第一轮评审改动了修复方案，见[评审记录](#review)。后续提交 [b5d97e3e1](https://github.com/pgsty/silo/commit/b5d97e3e1fe9eb93711221e8db6fd263a1a9b61a)（[#344](https://github.com/pgsty/silo/issues/344)）进一步从 `revisionKey` 中清除了随时间变化的 `xlFlagUsesDataDir` 标志位（见[遗留限制](#limits)）。已随 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`）发布；`RELEASE.2026-11-09T00-00-00Z` 受影响。
 
 ## 简短回答 {#tldr}
 

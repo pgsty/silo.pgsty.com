@@ -11,7 +11,7 @@ upstream_modified: true
 body_class: landing-page
 ---
 
-本站面向 **[SILO 20261109](/zh/blog/release/silo-20261109/)**（内嵌 [Console 2.7.0](/zh/blog/release/console-2.7.0/)，Go 1.27.3）、独立版 **[Console 2.7.1](/zh/blog/release/console-2.7.1/)**、**[mcli 20261112](/zh/blog/release/mcli-20261112/)**、**[silo-pkg 3.16.1](/zh/blog/release/pkg-3.16.1/)**（Go 1.27.4），以及可选外部密钥服务 **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**。升级前请核对[组件版本矩阵](/zh/compatibility/versions/)与 [20261109 升级检查](/zh/compatibility/server/#maintenance-20261109)（单独升级独立版 `mcli` 或 Console 不会替换旧版 Server 内嵌的组件）。
+本站面向 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（内嵌与独立版 **[Console 2.7.2](/zh/blog/release/console-2.7.2/)**、**[mcli 20261112](/zh/blog/release/mcli-20261112/)**、**[silo-pkg 3.16.1](/zh/blog/release/pkg-3.16.1/)**，Go 1.27.4）以及可选外部密钥服务 **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**。升级前请核对[组件版本矩阵](/zh/compatibility/versions/)与 [20261112 升级检查](/zh/compatibility/server/#maintenance-20261112)（单独升级独立版 `mcli` 或 Console 不会替换旧版 Server 内嵌的组件）。
 
 > [!WARNING]
 > **SILO 是由 Pigsty 社区维护的 MinIO 分支。** 本项目并非 MinIO, Inc. 的关联项目，也未获得其认可、赞助或背书。“MinIO” 是 MinIO, Inc. 的商标，此处仅用于标识上游项目。源码与许可信息详见[归属与署名](/zh/about/attribution/)。
@@ -22,7 +22,7 @@ SILO 在保留 S3 API、配置与磁盘存储契约的同时，为现有 MinIO �
 
 {{< tabs group="quickstart" >}}
 {{< tab label="Docker" value="docker" >}}
-以下命令固定使用已公开发布的 [Server 20261109](/zh/blog/release/silo-20261109/#delivery)。示例凭据仅用于本地评估。
+以下命令固定使用已公开发布的 [Server 20261112](/zh/blog/release/silo-20261112/#delivery)。示例凭据仅用于本地评估。
 
 {{% steps %}}
 
@@ -34,7 +34,7 @@ docker run -d --name silo \
   -e MINIO_ROOT_USER=silo-admin \
   -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
   -v silo-data:/data \
-  docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z \
+  docker.io/pgsty/silo:RELEASE.2026-11-12T00-00-00Z \
   server /data --console-address :9001
 ```
 
@@ -62,9 +62,9 @@ docker exec silo mcli mb local/demo
 原生软件包将服务端安装为 `/usr/bin/silo`，并沿用 `MINIO_*` 环境变量契约。替换现有 `minio` 软件包前，请阅读[二进制与软件包兼容说明](/zh/compatibility/binary/)。
 {{< /tab >}}
 {{< tab label="现有 MinIO" value="minio" >}}
-替换镜像或二进制前，请先阅读[迁移指南](/zh/compatibility/migration/)与 [20261109 升级检查](/zh/compatibility/server/#maintenance-20261109)。保留数据卷与配置，排空未完成的批处理任务，停止所有运行旧二进制的节点，再统一启动同一固定版本的 SILO。切勿对需要保留的数据卷执行 `docker compose down -v`。
+替换镜像或二进制前，请先阅读[迁移指南](/zh/compatibility/migration/)与 [20261112 升级检查](/zh/compatibility/server/#maintenance-20261112)。保留数据卷与配置，排空未完成的批处理任务，停止所有运行旧二进制的节点，再统一启动同一固定版本的 SILO。切勿对需要保留的数据卷执行 `docker compose down -v`。
 {{< /tab >}}
 {{< tab label="Kubernetes" value="kubernetes" >}}
-可使用仓库维护的独立 [`helm/silo` Chart（`7.0.4`）](https://github.com/pgsty/silo/tree/RELEASE.2026-11-09T00-00-00Z/helm/silo)直接部署，默认拉取 `pgsty/silo:RELEASE.2026-11-09T00-00-00Z` 与 `pgsty/mc:RELEASE.2026-11-09T00-00-00Z`（执行 `helm upgrade --reuse-values` 时请显式传入 `--set image.tag=RELEASE.2026-11-09T00-00-00Z`）。若使用已归档的 MinIO Operator `v7.1.1`，请遵循 [Tenant Helm 指南](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)覆盖租户镜像，并将该 Operator 版本视为冻结的兼容基线。
+可使用仓库维护的独立 [`helm/silo` Chart（`7.0.5`）](https://github.com/pgsty/silo/tree/RELEASE.2026-11-12T00-00-00Z/helm/silo)直接部署，默认拉取 `pgsty/silo:RELEASE.2026-11-12T00-00-00Z` 与 `pgsty/mc:RELEASE.2026-11-12T00-00-00Z`（执行 `helm upgrade --reuse-values` 时请显式传入 `--set image.tag=RELEASE.2026-11-12T00-00-00Z`）。若使用已归档的 MinIO Operator `v7.1.1`，请遵循 [Tenant Helm 指南](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)覆盖租户镜像，并将该 Operator 版本视为冻结的兼容基线。
 {{< /tab >}}
 {{< /tabs >}}

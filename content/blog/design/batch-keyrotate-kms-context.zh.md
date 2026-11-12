@@ -14,7 +14,7 @@ url: "/zh/blog/design/batch-keyrotate-kms-context/"
 
 本文记录 `cmd/batch-rotate.go` 中一处继承自上游 MinIO 的 SSE-KMS 关联数据（Associated Data）静默丢失缺陷及其修复设计，对应 [#346](https://github.com/pgsty/silo/issues/346)。
 
-**状态：** 已通过提交 [`467ce760e`](https://github.com/pgsty/silo/commit/467ce760ed2d77099e8c89cd57514b830acf8780) 与 [`4a9bdb540`](https://github.com/pgsty/silo/commit/4a9bdb54072dbd7e95dd303a190cda7237ce4fcd) 合入 `main`，将随 [`20261109`](/zh/blog/release/silo-20261109/) 之后的下一版 Server 发布。`SILO Server 20261109` 及更早版本，以及自 `RELEASE.2023-04-07T05-28-58Z` 以来的所有上游原版 MinIO 均受影响。
+**状态：** 已随 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`；提交 [`467ce760e`](https://github.com/pgsty/silo/commit/467ce760ed2d77099e8c89cd57514b830acf8780) 与 [`4a9bdb540`](https://github.com/pgsty/silo/commit/4a9bdb54072dbd7e95dd303a190cda7237ce4fcd)）发布。`SILO Server 20261109` 及更早版本，以及自 `RELEASE.2023-04-07T05-28-58Z` 以来的所有上游原版 MinIO 均受影响。
 
 ## 简短回答 {#tldr}
 
@@ -117,4 +117,4 @@ newKeyContext = r.Encryption.kmsContext
 
 ## 验证 {#verification}
 
-`cmd/batch-rotate-context_test.go` 使用真实内置 KMS 端到端验证了直接执行、`.minio.sys` 持久清单重载、KMS 临时错误重试恢复、探针字段隔离（对象元数据不含 `"MinIO batch API"`）、非法 UTF-8 键冲突与非法值前置拒绝、合法 Unicode 字符保留，以及轮换后对象的完整认证解密读取。另见[批量密钥轮换管理文档](/zh/administration/batch-framework-job-keyrotate/#candidate-context)与 [Server 候选兼容性说明](/zh/compatibility/server/#candidate-after-20261109)。
+`cmd/batch-rotate-context_test.go` 使用真实内置 KMS 端到端验证了直接执行、`.minio.sys` 持久清单重载、KMS 临时错误重试恢复、探针字段隔离（对象元数据不含 `"MinIO batch API"`）、非法 UTF-8 键冲突与非法值前置拒绝、合法 Unicode 字符保留，以及轮换后对象的完整认证解密读取。另见[批量密钥轮换管理文档](/zh/administration/batch-framework-job-keyrotate/#candidate-context)与 [Server 兼容性说明](/zh/compatibility/server/#candidate-after-20261109)。

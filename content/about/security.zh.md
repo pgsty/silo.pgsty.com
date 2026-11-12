@@ -8,9 +8,9 @@ type: docs
 icon: fa-solid fa-shield-halved
 ---
 
-在上游 `minio/minio` 归档停更后，PGSTY SILO 持续维护对象存储栈的漏洞跟踪与安全补丁。生产环境应运行 **[Server 20261109](/zh/blog/release/silo-20261109/)**、内嵌与独立版 **[Console v2.7.0](/zh/blog/release/console-2.7.0/)**、**[mcli 20261109](/zh/blog/release/mcli-20261109/)**、**[silo-pkg v3.16.0](/zh/blog/release/pkg-3.16.0/)**，以及可选外部密钥服务 **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**，统一使用 Go 1.27.3 构建。
+在上游 `minio/minio` 归档停更后，PGSTY SILO 持续维护对象存储栈的漏洞跟踪与安全补丁。生产环境应运行 **[Server 20261112](/zh/blog/release/silo-20261112/)**、内嵌与独立版 **[Console v2.7.2](/zh/blog/release/console-2.7.2/)**、**[mcli 20261112](/zh/blog/release/mcli-20261112/)** 与 **[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/)**（统一基于 Go 1.27.4 构建），以及可选外部密钥服务 **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**（Go 1.27.3）。
 
-Server 20261109 内嵌 Console v2.7.0，强化了复制删除、目录 `null` 版本批量删除与并发 S3 `DeleteObjects` 版本清除的 Object Lock 保护，并交付提交者权限绑定的批处理授权、基于持久记录的 IAM 修改、不完整策略加载拒绝、外部授权插件响应边界限制及 `heal --dry-run` 数据保护。该版本同时保留此前全部安全修复，包括 Server 20261018 的 `SN-2026-015` 至 `SN-2026-017` 与 Server 20260916 的 `SN-2026-011` 至 `SN-2026-014`。升级前请查阅 [20261109 升级要求](/zh/blog/release/silo-20261109/#upgrade)、[安全公告台账](/zh/about/security-advisories/)与[组件版本矩阵](/zh/compatibility/versions/)。
+Server 20261112 内嵌 Console v2.7.2，交付 `SN-2026-020` 至 `SN-2026-025` 安全修复：单池 `DeleteObjects` 路径隔离、服务账号三态内联策略保护、双活复制标签与读取代理鉴权及响应头裁剪、`STREAMING-UNSIGNED-PAYLOAD-TRAILER` 签名时间窗与请求头覆盖校验、对象属性／复制／Select／ZIP 归档读取上的 `s3:ExistingObjectTag/<key>` 与版本动作拒绝执行、严格 IAM 与桶策略 JSON 解码，以及 `null` 版本和副本 Object Lock 加固。该版本同时保留此前全部安全修复，包括 Server 20261109 的 `SN-2026-018` 至 `SN-2026-019`、Server 20261018 的 `SN-2026-015` 至 `SN-2026-017` 与 Server 20260916 的 `SN-2026-011` 至 `SN-2026-014`。升级前请查阅 [20261112 升级要求](/zh/blog/release/silo-20261112/#upgrade)、[安全公告台账](/zh/about/security-advisories/)与[组件版本矩阵](/zh/compatibility/versions/)。
 
 单独升级独立版 Console 或 `mcli` 不会替换旧版 Server 内嵌的组件；服务端授权、生命周期与 Object Lock 修复需通过升级 SILO Server 生效。
 

@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/20261111-attributes-and-archive-tag-authz/"
 ---
 
-**发布状态：** 主干已修复（[`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0)、[`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)），将随 [`20261109`](/zh/blog/release/silo-20261109/) 之后的下一版 Server 发布\
+**发布状态：** 已随 **[SILO 20261112](/zh/blog/release/silo-20261112/)** 发布（[`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0)、[`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)）\
 **安全编号：** `SN-2026-024`（[安全公告台账](/zh/about/security-advisories/#sn-2026-024)，[#342](https://github.com/pgsty/silo/issues/342)）\
 **严重程度：** 高危（High）\
 **影响范围：** **SILO Server**（`RELEASE.2026-11-09T00-00-00Z` 及更早版本）与自 `2021-06-10`（[`ba5fb2365`](https://github.com/pgsty/silo/commit/ba5fb2365cc9797fcf4952041e9cfb035b8277f8)）和 `2024-01-05`（[`9b8ba97f9`](https://github.com/pgsty/silo/commit/9b8ba97f9fc0a39ea6632443a102bd42f8067da3)）以来的上游原版 MinIO\
@@ -95,8 +95,8 @@ url: "/zh/blog/security/20261111-attributes-and-archive-tag-authz/"
 
 ## 升级指引与缓解建议 {#remediation}
 
-1. **升级 SILO Server** 至包含提交 [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) 与 [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555) 的 `20261109` 后续发布版本。
+1. **升级 SILO Server** 至 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`）或更高版本（包含提交 [`f746d0707`](https://github.com/pgsty/silo/commit/f746d07076faaf9be1479aadfaf904a4793fa8c0) 与 [`296c9710b`](https://github.com/pgsty/silo/commit/296c9710b16467e53fd4d861bf0b01f35fe6e555)）。
 2. **升级前网关层临时缓解：** 若未升级集群依赖 `s3:ExistingObjectTag/*` 的 `Deny` 规则保护敏感对象（尤其是 `.zip` 归档包），可在升级完成前于反向代理层拦截携带 `x-minio-extract` 请求头或 `?attributes` 查询参数的外部请求。
 3. **核对归档浏览角色的 IAM 策略：** 若业务应用使用了 `x-minio-extract: true` 配合 `ListObjectsV2` 在线展示 `.zip` 内部目录，升级前请确认该角色除 `s3:ListBucket` 外已同时具备目标 `.zip` 对象的 `s3:GetObject` 权限。
 
-更多信息请参阅[安全公告台账](/zh/about/security-advisories/#sn-2026-024)、[Server 候选兼容性说明](/zh/compatibility/server/#candidate-after-20261109)以及关联公告 [SN-2026-022（双活复制标签代理鉴权）](/zh/blog/security/20261111-tagging-replication-proxy-auth/)。
+更多信息请参阅[安全公告台账](/zh/about/security-advisories/#sn-2026-024)、[Server 兼容性说明](/zh/compatibility/server/#candidate-after-20261109)以及关联公告 [SN-2026-022（双活复制标签代理鉴权）](/zh/blog/security/20261111-tagging-replication-proxy-auth/)。
