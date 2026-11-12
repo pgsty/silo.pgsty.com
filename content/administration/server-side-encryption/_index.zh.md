@@ -7,6 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="server-side-encryption-of-objects"></a>
 <a id="minio-encryption-overview"></a>
 <a id="minio-sse"></a>
 <a id="id1" data-td-print-local></a>
@@ -15,10 +16,10 @@ MinIO 服务器端加密（SSE）在写入操作期间保护对象，使客户�
 
 MinIO SSE 使用 [PGSTY KES](https://github.com/pgsty/kes) 和外部密钥管理服务（KMS）来大规模执行安全的加密操作。 MinIO 也支持客户端管理的密钥管理模式，由应用程序全权负责创建和管理供 MinIO SSE 使用的加密密钥。
 
-MinIO SSE 在功能和 API 上与 [AWS Server-Side Encryption](https://docs.aws.amazon.com/AmazonS3/latest/userguide/server-side-encryption.html) 兼容，并支持以下加密策略：
+SILO 实现 [AWS Server-Side Encryption](https://docs.aws.amazon.com/AmazonS3/latest/userguide/server-side-encryption.html) 描述的 S3 加密请求接口，并支持以下加密策略：
 
-{{< tabs group="sse-kms-sse-s3-sse-c" >}}
-{{< tab label="SSE-KMS 推荐" value="sse-kms" >}}
+{{< tabs group="sse-kms-recommended-sse-s3-sse-c" >}}
+{{< tab label="SSE-KMS 推荐" value="sse-kms-recommended" >}}
 MinIO 支持使用存储在外部 <abbr title="密钥管理系统">KMS</abbr> 上的特定外部密钥（EK），为写入某个存储桶的所有对象启用自动 SSE-KMS 加密。 客户端可以在写入操作中指定显式密钥，以覆盖存储桶默认的 <abbr title="外部密钥">EK</abbr>。
 
 对于未启用自动 SSE-KMS 加密的存储桶，客户端也可以在写入操作时指定一个 <abbr title="外部密钥">EK</abbr>。
@@ -63,9 +64,10 @@ SSE-C 不支持存储桶默认加密设置，并要求客户端执行所有密�
 
 MinIO SSE 需要启用 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。
 
+<a id="minio-encryption-sse-secure-erasure-locking"></a>
 <a id="id3" data-td-print-local></a>
 
-## 安全擦除与锁定 {#minio-encryption-sse-secure-erasure-locking}
+## 安全擦除与锁定 {#secure-erasure-and-locking}
 
 KES 和 SILO 可以缓存密钥材料。封存密钥存储或撤销访问权限不保证立即清除缓存；测试撤销效果时需要考虑缓存过期和仍在运行的进程。
 

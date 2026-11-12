@@ -45,9 +45,11 @@ KES is not embedded in Server and maintains an independent release cycle. [Relea
 The latest published standalone Console is [2.7.1](/blog/release/console-2.7.1/),
 from source `3825ebc44451fdc8eefda3d4ec523a79dfecb236` (`v0.0.0-20261111181657-3825ebc44451`).
 It preserves service-account policy inheritance on metadata edits, blocks empty
-inline-policy variants, renders save errors inside the edit modal, and enforces
-strict policy JSON decoding, built with Go 1.27.4, [silo-pkg v3.16.1](/blog/release/pkg-3.16.1/)
-and [mcli 20261112](/blog/release/mcli-20261112/) (`v0.0.0-20261111180825-a37a9f054fba`).
+inline-policy variants, renders save errors inside the edit modal, preserves the
+request host (or `CONSOLE_SECURE_TLS_HOST`) on `--host 0.0.0.0` HTTP-to-HTTPS
+redirects, and enforces strict policy JSON decoding, built with Go 1.27.4,
+[silo-pkg v3.16.1](/blog/release/pkg-3.16.1/) and [mcli 20261112](/blog/release/mcli-20261112/)
+(`v0.0.0-20261111180825-a37a9f054fba`).
 [2.7.0](/blog/release/console-2.7.0/) (source
 `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`) added ten UI languages, Arabic RTL,
 container CA/temporary-directory fixes, and usage-worker, plain-HTTP and upload

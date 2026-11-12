@@ -24,7 +24,7 @@ mcli encrypt set sse-kms EXTERNALKEY mysilo/mybucket
 - Replace `EXTERNALKEY` with the name of the <abbr title="External Key">EK</abbr> to use for encrypting objects in the bucket.
 - Replace `mysilo/mybucket` with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) and bucket on which you want to enable automatic SSE-KMS encryption.
 
-MinIO SSE-KMS is functionally compatible with AWS S3 [Server-Side Encryption with KMS keys stored in AWS](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html) using KES as the key service. The following archived upstream integration guides describe inherited backends; the maintained integration is [SILO + PGSTY KES + OpenBao KV v2](/operations/server-side-encryption/configure-minio-kes/):
+SILO provides S3 [SSE-KMS interfaces](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html) through KES. The maintained integration is [SILO + PGSTY KES + OpenBao KV v2](/operations/server-side-encryption/configure-minio-kes/); the following archived upstream integration guides describe other inherited backends and require separate verification:
 
 - [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
 - [Azure Key Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)

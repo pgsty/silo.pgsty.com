@@ -133,7 +133,7 @@ Remove the pool from configuration and retire it only after its status is `Compl
 
 ### Candidate repair after 20261109 (unreleased) {#candidate-progress}
 
-Server 20261109 can leave a child key behind when a physical listing first encounters its parent as an object ([#293](https://github.com/pgsty/silo/issues/293)). The next candidate rescans the bucket after verified source removals expose more keys. This resolves the historical listing limitation without treating a logical NotFound response as proof that the source disks are empty.
+Server 20261109 can leave a child key behind when a physical listing first encounters its parent as an object ([#334](https://github.com/pgsty/silo/issues/334), [PR #335](https://github.com/pgsty/silo/pull/335)). The next candidate rescans the bucket after verified source removals expose more keys. This resolves the historical listing limitation without treating a logical NotFound response as proof that the source disks are empty.
 
 Decommission and rebalance clean up successfully migrated versions even when a sibling version is concurrently deleted. Confirmed source removal, including safe free-version cleanup, counts as progress; unreadable or conflicting metadata does not. Source-removal and final empty verification check every online drive and tolerate offline drives within the erasure set's read quorum, while still rejecting online metadata remnants, corrupt metadata, directory errors, and drive outages beyond parity. A scan with no physical progress stops instead of spinning; remaining physical metadata prevents completion with an error, and cancellation is returned as an error. Inspect the reported metadata or drive problem before restarting a failed attempt.
 

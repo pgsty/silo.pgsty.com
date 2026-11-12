@@ -17,9 +17,9 @@ SILO Console is Silo's build of the MinIO Console; **published SILO Server 20261
 
 <a id="candidate-policy-edit" data-td-print-local></a>
 
-## 2.7.1 service-account policy inheritance and strict JSON validation {#release-271}
+## 2.7.1 service-account policy inheritance, strict JSON validation, and HTTPS redirects {#release-271}
 
-[Console 2.7.1](/blog/release/console-2.7.1/) (`3825ebc44451`) tracks inherited and inline policies separately (`1be8a74bf`), so changing an access key's name, description, expiry or status preserves inheritance instead of saving a copy of its parent's policy. To remove an existing inline restriction, turn off **Restrict beyond user policy**; the Console sends an explicit empty policy and restores inheritance. While **Restrict beyond user policy** remains enabled, creating or replacing a policy with an empty editor, `{}`, `{"Statement":[]}`, or `{"Statement":null}` prevents saving (`a1a84cab4`, `1fdb279fd`, `3825ebc44`). Empty documents with case-insensitive, Unicode-folded, or duplicate-key field names accepted by the backend are also blocked, and save errors render inside the edit modal. An unchanged historical empty inline policy may still accompany a metadata-only edit, preserving its existing permissions; Console API endpoints also enforce strict policy JSON validation (rejecting unknown fields, trailing JSON, empty `Principal: {}` / `NotPrincipal`, and empty named policies).
+[Console 2.7.1](/blog/release/console-2.7.1/) (`3825ebc44451`) tracks inherited and inline policies separately (`1be8a74bf`), so changing an access key's name, description, expiry or status preserves inheritance instead of saving a copy of its parent's policy. To remove an existing inline restriction, turn off **Restrict beyond user policy**; the Console sends an explicit empty policy and restores inheritance. While **Restrict beyond user policy** remains enabled, creating or replacing a policy with an empty editor, `{}`, `{"Statement":[]}`, or `{"Statement":null}` prevents saving (`a1a84cab4`, `1fdb279fd`, `3825ebc44`). Empty documents with case-insensitive, Unicode-folded, or duplicate-key field names accepted by the backend are also blocked, and save errors render inside the edit modal. An unchanged historical empty inline policy may still accompany a metadata-only edit, preserving its existing permissions; Console API endpoints also enforce strict policy JSON validation (rejecting unknown fields, trailing JSON, empty `Principal: {}` / `NotPrincipal`, and empty named policies). When TLS redirect is enabled (`CONSOLE_SECURE_TLS_REDIRECT=on`), HTTP-to-HTTPS browser redirects preserve the incoming request host (or explicit `CONSOLE_SECURE_TLS_HOST`) instead of redirecting wildcard listeners (`--host 0.0.0.0` / `[::]`) to `https://0.0.0.0:<tls-port>`, backed by `unrolled/secure v1.18.0`.
 
 Explicit reset to inheritance requires the matching [post-20261109 Server policy semantics](/compatibility/server/#candidate-after-20261109): omitted/null means preserve, explicit empty means reset, and a nonempty document without Version receives the default. It is not included in Console v2.7.0 or published Server 20261109. Standalone Console 2.7.1 protects metadata-only saves immediately; embedded Console updates arrive with the next Server release.
 
@@ -95,13 +95,13 @@ Console v2.4.2 preserves wrapped S3 errors from bucket-versioning operations and
 
 ### 7. For developers: the module graph {#source}
 
-Console v2.7.0 requires Go 1.27.3, directly selects `github.com/pgsty/silo-pkg/v3` v3.16.0 and
+Console v2.7.1 requires Go 1.27.4, directly selects `github.com/pgsty/silo-pkg/v3` v3.16.1 and
 upstream SDK `v7.4.2-0.20261025165926-320af050c445`, and retains the historical
 `github.com/minio/console` module path. Embedders explicitly select these released sources:
 
 ```go
-replace github.com/minio/console => github.com/pgsty/silo-console v0.0.0-20261109114619-4e91ae506e70
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261109021353-e1d4cc5abfe0
+replace github.com/minio/console => github.com/pgsty/silo-console v0.0.0-20261111181657-3825ebc44451
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261111180825-a37a9f054fba
 ```
 
 Go does not inherit dependency replacements. Server must select both PGSTY
@@ -110,7 +110,7 @@ v0.0.5 preserves the MC API. Legacy transitive minio/pkg from colorjson remains
 separate from the maintained silo-pkg policy implementation. The old
 `minio/pkg => silo-pkg` and `minio-go => silo-go` replacements are unsupported.
 See the [component matrix](/compatibility/versions/) and
-[embedding guide](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/Embedding.md).
+[embedding guide](https://github.com/pgsty/silo-console/blob/v2.7.1/docs/Embedding.md).
 
 The release-gating target is the coordinated SILO, Console, mcli and pkg stack.
 Upstream MinIO/MC probes remain non-blocking compatibility signals and do not
@@ -118,7 +118,7 @@ require pkg downgrades or duplicate APIs.
 
 ## Migration {#migration}
 
-The official image is [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console). **Linux amd64/arm64 images are published** for `v2.7.0` and `latest` (`sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`); see [release verification](/blog/release/console-2.7.0/#verification). Published [GitHub binaries and packages](https://github.com/pgsty/silo-console/releases/tag/v2.7.0) are also available.
+The official image is [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console). **Linux amd64/arm64 images are published** for `v2.7.1` and `latest` (`sha256:2afef06f8505eadb24d657acd0f68c78bce8b148b1d9b74981454560fa3b055f`; `v2.7.0`: `sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`); see [release verification](/blog/release/console-2.7.1/#verification). Published [GitHub binaries and packages](https://github.com/pgsty/silo-console/releases/tag/v2.7.1) are also available.
 
 The image runs as UID 1000 with no home directory, so its default certificate directory is `/.console/certs`: mount private CA certificates into `/.console/certs/CAs/`, or choose another path with `--certs-dir`. Starting in `v2.7.0`, the scratch container image includes the system CA bundle at `/etc/ssl/certs/ca-certificates.crt` and a writable `/tmp` (`1777`) out of the box (images on `v2.6.0` and earlier omitted both, requiring a read-only host CA mount at `/etc/ssl/certs/ca-certificates.crt` to reach public HTTPS endpoints).
 

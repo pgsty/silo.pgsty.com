@@ -30,11 +30,11 @@ upstream_modified: true
   - **SILO 20261109：** 在变更锁内跨所有存储池串行核验物理版本删除（`6ef3a52fc`），防止并发修改法定保留或保留期时绕过锁定保护；删除目录对象 `null` 版本前检查 Object Lock（`aa2d79daf`）；普通批量删除按纠删码集合分组并发执行（[#301](https://github.com/pgsty/silo/issues/301)）。
 - [DeleteObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjectTagging.html)
 - [GetObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
-  - **SILO 20261109：** 当节点仅看到已存在对象的部分驱动器视图时，返回可重试的 `503 ServiceUnavailable` 而非 `404 NoSuchKey`（[#302](https://github.com/pgsty/silo/issues/302)）。已知限制（[#293](https://github.com/pgsty/silo/issues/293)）：仅通过对象标签授权的读取在底层对象不可读时仍返回 `403 AccessDenied`。
+  - **SILO 20261109：** 当节点仅看到已存在对象的部分驱动器视图时，返回可重试的 `503 ServiceUnavailable` 而非 `404 NoSuchKey`（[#302](https://github.com/pgsty/silo/issues/302)）。20261109 已知限制（[#293](https://github.com/pgsty/silo/issues/293)，`main` 已由 [PR #294](https://github.com/pgsty/silo/pull/294) 修复）：仅通过对象标签授权的读取在底层对象不可读时仍返回 `403 AccessDenied`。
 - [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectAttributes.html)
 - [GetObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectTagging.html)
 - [HeadObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html)
-  - **SILO 20261109：** 已知部分驱动器视图场景下返回可重试的 `503 ServiceUnavailable` 而非 `404 NoSuchKey`（[#302](https://github.com/pgsty/silo/issues/302)）；仅通过对象标签授权且对象不可读时仍返回 `403`（[#293](https://github.com/pgsty/silo/issues/293)）。
+  - **SILO 20261109：** 已知部分驱动器视图场景下返回可重试的 `503 ServiceUnavailable` 而非 `404 NoSuchKey`（[#302](https://github.com/pgsty/silo/issues/302)）；仅通过对象标签授权且对象不可读时在 20261109 中仍返回 `403`（[#293](https://github.com/pgsty/silo/issues/293)，`main` 已由 [PR #294](https://github.com/pgsty/silo/pull/294) 修复）。
 - [ListObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjects.html)
 - [ListObjectsV2](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html)
 - [ListObjectVersions](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectVersions.html)

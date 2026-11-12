@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/20261111-tagging-replication-proxy-auth/"
 ---
 
-**Status:** Fixed on `main` ([`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697), [`67a90dfef`](https://github.com/pgsty/silo/commit/67a90dfef458d3e5228e849711118bc162abed30), [`293ab78b4`](https://github.com/pgsty/silo/commit/293ab78b4cc505c3ab8170a4b2b4b29c04ad74f9)); scheduled for the next post-[`20261109`](/blog/release/silo-20261109/) Server release\
+**Status:** Fixed on `main` ([`14ecb222e`](https://github.com/pgsty/silo/commit/14ecb222e714eaa69e712b7497e500d72854f697), [`67a90dfef`](https://github.com/pgsty/silo/commit/67a90dfef458d3e5228e849711118bc162abed30), [`293ab78b4`](https://github.com/pgsty/silo/commit/293ab78b4cc505c3ab8170a4b2b4b29c04ad74f9); companion proxied `GET`/`HEAD` tag-policy and `x-amz-tagging-count` / `X-Amz-Object-Lock-*` header filtering in [`c39605d4f`](https://github.com/pgsty/silo/commit/c39605d4f8a384096685ee3ea3a97802d9c8071c) and [`ea37a7e8b`](https://github.com/pgsty/silo/commit/ea37a7e8b05fddb32c8578c3e959d956dee3e2b0)); scheduled for the next post-[`20261109`](/blog/release/silo-20261109/) Server release\
 **Identifier:** `SN-2026-022` ([Security Advisory Ledger](/about/security-advisories/#sn-2026-022), [#337](https://github.com/pgsty/silo/issues/337))\
 **Severity:** Critical\
 **Affected scope:** **SILO Server** (`RELEASE.2026-11-09T00-00-00Z` and earlier) and inherited upstream MinIO releases since `2024-01-12` ([`b2b26d9c9`](https://github.com/pgsty/silo/commit/b2b26d9c958a82fbd9f7e0dc70fc2133838576d0))\

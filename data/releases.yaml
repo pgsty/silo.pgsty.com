@@ -8,6 +8,8 @@ server:
   published: true
   go_version: "1.27.3"
   embedded_console: v2.7.0
+  embedded_mcli: RELEASE.2026-11-09T00-00-00Z
+  helm_chart: "7.0.4"
   windows_archive_format: zip
   source: d998292387ccf1d2907749e0fb1575ef5fb93fda
 published_server:
@@ -17,6 +19,8 @@ published_server:
   published: true
   go_version: "1.27.3"
   embedded_console: v2.7.0
+  embedded_mcli: RELEASE.2026-11-09T00-00-00Z
+  helm_chart: "7.0.4"
   windows_archive_format: zip
   source: d998292387ccf1d2907749e0fb1575ef5fb93fda
 client:

@@ -14,6 +14,9 @@
 {{- end -}}
 {{- $serverTag := $server.tag -}}
 {{- $serverBuild := $server.build -}}
+{{- $serverEmbeddedConsole := $server.embedded_console | default hugo.Data.releases.console.tag -}}
+{{- $serverClientTag := $server.embedded_mcli | default $serverTag -}}
+{{- $serverHelmChart := $server.helm_chart | default "7.0.4" -}}
 {{- $serverWindowsFormat := $server.windows_archive_format | default "tar.gz" -}}
 {{- $serverPublished := $server.published -}}
 {{- $serverVer := replace $server.date "-" "" -}}
@@ -159,7 +162,7 @@
               </div>
               <div class="method-grid method-grid--single">
                 <div class="method-main">
-                  <p>{{ if $zh }}适合本地评估、开发环境和已经以容器为交付边界的部署。标准镜像内嵌 Console <code>{{ $consoleTag }}</code>，并附带 <code>mcli</code>、<code>curl</code> 与 shell。{{ else }}Use containers for local evaluation, development, or container-managed deployments. The standard image embeds Console <code>{{ $consoleTag }}</code> and bundles <code>mcli</code>, <code>curl</code>, and a shell.{{ end }}</p>
+                  <p>{{ if $zh }}适合本地评估、开发环境和已经以容器为交付边界的部署。标准镜像内嵌 Console <code>{{ $serverEmbeddedConsole }}</code>，并附带 <code>mcli</code>、<code>curl</code> 与 shell。{{ else }}Use containers for local evaluation, development, or container-managed deployments. The standard image embeds Console <code>{{ $serverEmbeddedConsole }}</code> and bundles <code>mcli</code>, <code>curl</code>, and a shell.{{ end }}</p>
                   <p>{{ if $zh }}Distroless 变体仅含 <code>silo</code> 二进制，与标准镜像共享相同的 UBI CA 根证书束，内置 <code>silo healthcheck</code> 探针并支持任意 <code>--user</code> 运行。{{ else }}The distroless variant ships the <code>silo</code> binary with the same UBI CA trust bundle as the standard image, built-in <code>silo healthcheck</code> probes, and support for any <code>--user</code>.{{ end }}</p>
                   <div class="download-subtabs" data-download-tabs>
                     <div class="download-tablist download-tablist--sub" role="tablist" aria-label="{{ if $zh }}镜像变体{{ else }}Image variant{{ end }}">
@@ -250,11 +253,11 @@
             <section class="download-panel" id="server-kubernetes" role="tabpanel" aria-labelledby="tab-server-kubernetes" hidden>
               <div class="method-heading">
                 <div><span class="method-kicker">KUBERNETES / HELM</span><h3>{{ if $zh }}使用维护版 Helm Chart 或 Operator Tenant 部署{{ else }}Deploy with the SILO Helm Chart or Operator Tenant{{ end }}</h3></div>
-                <div class="method-tags"><span>helm/silo 7.0.4</span><span>Operator v7.1.1</span><span>Helm 3.8+</span><span>PVC</span><span>TLS</span></div>
+                <div class="method-tags"><span>helm/silo {{ $serverHelmChart }}</span><span>Operator v7.1.1</span><span>Helm 3.8+</span><span>PVC</span><span>TLS</span></div>
               </div>
               <div class="method-grid method-grid--single">
                 <div class="method-main">
-                  <p>{{ if $zh }}PGSTY 在 <code>pgsty/silo</code> 仓库中维护独立的 <code>helm/silo</code> Chart（<code>7.0.4</code>），默认部署 <code>pgsty/silo:{{ $serverTag }}</code> 与 <code>pgsty/mc:{{ $clientTag }}</code>。既有 MinIO Operator <code>v7.1.1</code> 用户也可通过覆盖 <code>tenant.image</code> 运行 SILO。{{ else }}PGSTY maintains the standalone <code>helm/silo</code> chart (<code>7.0.4</code>) in <code>pgsty/silo</code>, defaulting to <code>pgsty/silo:{{ $serverTag }}</code> and <code>pgsty/mc:{{ $clientTag }}</code>. Existing MinIO Operator <code>v7.1.1</code> deployments can also override <code>tenant.image</code>.{{ end }}</p>
+                  <p>{{ if $zh }}PGSTY 在 <code>pgsty/silo</code> 仓库中维护独立的 <code>helm/silo</code> Chart（<code>{{ $serverHelmChart }}</code>），默认部署 <code>pgsty/silo:{{ $serverTag }}</code> 与 <code>pgsty/mc:{{ $serverClientTag }}</code>。既有 MinIO Operator <code>v7.1.1</code> 用户也可通过覆盖 <code>tenant.image</code> 运行 SILO。{{ else }}PGSTY maintains the standalone <code>helm/silo</code> chart (<code>{{ $serverHelmChart }}</code>) in <code>pgsty/silo</code>, defaulting to <code>pgsty/silo:{{ $serverTag }}</code> and <code>pgsty/mc:{{ $serverClientTag }}</code>. Existing MinIO Operator <code>v7.1.1</code> deployments can also override <code>tenant.image</code>.{{ end }}</p>
                   <div class="download-subtabs" data-download-tabs>
                     <div class="download-tablist download-tablist--sub" role="tablist" aria-label="{{ if $zh }}Kubernetes 部署方式{{ else }}Kubernetes deployment method{{ end }}">
                       <button type="button" role="tab" id="tab-server-k8s-helm" aria-controls="server-k8s-helm" aria-selected="true" data-download-tab="server-k8s-helm">SILO Helm Chart</button>
@@ -265,8 +268,8 @@
                         <div class="download-code-head"><span><i class="fas fa-terminal" aria-hidden="true"></i> helm</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 SILO Helm 安装命令{{ else }}Copy SILO Helm install command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
                         <pre><code>git clone --branch {{ $serverTag }} --depth 1 https://github.com/pgsty/silo.git
 helm install silo ./silo/helm/silo -n silo --create-namespace
-# {{ if $zh }}使用 --reuse-values 升级既有 Release 时，请显式设置新版 image.tag：{{ else }}When upgrading with --reuse-values, set image.tag explicitly:{{ end }}
-# helm upgrade silo ./silo/helm/silo -n silo --reuse-values --set image.tag={{ $serverTag }}</code></pre>
+# {{ if $zh }}使用 --reuse-values 升级既有 Release 时，请显式设置新版 image.tag 与 mcImage.tag：{{ else }}When upgrading with --reuse-values, set image.tag and mcImage.tag explicitly:{{ end }}
+# helm upgrade silo ./silo/helm/silo -n silo --reuse-values --set-string image.tag={{ $serverTag }} --set-string mcImage.tag={{ $serverClientTag }}</code></pre>
                       </div>
                     </section>
                     <section role="tabpanel" id="server-k8s-tenant" aria-labelledby="tab-server-k8s-tenant" hidden>
@@ -406,7 +409,7 @@ mcli ls sss/</code></pre>
             <section class="download-panel" id="server-source" role="tabpanel" aria-labelledby="tab-server-source" hidden>
               <div class="method-heading">
                 <div><span class="method-kicker">SOURCE BUILD</span><h3>{{ if $zh }}从发行标签构建{{ else }}Build from the release tag{{ end }}</h3></div>
-                <div class="method-tags"><span>Go {{ hugo.Data.releases.server.go_version }}+</span><span>AGPLv3</span><span>make</span></div>
+                <div class="method-tags"><span>Go {{ $server.go_version }}+</span><span>AGPLv3</span><span>make</span></div>
               </div>
               <div class="method-grid">
                 <div class="method-main">

@@ -44,9 +44,9 @@ KES 不内嵌于 Server，独立维护版本节奏。[发布与升级说明](/zh
 
 最新正式发布的独立 Console 为 [2.7.1](/zh/blog/release/console-2.7.1/)，
 源码提交为 `3825ebc44451fdc8eefda3d4ec523a79dfecb236`（`v0.0.0-20261111181657-3825ebc44451`）。
-该版本在编辑元数据时保留服务账号策略继承关系、拦截各类空内联策略变体、在编辑弹窗内直接显示保存报错并执行严格策略 JSON 校验，
+该版本在编辑元数据时保留服务账号策略继承关系、拦截各类空内联策略变体、在编辑弹窗内直接显示保存报错、在 `--host 0.0.0.0` HTTP→HTTPS 重定向时保留请求主机名（或使用 `CONSOLE_SECURE_TLS_HOST`）并执行严格策略 JSON 校验，
 使用 Go 1.27.4、[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/) 与 [mcli 20261112](/zh/blog/release/mcli-20261112/)（Go 伪版本 `v0.0.0-20261111180825-a37a9f054fba`）构建。
-[2.7.0](/zh/blog/release/console-2.7.0/)（源码 `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`）加入了十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复及用量后台任务修复；
+[2.7.0](/zh/blog/release/console-2.7.0/)（源码 `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`）加入了十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复，以及用量后台任务、普通 HTTP 浏览器操作与上传修复；
 [2.6.0](/zh/blog/release/console-2.6.0/)（源码 `f8ab146695fd1df74e4b84128a286d552921bf00`）加入了用量扫描、保留版本统计与存储桶管理修复。
 已公开的 Server 20261109 内嵌 Console 2.7.0（待发布的 Draft Server 20261112 内嵌 Console 2.7.1）；历史 Server 20261026 保留 Console 2.5.1。
 

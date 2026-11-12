@@ -28,11 +28,11 @@ This page documents S3 APIs supported by MinIO Object Storage. For reference doc
   - **SILO 20261109:** checks physical version removals sequentially under the mutation lock across all pools (`6ef3a52fc`) so concurrent legal-hold or retention updates cannot be bypassed, checks Object Lock on directory `null` versions (`aa2d79daf`), and runs ordinary bulk-delete erasure-set groups concurrently ([#301](https://github.com/pgsty/silo/issues/301)).
 - [DeleteObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjectTagging.html)
 - [GetObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
-  - **SILO 20261109:** returns retryable `503 ServiceUnavailable` instead of `404 NoSuchKey` when a node sees only a partial drive view of an existing object ([#302](https://github.com/pgsty/silo/issues/302)). Known limitation ([#293](https://github.com/pgsty/silo/issues/293)): reads authorized solely by object tags still return `403 AccessDenied` when the object is unreadable.
+  - **SILO 20261109:** returns retryable `503 ServiceUnavailable` instead of `404 NoSuchKey` when a node sees only a partial drive view of an existing object ([#302](https://github.com/pgsty/silo/issues/302)). Known limitation in 20261109 ([#293](https://github.com/pgsty/silo/issues/293), fixed on `main` via [PR #294](https://github.com/pgsty/silo/pull/294)): reads authorized solely by object tags still return `403 AccessDenied` when the object is unreadable.
 - [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectAttributes.html)
 - [GetObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectTagging.html)
 - [HeadObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html)
-  - **SILO 20261109:** returns retryable `503 ServiceUnavailable` instead of `404 NoSuchKey` on known partial drive views ([#302](https://github.com/pgsty/silo/issues/302)); tag-only authorization on an unreadable object still returns `403` ([#293](https://github.com/pgsty/silo/issues/293)).
+  - **SILO 20261109:** returns retryable `503 ServiceUnavailable` instead of `404 NoSuchKey` on known partial drive views ([#302](https://github.com/pgsty/silo/issues/302)); tag-only authorization on an unreadable object still returns `403` in 20261109 ([#293](https://github.com/pgsty/silo/issues/293), fixed on `main` via [PR #294](https://github.com/pgsty/silo/pull/294)).
 - [ListObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjects.html)
 - [ListObjectsV2](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html)
 - [ListObjectVersions](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectVersions.html)
@@ -45,7 +45,7 @@ This page documents S3 APIs supported by MinIO Object Storage. For reference doc
 ### Write commit errors {#write-commit-errors}
 
 [PR #232](https://github.com/pgsty/silo/pull/232), included in the Server 20261018
-candidate, returns HTTP 503 `SlowDownWrite` when staged `xl.meta`
+release, returns HTTP 503 `SlowDownWrite` when staged `xl.meta`
 disappears at the final commit of PUT or multipart completion. Earlier code
 could report `400 IncompleteBody` for PUT or `404 NoSuchKey` for completion.
 Actual incomplete client uploads retain their existing error handling. This

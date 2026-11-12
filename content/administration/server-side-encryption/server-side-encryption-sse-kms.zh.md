@@ -6,6 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="server-side-encryption-with-per-bucket-keys-sse-kms"></a>
 <a id="sse-kms"></a>
 <a id="minio-encryption-sse-kms"></a>
 
@@ -34,17 +35,22 @@ SILO 通过 KES 提供与 AWS S3 [SSE-KMS 接口](https://docs.aws.amazon.com/Am
 - [HashiCorp Vault Keystore](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
 - [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 
+<a id="minio-encryption-sse-kms-quickstart"></a>
 <a id="id2" data-td-print-local></a>
 
-## 快速开始 {#minio-encryption-sse-kms-quickstart}
+## 快速开始 {#quickstart}
 
 使用由你管理的 PGSTY KES 部署。先完成 [SILO 与 KES 配置](/zh/operations/server-side-encryption/configure-minio-kes/)，包括持久化密钥存储、TLS 信任、SILO 应用策略，以及可用的 `mysilo` 客户端别名。不要用公开演示密钥保护需要保存的数据。
 
-### 1) 为 SSE-KMS 创建加密密钥 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 1) 为 SSE-KMS 创建加密密钥 {#create-an-encryption-key-for-sse-kms-encryption}
 
 KES 配置流程创建 `silo-default` 供后端数据和 SSE-S3 使用，创建 `silo-bucket` 供 SSE-KMS 示例使用。确认 `silo-bucket` 已存在，且 SILO 的 KES 身份有权使用它生成和解密数据密钥。管理员可用 `mcli admin kms key create mysilo KEYNAME` 创建其他已获策略授权的密钥。
 
-### 2) 配置 SILO 的 SSE-KMS {#minio-sse-kms}
+<a id="minio-sse-kms"></a>
+
+### 2) 配置 SILO 的 SSE-KMS {#configure-minio-for-sse-kms-object-encryption}
 
 每台服务端使用相同的 KES 配置。以下对应 KES 配置流程中的示例：
 
@@ -57,11 +63,15 @@ MINIO_KMS_KES_KEY_NAME=silo-default
 
 妥善保存 API key，并填写各主机上的实际 CA 路径。API key 与显式客户端私钥/证书配置互斥。对已有加密部署，必须保留原默认密钥及现存对象所需的全部密钥。
 
-### 3) 应用服务端配置 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 3) 应用服务端配置 {#restart-the-minio-deployment-to-enable-sse-kms}
 
 修改环境配置后，通过管理该部署的服务管理器重启。若修改 systemd 的 `EnvironmentFile`，应重启 `silo.service`；单独执行管理 API 重启不会重新读取该文件，除非 SILO 另通过 `MINIO_CONFIG_ENV_FILE` 加载它。若已完成 KES 配置且配置没有变化，无需额外重启。
 
-### 4) 配置存储桶默认加密 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 4) 配置存储桶默认加密 {#configure-automatic-bucket-encryption}
 
 若示例桶尚不存在，先创建它，再设置默认加密：
 
@@ -75,9 +85,10 @@ mcli encrypt info mysilo/encryptedbucket
 
 可用 `mcli encrypt clear mysilo/encryptedbucket` 清除桶默认加密。这不会解密已有对象或后端数据，也不会解除它们对原密钥的依赖。全局自动加密设置或客户端显式加密请求仍可能使新写入加密。
 
+<a id="minio-encryption-sse-kms-erasure-locking"></a>
 <a id="id6" data-td-print-local></a>
 
-## 安全擦除与锁定 {#minio-encryption-sse-kms-erasure-locking}
+## 安全擦除与锁定 {#secure-erasure-and-locking}
 
 KES 和 SILO 可以缓存密钥材料。封存密钥存储或撤销访问权限不保证立即使缓存失效；验证撤销效果时应考虑缓存过期与仍在运行的进程。
 
@@ -93,9 +104,10 @@ SSE-KMS 使用在存储桶自动加密设置中指定的 <abbr title="外部密�
 
 例如，仅供一个桶使用的密钥丢失时，影响限于仍依赖它的对象；多个桶共用密钥时，恢复要求也会相互关联。桶默认设置可能变化，客户端也可以指定其他密钥，因此应检查实际对象版本，不能仅凭当前桶设置推断密钥使用情况。
 
+<a id="minio-encryption-sse-kms-encryption-process"></a>
 <a id="id7" data-td-print-local></a>
 
-## 加密过程 {#minio-encryption-sse-kms-encryption-process}
+## 加密过程 {#encryption-process}
 
 > [!NOTE]
 > **说明**
