@@ -108,6 +108,8 @@ mc mirror [FLAGS] ~/data/ myminio/mybucket
 
 若指定的是目录，[`mc mirror`](#command-mc.mirror) 会同步该目录中的所有文件。
 
+包含提交 `59e05d3b` 的 mcli 也会在扫描时同步本地空目录。例如，空目录 `logs/` 上传后是一个名为 `logs/` 的零字节 S3 对象，下载后仍是目录。名为 `logs` 的零字节对象下载后是普通文件。使用 `--remove` 时，扫描会删除仅存在于目标端的空目录。`--watch` 会在初始扫描时同步本地空目录，监听期间新建的空目录需要再次扫描才能同步。[pgsty/mc#83](https://github.com/pgsty/mc/pull/83)
+
 ##### `TARGET` {#mc.mirror.TARGET}
 
 *mc-cmd*
