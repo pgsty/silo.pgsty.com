@@ -105,6 +105,8 @@ mc mirror [FLAGS] ~/data/ myminio/mybucket
 
 If specifying a directory, [`mc mirror`](#command-mc.mirror) synchronizes all files in the directory.
 
+In mcli builds containing commit `59e05d3b`, the scan also copies empty local directories. For example, an empty directory named `logs/` becomes a zero-byte S3 key named `logs/` and downloads as a directory. A zero-byte key named `logs` downloads as a regular file. With `--remove`, the scan deletes empty directories that exist only at the destination. In `--watch` mode, the initial scan includes local empty directories. Run another scan to synchronize empty directories created later. [pgsty/mc#83](https://github.com/pgsty/mc/pull/83)
+
 ##### `TARGET` {#mc.mirror.TARGET}
 
 *mc-cmd*
