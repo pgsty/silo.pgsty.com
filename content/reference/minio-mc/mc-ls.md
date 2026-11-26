@@ -120,6 +120,8 @@ Use [`--versions`](#mc.ls.-versions) and [`--rewind`](#mc.ls.-rewind) together t
 
 ##### `--sort=size` {#mc.ls.-sort}
 
+This option requires a SILO `mcli` build that includes [pgsty/mc@ecba86cd](https://github.com/pgsty/mc/commit/ecba86cdc134281684b7a05bfae497969a5dec18).
+
 SILO `mcli` lists entries in descending order by their reported size in bytes. Equal-sized entries keep their ordinary listing order. With `--versions`, each version is ranked by its own size.
 
 ```shell

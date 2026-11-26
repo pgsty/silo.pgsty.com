@@ -120,6 +120,8 @@ mc ls ~/mydata/object.txt
 
 ##### `--sort=size` {#mc.ls.-sort}
 
+此选项始于 SILO `mcli` 提交 [pgsty/mc@ecba86cd](https://github.com/pgsty/mc/commit/ecba86cdc134281684b7a05bfae497969a5dec18)。
+
 SILO `mcli` 按条目列出的字节数从大到小排序。同大小的条目保留普通列举时的先后顺序。配合 `--versions` 使用时，每个版本按自己的大小排序。
 
 ```shell
