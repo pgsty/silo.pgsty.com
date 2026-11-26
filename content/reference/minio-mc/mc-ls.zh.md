@@ -3,7 +3,7 @@ title: "mc ls"
 url: "/zh/reference/minio-mc/mc-ls/"
 weight: 220
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ls.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-ls"></a>
@@ -120,6 +120,8 @@ mc ls ~/mydata/object.txt
 
 ##### `--sort=size` {#mc.ls.-sort}
 
+*可选*
+
 此选项始于 SILO `mcli` 提交 [pgsty/mc@ecba86cd](https://github.com/pgsty/mc/commit/ecba86cdc134281684b7a05bfae497969a5dec18)。
 
 SILO `mcli` 按条目列出的字节数从大到小排序。同大小的条目保留普通列举时的先后顺序。配合 `--versions` 使用时，每个版本按自己的大小排序。
@@ -128,13 +130,17 @@ SILO `mcli` 按条目列出的字节数从大到小排序。同大小的条目�
 mcli ls --recursive --sort=size store/backups/
 ```
 
-客户端会把当前目标的全部匹配条目读入内存，再输出第一行。指定多个目标时，按参数顺序逐个处理，各自排序并按需汇总。省略该选项时，条目仍按通常方式流式输出。
+客户端会把当前目标的全部匹配条目读入内存，再输出第一条对象记录。指定多个目标时，按参数顺序逐个处理，各自排序并按需汇总。省略该选项时，条目仍按通常方式流式输出。
+
+如果读取后续分页失败，客户端仍会按大小输出已收到的条目，汇总也只涵盖这些条目。命令以非零状态码退出。使用 `--json` 时，错误记录可能出现在第一条排序结果之前。
 
 ##### `--summarize` {#mc.ls.-summarize}
 
 *mc-cmd*
 
 *可选* 显示指定 `ALIAS` 路径的汇总信息。
+
+在启用版本控制的桶中，`--rewind --summarize` 会将每个键在指定时间前的所有匹配版本计入对象数和总大小。列表默认每个键只显示当时最新的版本。加上 `--versions` 即可查看参与汇总的每个版本。
 
 ### 全局标志 {#id3}
 
