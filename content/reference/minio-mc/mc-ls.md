@@ -44,6 +44,7 @@ mc [GLOBALFLAGS] ls              \
                  [--recursive]   \
                  [--rewind]      \
                  [--versions]    \
+                 [--sort=size]   \
                  [--summarize]   \
                  ALIAS [ALIAS ...]
 ```
@@ -116,6 +117,16 @@ Directs [`mc ls`](#command-mc.ls) to operate on all object versions that exist i
 [`--versions`](#mc.ls.-versions) requires that the specified [`ALIAS`](#mc.ls.ALIAS) be an S3-compatible service that supports [Bucket Versioning](/administration/object-management/object-versioning/#minio-bucket-versioning). For MinIO deployments, use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable or disable bucket versioning.
 
 Use [`--versions`](#mc.ls.-versions) and [`--rewind`](#mc.ls.-rewind) together to display on those object versions which existed at a specific point in time.
+
+##### `--sort=size` {#mc.ls.-sort}
+
+SILO `mcli` lists entries in descending order by their reported size in bytes. Equal-sized entries keep their ordinary listing order. With `--versions`, each version is ranked by its own size.
+
+```shell
+mcli ls --recursive --sort=size store/backups/
+```
+
+The client buffers all matching entries for one target in memory before printing its first row. Multiple targets are processed in argument order, each with its own sorted list and optional summary. Omit the flag to stream entries as usual.
 
 ##### `--summarize` {#mc.ls.-summarize}
 

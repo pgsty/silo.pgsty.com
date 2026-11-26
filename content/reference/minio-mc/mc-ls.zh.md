@@ -44,6 +44,7 @@ mc [GLOBALFLAGS] ls              \
                  [--recursive]   \
                  [--rewind]      \
                  [--versions]    \
+                 [--sort=size]   \
                  [--summarize]   \
                  ALIAS [ALIAS ...]
 ```
@@ -116,6 +117,16 @@ mc ls ~/mydata/object.txt
 [`--versions`](#mc.ls.-versions) 要求指定的 [`ALIAS`](#mc.ls.ALIAS) 指向支持 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 的 S3 兼容服务。对于 MinIO 部署， 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 启用或禁用存储桶版本控制。
 
 同时使用 [`--versions`](#mc.ls.-versions) 和 [`--rewind`](#mc.ls.-rewind)，可显示在特定时间点存在的对象版本。
+
+##### `--sort=size` {#mc.ls.-sort}
+
+SILO `mcli` 按条目列出的字节数从大到小排序。同大小的条目保留普通列举时的先后顺序。配合 `--versions` 使用时，每个版本按自己的大小排序。
+
+```shell
+mcli ls --recursive --sort=size store/backups/
+```
+
+客户端会把当前目标的全部匹配条目读入内存，再输出第一行。指定多个目标时，按参数顺序逐个处理，各自排序并按需汇总。省略该选项时，条目仍按通常方式流式输出。
 
 ##### `--summarize` {#mc.ls.-summarize}
 
