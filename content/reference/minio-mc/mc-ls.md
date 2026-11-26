@@ -120,6 +120,8 @@ Use [`--versions`](#mc.ls.-versions) and [`--rewind`](#mc.ls.-rewind) together t
 
 ##### `--sort=size` {#mc.ls.-sort}
 
+*Optional*
+
 This option requires a SILO `mcli` build that includes [pgsty/mc@ecba86cd](https://github.com/pgsty/mc/commit/ecba86cdc134281684b7a05bfae497969a5dec18).
 
 SILO `mcli` lists entries in descending order by their reported size in bytes. Equal-sized entries keep their ordinary listing order. With `--versions`, each version is ranked by its own size.
@@ -128,13 +130,17 @@ SILO `mcli` lists entries in descending order by their reported size in bytes. E
 mcli ls --recursive --sort=size store/backups/
 ```
 
-The client buffers all matching entries for one target in memory before printing its first row. Multiple targets are processed in argument order, each with its own sorted list and optional summary. Omit the flag to stream entries as usual.
+The client buffers all matching entries for one target in memory before printing its first object row. Multiple targets are processed in argument order, each with its own sorted list and optional summary. Omit the flag to stream entries as usual.
+
+If a later page fails, the client still prints the entries it received, in size order. Any summary covers only the entries received. The command exits with a nonzero status. With `--json`, an error record can appear before the first sorted entry.
 
 ##### `--summarize` {#mc.ls.-summarize}
 
 *mc-cmd*
 
 *Optional* Displays summarized information for the specified `ALIAS` path.
+
+On a versioned bucket, `--rewind --summarize` counts all matching versions of each key toward the object count and total size. By default the listing shows only the newest matching version per key. Add `--versions` to see every version included in the summary.
 
 ### Global Flags {#global-flags}
 
