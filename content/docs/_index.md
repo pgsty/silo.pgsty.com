@@ -11,6 +11,6 @@ upstream_link: ""
 upstream_modified: true
 ---
 
-Use the sidebar to browse [Operations](/operations/), [Administration](/administration/), [Developers](/developers/), [Command & Settings Reference](/reference/), [Compatibility](/compatibility/), and [Release Notes](/blog/release/), or start with the [Download & Install](/download/) matrix.
+Use the sidebar to browse [Operations](/operations/), [Administration](/administration/), [Developers](/developers/), [Command & Settings Reference](/reference/), [Compatibility](/compatibility/), and [Release Notes](/release/), or start with the [Download & Install](/download/) matrix.
 
 {{< home-docs >}}

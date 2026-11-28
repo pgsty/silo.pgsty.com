@@ -20,13 +20,13 @@ upstream_modified: true
 
 `mcli batch status TARGET JOBID` 会持续观察批处理作业直至完成或失败。当实时指标暂未生成时，命令输出 `pending`（JSON 模式下为 `status: "pending"`），避免将排队中或暂缺采样点的任务误判为已完成。若连续 30 秒未收到任务指标或指标流提前中断，客户端会主动回查服务端持久化状态（单次查询超时为 10 秒）；若仍无法获取终态则返回错误，此时可重新运行命令继续观察。
 
-只要成功获取到 `complete` 或 `failed` 终态，命令均以退出码 `0` 结束，自动化脚本应根据返回的 `status` 字段判断作业成败；当状态无法获取、任务不存在或请求出错时则返回非零退出码。此外，本版修复了海量对象下 IOPs 中间计算整数溢出的问题，详见[本版变更](/zh/blog/release/silo-20261026/#mcli)。
+只要成功获取到 `complete` 或 `failed` 终态，命令均以退出码 `0` 结束，自动化脚本应根据返回的 `status` 字段判断作业成败；当状态无法获取、任务不存在或请求出错时则返回非零退出码。此外，本版修复了海量对象下 IOPs 中间计算整数溢出的问题，详见[本版变更](/zh/release/silo-20261026/#mcli)。
 
 <a id="silo-status-details"></a>
 
 ## mcli 20261109 与 SILO 20261109：暂停与跳过结果 {#silo-job-outcomes}
 
-[mcli 20261109](/zh/blog/release/mcli-20261109/) 与 [SILO 20261109](/zh/blog/release/silo-20261109/) 增加 `paused` 和 `complete-with-skips`。`paused` 是非终态：服务器正在等待重试，实时指标仍可用时客户端继续观察。`complete-with-skips` 表示本轮已经结束，但仍保留了受保护版本或整 key 被拒绝的对象，不代表所有选中对象都已删除。与 `complete`、`failed` 一样，成功取得它时退出码为 `0`；脚本必须检查状态与计数。
+[mcli 20261109](/zh/release/mcli-20261109/) 与 [SILO 20261109](/zh/release/silo-20261109/) 增加 `paused` 和 `complete-with-skips`。`paused` 是非终态：服务器正在等待重试，实时指标仍可用时客户端继续观察。`complete-with-skips` 表示本轮已经结束，但仍保留了受保护版本或整 key 被拒绝的对象，不代表所有选中对象都已删除。与 `complete`、`failed` 一样，成功取得它时退出码为 `0`；脚本必须检查状态与计数。
 
 文本输出按需显示 `VersionsSkippedLocked`、`KeysRefused`、`FailureReason` 和 `PausedReason`。JSON 保留原有 `metric` 对象，在新增的 `details` 下提供 `versionsSkippedLocked`、`keysRefused`、`failureReason`、`pausedReason`。两个计数的单位不同，分别是跳过的版本数和整 key 拒绝数，不能相加当作已删除对象数。
 

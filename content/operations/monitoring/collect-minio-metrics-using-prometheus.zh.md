@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**[SILO 20261109](/zh/blog/release/silo-20261109/) / [Console 2.7.0](/zh/blog/release/console-2.7.0/)：** Console 的 Metrics 页面使用 Metrics V3 指标，按节点聚合并明确区分“真实零值”与“缺失数据”。Overview 页面展示的是 Server 上报的裸盘总容量（而非扣除纠删码开销后的可用容量估算）；存储桶列表为实时读取，对象数量与空间占用则由后台扫描器（或 Console 2.7.0 可选的 `console usage-worker`）统计。在 SILO 20261109 中，复制工作协程指标在复制工作池不存在时不会触发 panic，并继续保留历史均值和峰值计数（[`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)）；实时批处理指标则保留暂停原因以及跳过或拒绝计数（[#325](https://github.com/pgsty/silo/issues/325)）。详见 [Console 2.7.0 发布说明](/zh/blog/release/console-2.7.0/)与 [Metrics V3 指标映射参考](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/metrics-v3.md)。
+**[SILO 20261109](/zh/release/silo-20261109/) / [Console 2.7.0](/zh/release/console-2.7.0/)：** Console 的 Metrics 页面使用 Metrics V3 指标，按节点聚合并明确区分“真实零值”与“缺失数据”。Overview 页面展示的是 Server 上报的裸盘总容量（而非扣除纠删码开销后的可用容量估算）；存储桶列表为实时读取，对象数量与空间占用则由后台扫描器（或 Console 2.7.0 可选的 `console usage-worker`）统计。在 SILO 20261109 中，复制工作协程指标在复制工作池不存在时不会触发 panic，并继续保留历史均值和峰值计数（[`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)）；实时批处理指标则保留暂停原因以及跳过或拒绝计数（[#325](https://github.com/pgsty/silo/issues/325)）。详见 [Console 2.7.0 发布说明](/zh/release/console-2.7.0/)与 [Metrics V3 指标映射参考](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/metrics-v3.md)。
 
 <a id="prometheus"></a>
 <a id="monitoring-and-alerting-using-prometheus"></a>
@@ -22,7 +22,7 @@ MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_
 
 ## 20261109 推荐的 Metrics V3 抓取 {#metrics-v3}
 
-新部署以及 Console 2.7.0 的 Metrics 页面应抓取 Metrics V3 指标。使用 [mcli 20261109](/zh/blog/release/mcli-20261109/) 显式传入 `--api-version v3` 即可生成配置：
+新部署以及 Console 2.7.0 的 Metrics 页面应抓取 Metrics V3 指标。使用 [mcli 20261109](/zh/release/mcli-20261109/) 显式传入 `--api-version v3` 即可生成配置：
 
 ```shell
 mcli admin prometheus generate mysilo --api-version v3

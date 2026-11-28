@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/server-release-readiness/"
 ---
 
-This is the pre-release engineering review behind [SILO 20260903](/blog/release/silo-20260903/) (`RELEASE.2026-09-03T13-18-01Z` at `9b11dc9469e650815b775cb47b039610644f5da4`, reviewed candidate `6e112d1856d4f3655f30fc81ee47e9f43d50d8f3`, against baseline `RELEASE.2026-08-06T00-00-00Z` at `3be10fcc1a44f6620ded0bd303461f9d688cca23`). It records what the second-pass review found after the initial implementation pass, how the fixes were narrowed, and how the release gates were structured. Subsequent September and October releases are covered in [Replication Reliability](/blog/design/replication-reliability/), [Server 20260916](/blog/release/silo-20260916/), and [Server 20261018](/blog/release/silo-20261018/#delivery).
+This is the pre-release engineering review behind [SILO 20260903](/release/silo-20260903/) (`RELEASE.2026-09-03T13-18-01Z` at `9b11dc9469e650815b775cb47b039610644f5da4`, reviewed candidate `6e112d1856d4f3655f30fc81ee47e9f43d50d8f3`, against baseline `RELEASE.2026-08-06T00-00-00Z` at `3be10fcc1a44f6620ded0bd303461f9d688cca23`). It records what the second-pass review found after the initial implementation pass, how the fixes were narrowed, and how the release gates were structured. Subsequent September and October releases are covered in [Replication Reliability](/blog/design/replication-reliability/), [Server 20260916](/release/silo-20260916/), and [Server 20261018](/release/silo-20261018/#delivery).
 
 ## Why the Second Review Was Necessary {#why-review}
 

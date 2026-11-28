@@ -14,7 +14,7 @@ url: "/zh/blog/design/restored-copy-expiry/"
 
 本文覆盖 [issue #281](https://github.com/pgsty/silo/issues/281) 和 Denis Babchuk 提交的 [PR #282](https://github.com/pgsty/silo/pull/282)，基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 评估。修复与多池生命周期修复（[多池生命周期过期](/zh/blog/design/multi-pool-lifecycle-expiry/)，[#278](https://github.com/pgsty/silo/issues/278)）在同一个维护者集成 PR 中交付：贡献者提交原样保留，并附加下文所述的防护，同时配合[单池锁域修复](/zh/blog/design/single-pool-lock-domains/)一并发布。
 
-**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+**状态：** 已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短结论 {#tldr}
 
@@ -257,7 +257,7 @@ url: "/zh/blog/design/restored-copy-expiry/"
 
 跨独立物理主机的锁域、跨独立物理主机的混合版本集群、长达一小时的存储停顿以及节点间时钟偏差，不在本地验证范围内。
 
-**集成与发布验证。** 该修复为 `SILO Server 20261109` 紧接 #278 合入集成分支，锁域、Heal 演练、#259、#285、`delete-all` 和 Console 修复无冲突叠合在其上。本地集成运行通过了完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件与 CI 竞态检测选集，针对组合分支的对抗性审查通过实际执行的探针检查了锁域、清理路径以及清除与恢复之间的交互，未发现缺陷。发布提交 `d998292387cc`（`RELEASE.2026-11-09T00-00-00Z`）已通过 Go CI（含无标签 Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 门禁）、VulnCheck、发布流水线测试与[发布构建校验](/zh/blog/release/silo-20261109/)。
+**集成与发布验证。** 该修复为 `SILO Server 20261109` 紧接 #278 合入集成分支，锁域、Heal 演练、#259、#285、`delete-all` 和 Console 修复无冲突叠合在其上。本地集成运行通过了完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件与 CI 竞态检测选集，针对组合分支的对抗性审查通过实际执行的探针检查了锁域、清理路径以及清除与恢复之间的交互，未发现缺陷。发布提交 `d998292387cc`（`RELEASE.2026-11-09T00-00-00Z`）已通过 Go CI（含无标签 Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 门禁）、VulnCheck、发布流水线测试与[发布构建校验](/zh/release/silo-20261109/)。
 
 ## 审查记录 {#review}
 

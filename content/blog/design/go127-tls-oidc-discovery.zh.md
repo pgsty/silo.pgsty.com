@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/go127-tls-oidc-discovery/"
 ---
 
-SILO 工具链升级至 Go 1.27 后，Server TLS 修复 [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31)（"fix(tls): honor Go key exchange defaults across transports"，随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布）移除了 8 处 Server TLS 配置点上的显式椭圆曲线覆盖。本文记录 Go 1.27 在 TLS 层的变更细节、[issue #154](https://github.com/pgsty/silo/issues/154) 排查总结的分阶段诊断方法，以及身份提供方（IdP）在启动阶段不可达时的健康检查端点行为。
+SILO 工具链升级至 Go 1.27 后，Server TLS 修复 [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31)（"fix(tls): honor Go key exchange defaults across transports"，随 [Server 20260916](/zh/release/silo-20260916/) 发布）移除了 8 处 Server TLS 配置点上的显式椭圆曲线覆盖。本文记录 Go 1.27 在 TLS 层的变更细节、[issue #154](https://github.com/pgsty/silo/issues/154) 排查总结的分阶段诊断方法，以及身份提供方（IdP）在启动阶段不可达时的健康检查端点行为。
 
 关于发布后复测的深入机制分析——为什么 `GODEBUG=tlsmlkem=0` 只能关闭混合密钥交换而无法隐去新增的 12 字节 `ML-DSA` 签名算法扩展，以及应对 TLS 深度检测中间设备的完整配置方案——参见[《写死 TLS 参数与握手兼容性》](/zh/blog/design/tls-parameter-pinning/)。
 

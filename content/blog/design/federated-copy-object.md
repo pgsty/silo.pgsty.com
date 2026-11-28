@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/federated-copy-object/"
 ---
 
-[Server 20260916](/blog/release/silo-20260916/) repairs the legacy etcd bucket-federation `CopyObject` path across [PR #157](https://github.com/pgsty/silo/pull/157), [PR #159](https://github.com/pgsty/silo/pull/159), [PR #163](https://github.com/pgsty/silo/pull/163), [PR #177](https://github.com/pgsty/silo/pull/177), and [PR #179](https://github.com/pgsty/silo/pull/179). When `CopyObject` forwards a copy across federated deployments as a remote `PutObject`, the proxy streams logical source bytes, delegates destination encryption and Object Lock enforcement to the destination deployment, validates full-object checksums, and returns the exact committed version metadata.
+[Server 20260916](/release/silo-20260916/) repairs the legacy etcd bucket-federation `CopyObject` path across [PR #157](https://github.com/pgsty/silo/pull/157), [PR #159](https://github.com/pgsty/silo/pull/159), [PR #163](https://github.com/pgsty/silo/pull/163), [PR #177](https://github.com/pgsty/silo/pull/177), and [PR #179](https://github.com/pgsty/silo/pull/179). When `CopyObject` forwards a copy across federated deployments as a remote `PutObject`, the proxy streams logical source bytes, delegates destination encryption and Object Lock enforcement to the destination deployment, validates full-object checksums, and returns the exact committed version metadata.
 
 ## Logical Byte Streaming and Destination Encryption {#bytes}
 

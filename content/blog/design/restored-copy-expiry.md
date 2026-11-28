@@ -14,7 +14,7 @@ url: "/blog/design/restored-copy-expiry/"
 
 This record covers [issue #281](https://github.com/pgsty/silo/issues/281) and [PR #282](https://github.com/pgsty/silo/pull/282) by Denis Babchuk, evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). The fix shipped in the same maintainer integration PR as the multi-pool lifecycle fix ([Multi-Pool Lifecycle Expiry](/blog/design/multi-pool-lifecycle-expiry/), [#278](https://github.com/pgsty/silo/issues/278)). That PR keeps the contributor commit unchanged and adds the safeguards described below, paired with the [single-pool lock-domain fix](/blog/design/single-pool-lock-domains/).
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 
@@ -257,7 +257,7 @@ The adversarial review's own probes ran on the final patch, and 33 of 46 pass. T
 
 Lock domains across separate physical hosts, mixed-binary clusters across separate hosts, hour-long storage stalls, and clock skew between nodes were not exercised in the local checks.
 
-**Integration and release verification.** The fix integrated on top of #278 for `SILO Server 20261109` together with the lock-domain, heal dry-run, #259, #285, `delete-all`, and Console fixes without conflicts. Local integration runs passed the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite and CI race-detector selections, and an adversarial review of the combined branch checked lock domains, cleanup paths, and purge against restore with executed probes and found no defects. Release commit `d998292387cc` (`RELEASE.2026-11-09T00-00-00Z`) passed Go CI (including the untagged Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` gate), VulnCheck, Test Release Pipeline, and [release build verification](/blog/release/silo-20261109/).
+**Integration and release verification.** The fix integrated on top of #278 for `SILO Server 20261109` together with the lock-domain, heal dry-run, #259, #285, `delete-all`, and Console fixes without conflicts. Local integration runs passed the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite and CI race-detector selections, and an adversarial review of the combined branch checked lock domains, cleanup paths, and purge against restore with executed probes and found no defects. Release commit `d998292387cc` (`RELEASE.2026-11-09T00-00-00Z`) passed Go CI (including the untagged Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` gate), VulnCheck, Test Release Pipeline, and [release build verification](/release/silo-20261109/).
 
 ## Review history {#review}
 

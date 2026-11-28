@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/listobjects-nosuchbucket/"
 ---
 
-Shipped in [SILO Server 20260903](/blog/release/silo-20260903/), [PR #37](https://github.com/pgsty/silo/pull/37) (commit [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377), merged as [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef), closing [SILO #32](https://github.com/pgsty/silo/issues/32)) fixes an S3 compatibility regression where three early-return shortcuts in `ListObjects`, `ListObjectsV2`, and `ListObjectVersions` returned HTTP `200 OK` with an empty listing instead of HTTP `404 NoSuchBucket` when called against a non-existent bucket.
+Shipped in [SILO Server 20260903](/release/silo-20260903/), [PR #37](https://github.com/pgsty/silo/pull/37) (commit [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377), merged as [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef), closing [SILO #32](https://github.com/pgsty/silo/issues/32)) fixes an S3 compatibility regression where three early-return shortcuts in `ListObjects`, `ListObjectsV2`, and `ListObjectVersions` returned HTTP `200 OK` with an empty listing instead of HTTP `404 NoSuchBucket` when called against a non-existent bucket.
 
 ## Too Long; Didn't Read (TL;DR) {#tldr}
 
@@ -240,7 +240,7 @@ Adding a TTL cache for bucket existence reduces shortcut latency, but requires i
 
 ## Acceptance Decision {#decision}
 
-PR #37 was accepted and merged as [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef) (retaining Jason Lin as co-author on [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377)) with typed error predicates and full V1/V2/version-list object-layer and HTTP-level coverage, and shipped in [SILO Server 20260903](/blog/release/silo-20260903/).
+PR #37 was accepted and merged as [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef) (retaining Jason Lin as co-author on [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377)) with typed error predicates and full V1/V2/version-list object-layer and HTTP-level coverage, and shipped in [SILO Server 20260903](/release/silo-20260903/).
 
 ## Summary {#conclusion}
 

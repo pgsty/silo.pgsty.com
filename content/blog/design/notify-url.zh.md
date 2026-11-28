@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/notify-url/"
 ---
 
-随 [SILO Server 20260903](/zh/blog/release/silo-20260903/) 发布的提交 [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) 修复了 [SILO #53](https://github.com/pgsty/silo/issues/53)，明确了 PostgreSQL 与 MySQL 桶通知目标的兼容性边界、旧配置迁移行为与启动期错误处理契约。
+随 [SILO Server 20260903](/zh/release/silo-20260903/) 发布的提交 [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) 修复了 [SILO #53](https://github.com/pgsty/silo/issues/53)，明确了 PostgreSQL 与 MySQL 桶通知目标的兼容性边界、旧配置迁移行为与启动期错误处理契约。
 
 ## 最终决策 {#decision}
 
@@ -216,11 +216,11 @@ go test -v ./cmd -run 'Test(ReadConfigWithoutMigrate|InitConfigSubsystem)' -coun
 
 ## 实现结果与发布边界 {#implementation-result}
 
-提交 [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) 已随 [SILO Server 20260903](/zh/blog/release/silo-20260903/) 正式发布。跨仓库核对确认 `pgsty/mc`、`pgsty/silo-pkg` 与 `pgsty/silo-console` 均无需代码修改：客户端原样转发配置文本，`silo-pkg` 不包含通知配置 schema，而 Console 已将表单序列化为规范的 `connection_string` 或 `dsn_string`。
+提交 [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) 已随 [SILO Server 20260903](/zh/release/silo-20260903/) 正式发布。跨仓库核对确认 `pgsty/mc`、`pgsty/silo-pkg` 与 `pgsty/silo-console` 均无需代码修改：客户端原样转发配置文本，`silo-pkg` 不包含通知配置 schema，而 Console 已将表单序列化为规范的 `connection_string` 或 `dsn_string`。
 
 ### 发布与兼容性声明 {#release}
 
-SILO 数据库通知要求 PostgreSQL 使用 `connection_string`、MySQL 使用 `dsn_string`。2020 年前的离散 `host`/`port`/`username`/`password`/`database` 形式不会被迁移；在升级至 [SILO Server 20260903](/zh/blog/release/silo-20260903/) 及更新版本前，请先转换、禁用或移除这类旧数据库 target。
+SILO 数据库通知要求 PostgreSQL 使用 `connection_string`、MySQL 使用 `dsn_string`。2020 年前的离散 `host`/`port`/`username`/`password`/`database` 形式不会被迁移；在升级至 [SILO Server 20260903](/zh/release/silo-20260903/) 及更新版本前，请先转换、禁用或移除这类旧数据库 target。
 
 ### 设计审查校准记录 {#review-record}
 

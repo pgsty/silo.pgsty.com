@@ -142,7 +142,7 @@ MinIO 会为每个已转移对象创建元数据，用于标识其在远程存�
 
 ### 恢复、过期与存储池下线 {#restore-expiry-and-pool-decommissioning}
 
-自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，远程层操作遵循以下行为：
+自 [SILO 20261109](/zh/release/silo-20261109/) 起，远程层操作遵循以下行为：
 
 - **两阶段原地原生恢复：** 原生恢复（`POST ?restore`）在对象写锁之外下载远程层数据（[#284](https://github.com/pgsty/silo/issues/284)），并原地恢复指定版本，不会改变版本顺序，多池部署下也不再挂起（[#289](https://github.com/pgsty/silo/issues/289)）。详见 [`mc ilm restore`](/zh/reference/minio-mc/mc-ilm-restore/)。
 - **恢复副本过期与跨池保留：** 已恢复副本到期时仅清理本地临时缓存，同时保留对象版本及其远程层数据（[#281](https://github.com/pgsty/silo/issues/281)）。只要其他存储池仍引用某份远程层对象，SILO 就会保留该远程数据（[#306](https://github.com/pgsty/silo/issues/306)、[#308](https://github.com/pgsty/silo/issues/308)）。

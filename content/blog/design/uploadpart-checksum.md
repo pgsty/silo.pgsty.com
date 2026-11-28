@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/uploadpart-checksum/"
 ---
 
-This is the design and implementation record for [SILO #46](https://github.com/pgsty/silo/issues/46) (merged as [`7fea6d5a5`](https://github.com/pgsty/silo/commit/7fea6d5a5) and shipped in [Server 20260903](/blog/release/silo-20260903/), with follow-up items [#63](https://github.com/pgsty/silo/issues/63) and [#64](https://github.com/pgsty/silo/issues/64)). It documents how handling an optional S3 part checksum header affected multipart completion semantics, copy responses, compression and encryption pipelines, and compatibility baselines.
+This is the design and implementation record for [SILO #46](https://github.com/pgsty/silo/issues/46) (merged as [`7fea6d5a5`](https://github.com/pgsty/silo/commit/7fea6d5a5) and shipped in [Server 20260903](/release/silo-20260903/), with follow-up items [#63](https://github.com/pgsty/silo/issues/63) and [#64](https://github.com/pgsty/silo/issues/64)). It documents how handling an optional S3 part checksum header affected multipart completion semantics, copy responses, compression and encryption pipelines, and compatibility baselines.
 
 ## Too Long; Didn't Read (TL;DR) {#tldr}
 

@@ -11,7 +11,7 @@ draft: false
 url: "/blog/design/ssec-replica-integrity/"
 ---
 
-This article records the SSE-C replica integrity contract formed by [#122](https://github.com/pgsty/silo/pull/122), [#123](https://github.com/pgsty/silo/pull/123), [#124](https://github.com/pgsty/silo/pull/124), [#126](https://github.com/pgsty/silo/pull/126), and [#134](https://github.com/pgsty/silo/pull/134), which shipped in [Server 20260916](/blog/release/silo-20260916/), building on the earlier zero-byte/read-attribute authentication and destination-key checksum repairs from [Server 20260903](/blog/release/silo-20260903/).
+This article records the SSE-C replica integrity contract formed by [#122](https://github.com/pgsty/silo/pull/122), [#123](https://github.com/pgsty/silo/pull/123), [#124](https://github.com/pgsty/silo/pull/124), [#126](https://github.com/pgsty/silo/pull/126), and [#134](https://github.com/pgsty/silo/pull/134), which shipped in [Server 20260916](/release/silo-20260916/), building on the earlier zero-byte/read-attribute authentication and destination-key checksum repairs from [Server 20260903](/release/silo-20260903/).
 
 ## Ciphertext and Trust {#ciphertext}
 

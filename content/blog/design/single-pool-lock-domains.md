@@ -14,7 +14,7 @@ url: "/blog/design/single-pool-lock-domains/"
 
 This record covers a lock-domain defect found during review of the restored-copy fix ([Restored Copies: Expire the Copy, Not the Object](/blog/design/restored-copy-expiry/)), evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). Tracked as [#298](https://github.com/pgsty/silo/issues/298).
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 

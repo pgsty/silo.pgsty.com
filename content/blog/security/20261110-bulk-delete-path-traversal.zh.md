@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/20261110-bulk-delete-path-traversal/"
 ---
 
-**发布状态：** 已随 **[SILO Server 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，[`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)）发布\
+**发布状态：** 已随 **[SILO Server 20261112](/zh/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，[`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)）发布\
 **安全编号：** `SN-2026-020`（[安全公告台账](/zh/about/security-advisories/#sn-2026-020)）\
 **严重程度：** 严重（Critical）\
 **影响范围：** 单存储池（Single-Pool）部署的 **SILO Server**（`RELEASE.2026-11-09T00-00-00Z` 及更早版本）与上游原版 MinIO；多存储池（`2` 个及以上存储池）部署自 SILO `20261026` 起不受影响\
@@ -29,7 +29,7 @@ url: "/zh/blog/security/20261110-bulk-delete-path-traversal/"
 
 ## 一、问题的发现 {#discovery}
 
-2026 年 10 月 31 日，Denis Babchuk（[`@botdeniska`](https://github.com/botdeniska)）通过 GitHub 私密漏洞报告指出：`DeleteMultipleObjectsHandler`（`cmd/bucket-handlers.go`）仅根据请求桶在节点内存中的 `hasLockEnabled` 缓存决定是否执行对象锁保留期与法务保留检查，而未在存储写锁内逐版本校验目标状态。为此，[SILO Server 20261109](/zh/blog/release/silo-20261109/#authorization) 合入了 [PR #330](https://github.com/pgsty/silo/pull/330)（[`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)），使开启对象锁的桶在批量物理删除版本时复用持有变更锁的单对象删除路径。
+2026 年 10 月 31 日，Denis Babchuk（[`@botdeniska`](https://github.com/botdeniska)）通过 GitHub 私密漏洞报告指出：`DeleteMultipleObjectsHandler`（`cmd/bucket-handlers.go`）仅根据请求桶在节点内存中的 `hasLockEnabled` 缓存决定是否执行对象锁保留期与法务保留检查，而未在存储写锁内逐版本校验目标状态。为此，[SILO Server 20261109](/zh/release/silo-20261109/#authorization) 合入了 [PR #330](https://github.com/pgsty/silo/pull/330)（[`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)），使开启对象锁的桶在批量物理删除版本时复用持有变更锁的单对象删除路径。
 
 在对 `6ef3a52fc` 与私密安全报告队列开展后续核验时，我们进一步检查了跨桶边界场景：当 URL 中的请求桶 `A`（`POST /A?delete`）未开启对象锁，而 XML 请求体中的 `<Object><Key>` 包含 `../B/secret` 指向已开启 `COMPLIANCE` 对象锁的桶 `B` 时，系统如何处理。在 `Server 20261026` 与 `Server 20261109` 上的实测确认单存储池部署会执行该跨桶删除；进一步排查同时确认了仅凭 `s3:DeleteObject` 跨桶写入删除标记、向 `.minio.sys` 元数据写入删除标记，以及同批次重复归一化别名导致的批量锁自死锁。感谢 [`@botdeniska`](https://github.com/botdeniska) 此前提交的 `DeleteObjects` 对象锁报告促成了本次关联审计。
 
@@ -174,8 +174,8 @@ if slices.ContainsFunc(derrs, func(err error) bool { return err != nil }) {
 
 ## 升级指引与临时缓解措施 {#remediation}
 
-1. **升级 SILO Server：** 单存储池部署请升级至 **[SILO Server 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，包含提交 [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)）。单独升级 `silo-console` 或 `mcli` 无法修复服务端问题。
-2. **升级前临时缓解：** 未修复的单存储池服务端无配置项可关闭该代码路径。完成升级前，请在单存储池集群上收回不可信或半可信多租户主体的 `s3:DeleteObject` 与 `s3:DeleteObjectVersion` 权限（或将不可信租户隔离至独立实例）。运行 [SILO Server 20261026](/zh/blog/release/silo-20261026/) 或 [20261109](/zh/blog/release/silo-20261109/) 的多存储池（`2` 个及以上存储池）集群不受影响。
+1. **升级 SILO Server：** 单存储池部署请升级至 **[SILO Server 20261112](/zh/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，包含提交 [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)）。单独升级 `silo-console` 或 `mcli` 无法修复服务端问题。
+2. **升级前临时缓解：** 未修复的单存储池服务端无配置项可关闭该代码路径。完成升级前，请在单存储池集群上收回不可信或半可信多租户主体的 `s3:DeleteObject` 与 `s3:DeleteObjectVersion` 权限（或将不可信租户隔离至独立实例）。运行 [SILO Server 20261026](/zh/release/silo-20261026/) 或 [20261109](/zh/release/silo-20261109/) 的多存储池（`2` 个及以上存储池）集群不受影响。
 3. **升级后核查：** 若未修复的单存储池集群此前曾向半可信主体授予开启版本控制桶的删除权限，建议升级后通过 `mcli ls --versions` 检查业务桶，并核查磁盘上 `.minio.sys/buckets/<bucket>/.metadata.bin` 是否存在异常删除标记。
 
 更多信息请参阅[安全公告台账](/zh/about/security-advisories/#sn-2026-020)、[SN-2026-002 内部节点路径包含审计](/zh/blog/security/internode-path-containment/)与[组件版本矩阵](/zh/compatibility/versions/)。

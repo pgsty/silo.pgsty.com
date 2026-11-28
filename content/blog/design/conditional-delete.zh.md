@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/conditional-delete/"
 ---
 
-单对象条件删除（`DeleteObject` 上的 `If-Match`）由 [PR #145](https://github.com/pgsty/silo/pull/145) 引入，随后 [PR #178](https://github.com/pgsty/silo/pull/178) 修复了多池串行化与跨池清理。这两项改动均已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布。
+单对象条件删除（`DeleteObject` 上的 `If-Match`）由 [PR #145](https://github.com/pgsty/silo/pull/145) 引入，随后 [PR #178](https://github.com/pgsty/silo/pull/178) 修复了多池串行化与跨池清理。这两项改动均已随 [Server 20260916](/zh/release/silo-20260916/) 发布。
 
 八月围绕 [PR #12](https://github.com/pgsty/silo/pull/12) 的早期方案曾设想更宽的范围——包括批量 `DeleteObjects` 拒绝保护、额外的 `s3:GetObject` 读取授权检查，以及“仅比较当前版本”规则——但实际合入的实现并未采纳这些扩展。本文记录 [`f99ed829b`](https://github.com/pgsty/silo/tree/f99ed829b5eba549160725f035156c9e020b6a07) 中已交付的契约，并阐述为什么前置条件判断必须位于单池存储层之上。
 

@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/internode-path-containment/"
 ---
 
-**发布状态：** 已随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 发布（[发行注记](/zh/blog/release/silo-20260804/#sn-2026-002)）\
+**发布状态：** 已随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 发布（[发行注记](/zh/release/silo-20260804/#sn-2026-002)）\
 **安全编号：** `SN-2026-002`（[安全公告台账](/zh/about/security-advisories/#sn-2026-002)）\
 **修复提交：** [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670)、[`b6f70ab08`](https://github.com/pgsty/silo/commit/b6f70ab08)、[`80e8eaa42`](https://github.com/pgsty/silo/commit/80e8eaa42)、[`1af351a70`](https://github.com/pgsty/silo/commit/1af351a70)、[`a36fd8fff`](https://github.com/pgsty/silo/commit/a36fd8fff)\
 **影响范围：** 仅分布式纠删码（distributed erasure）部署；需持有集群 root / 节点间 JWT\
@@ -138,7 +138,7 @@ go test ./cmd -run 'Test.*Containment.*|Test.*Guard.*|Fuzz.*' -count=1
 
 ## Server 20260804 同步发版的五项后续加固 {#open}
 
-除主提交 [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670) 外，以下五项配套修复已随 [Server 20260804](/zh/blog/release/silo-20260804/#sn-2026-002) 一并发布：
+除主提交 [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670) 外，以下五项配套修复已随 [Server 20260804](/zh/release/silo-20260804/#sn-2026-002) 一并发布：
 
 - **`ReadFileHandler` 读取长度上限（`b6f70ab08`）**：提交 [`b6f70ab08`](https://github.com/pgsty/silo/commit/b6f70ab08) 拒绝超过 5 GiB（单 S3 分片最大尺寸）的声明读取长度，消除由调用方任意声明数十 GiB 触发的预分配。
 - **拒绝负数分片尺寸（`80e8eaa42`）**：提交 [`80e8eaa42`](https://github.com/pgsty/silo/commit/80e8eaa42) 在 `AddVersion` 写入收口点以及 `CheckParts`、`VerifyFile`、节点间 `guardErasureParams` 中统一拒绝负数分片尺寸，同时覆盖新写入与历史落盘元数据。

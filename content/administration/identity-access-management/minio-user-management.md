@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> - **SILO 20261109 IAM persistence and policy-load safety ([#316](https://github.com/pgsty/silo/issues/316), [#317](https://github.com/pgsty/silo/issues/317), [#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)):** [SILO 20261109](/blog/release/silo-20261109/) refuses incomplete policy loads instead of publishing partial policy sets, keeps cached authentication available during lazy reloads, and applies user, group, policy, and service-account mutations directly to persisted records so a stale peer cannot restore rotated credentials or resurrect deleted identities.
+> - **SILO 20261109 IAM persistence and policy-load safety ([#316](https://github.com/pgsty/silo/issues/316), [#317](https://github.com/pgsty/silo/issues/317), [#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)):** [SILO 20261109](/release/silo-20261109/) refuses incomplete policy loads instead of publishing partial policy sets, keeps cached authentication available during lazy reloads, and applies user, group, policy, and service-account mutations directly to persisted records so a stale peer cannot restore rotated credentials or resurrect deleted identities.
 > - **SILO 20261018 self-administration rules:** Self inspection and cleanup respect explicit denies, session restrictions, and authorization-plugin decisions. Built-in authorization rejects service-account creation or update by restricted derived credentials and protects root-derived credentials. Ordinary users retain established self rights, and bulk self aliases resolve to the parent identity. Review the [Admin authorization contract](/blog/design/iam-admin-authorization/) and [SN-2026-017](/blog/security/20261018-release-hardening/#sn-2026-017).
 
 <a id="user-management"></a>
@@ -48,7 +48,7 @@ You can also create [security token service](/developers/security-token-service/
 
 ## MinIO `root` User {#minio-root-user}
 
-MinIO deployments have a `root` user with access to all actions and resources on the deployment, regardless of the configured [identity manager](/administration/identity-access-management/#minio-authentication-and-identity-management) (including embedded Console sign-in when AD/LDAP is enabled in [SILO 20261109](/blog/release/silo-20261109/), [#272](https://github.com/pgsty/silo/issues/272)). When a [`silo`](/reference/minio-server/#command-minio) server first starts, it sets the `root` user credentials by checking the value of the following environment variables:
+MinIO deployments have a `root` user with access to all actions and resources on the deployment, regardless of the configured [identity manager](/administration/identity-access-management/#minio-authentication-and-identity-management) (including embedded Console sign-in when AD/LDAP is enabled in [SILO 20261109](/release/silo-20261109/), [#272](https://github.com/pgsty/silo/issues/272)). When a [`silo`](/reference/minio-server/#command-minio) server first starts, it sets the `root` user credentials by checking the value of the following environment variables:
 
 - [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER)
 - [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD)

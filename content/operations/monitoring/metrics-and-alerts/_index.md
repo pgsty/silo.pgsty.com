@@ -14,7 +14,7 @@ upstream_modified: true
 
 MinIO publishes metrics using the [Prometheus Data Model](https://prometheus.io/docs/concepts/data_model/). You can use any scraping tool to pull metrics data from SILO for analysis and alerting.
 
-[SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), [Console 2.7.0](/blog/release/console-2.7.0/), and [mcli 20261109](/blog/release/mcli-20261109/) use Metrics V3 (`/minio/metrics/v3`) as the recommended scraping contract. In SILO 20261109, replication worker metrics handle an absent replication pool without panicking while retaining historical averages and peak counts ([`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)), and live batch job metrics preserve pause reasons alongside skipped or refused counts ([#325](https://github.com/pgsty/silo/issues/325)).
+[SILO 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), [Console 2.7.0](/release/console-2.7.0/), and [mcli 20261109](/release/mcli-20261109/) use Metrics V3 (`/minio/metrics/v3`) as the recommended scraping contract. In SILO 20261109, replication worker metrics handle an absent replication pool without panicking while retaining historical averages and peak counts ([`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)), and live batch job metrics preserve pause reasons alongside skipped or refused counts ([#325](https://github.com/pgsty/silo/issues/325)).
 
 > [!NOTE]
 > **Metrics version 2**
@@ -38,7 +38,7 @@ http://HOSTNAME:PORT/minio/metrics/v3/audit
 
 Replace `HOSTNAME:PORT` with the <abbr title="Fully Qualified Domain Name">FQDN</abbr> and port of the SILO deployment. For deployments with a load balancer managing connections between SILO nodes, specify the address of the load balancer.
 
-By default, SILO requires authentication to scrape the metrics endpoints. Generate the required bearer token with [`mcli admin prometheus generate --api-version v3`](/reference/minio-mc-admin/mc-admin-prometheus-generate/#command-mc.admin.prometheus.generate) ([mcli 20261109](/blog/release/mcli-20261109/)). You can also disable metrics endpoint authentication by setting [`MINIO_PROMETHEUS_AUTH_TYPE`](/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_PROMETHEUS_AUTH_TYPE) to `public`.
+By default, SILO requires authentication to scrape the metrics endpoints. Generate the required bearer token with [`mcli admin prometheus generate --api-version v3`](/reference/minio-mc-admin/mc-admin-prometheus-generate/#command-mc.admin.prometheus.generate) ([mcli 20261109](/release/mcli-20261109/)). You can also disable metrics endpoint authentication by setting [`MINIO_PROMETHEUS_AUTH_TYPE`](/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_PROMETHEUS_AUTH_TYPE) to `public`.
 
 MinIO provides the following scraping endpoints, relative to the base URL:
 

@@ -30,7 +30,7 @@ Inspect diagnostic files before sharing them. They may contain topology, configu
 
 ## Upgrades and Version Support {#upgrades-and-version-support}
 
-Use [published releases](/download/) and read the intervening [release notes](/blog/release/) and [security advisories](/about/security-advisories/). A source change or a planned release date does not establish public artifact availability.
+Use [published releases](/download/) and read the intervening [release notes](/release/) and [security advisories](/about/security-advisories/). A source change or a planned release date does not establish public artifact availability.
 
 ### Choosing an Upgrade {#recommended-upgrade-schedule}
 

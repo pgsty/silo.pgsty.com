@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **Console 2.5.1 – 2.7.0 更新：** 新增 Tasks 抽屉用于跟踪分批传输与批量操作进度（取消任务会停止后续批次，但不会回滚已完成的修改）；文本/Markdown/CSV 预览超过 `1 MiB` 时会显示截断提示；ZIP 归档预览在输出首字节前失败时会保留原始 S3 错误状态；对象列表的排序、筛选与全选作用于当前已加载的分页（[Console 2.5.1](/zh/blog/release/console-2.5.1/#objects)）。[Console 2.6.0](/zh/blog/release/console-2.6.0/) 新增按需文件夹大小扫描、带可选 PostgreSQL worker 持久化的存储桶用量刷新、创建前存储桶校验以及精确整数配额换算。[Console v2.7.0](/zh/blog/release/console-2.7.0/)（`4e91ae506e70`，已内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)）将界面扩展为十种语言，支持在普通 HTTP（`http://<ip>:9001`）下执行**计算文件夹大小**与复制 SSE-C 解密密钥，对畸形或截断的分段上传返回 HTTP `400` 错误，并修复 `console usage-worker` 的 TLS 证书信任、跨时间片累计扫描预算、关停/删桶状态持久化以及 `HTTP 429` 繁忙重试。
+> **Console 2.5.1 – 2.7.0 更新：** 新增 Tasks 抽屉用于跟踪分批传输与批量操作进度（取消任务会停止后续批次，但不会回滚已完成的修改）；文本/Markdown/CSV 预览超过 `1 MiB` 时会显示截断提示；ZIP 归档预览在输出首字节前失败时会保留原始 S3 错误状态；对象列表的排序、筛选与全选作用于当前已加载的分页（[Console 2.5.1](/zh/release/console-2.5.1/#objects)）。[Console 2.6.0](/zh/release/console-2.6.0/) 新增按需文件夹大小扫描、带可选 PostgreSQL worker 持久化的存储桶用量刷新、创建前存储桶校验以及精确整数配额换算。[Console v2.7.0](/zh/release/console-2.7.0/)（`4e91ae506e70`，已内嵌于 [SILO Server 20261109](/zh/release/silo-20261109/)）将界面扩展为十种语言，支持在普通 HTTP（`http://<ip>:9001`）下执行**计算文件夹大小**与复制 SSE-C 解密密钥，对畸形或截断的分段上传返回 HTTP `400` 错误，并修复 `console usage-worker` 的 TLS 证书信任、跨时间片累计扫描预算、关停/删桶状态持久化以及 `HTTP 429` 繁忙重试。
 
 <a id="managing-objects"></a>
 <a id="minio-console-managing-objects"></a>
@@ -25,9 +25,9 @@ upstream_modified: true
 
 ## 对象浏览器 {#object-browser}
 
-自 [SILO Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 起，Console 的 `account-info` 请求改为读取实时存储桶清单，创建或删除存储桶后刷新即可获取最新列表（存储桶容量统计仍由后台扫描器更新）。此前的 Server 20261018 返回缓存的存储桶列表。
+自 [SILO Server 20261026](/zh/release/silo-20261026/#server-20261026) 起，Console 的 `account-info` 请求改为读取实时存储桶清单，创建或删除存储桶后刷新即可获取最新列表（存储桶容量统计仍由后台扫描器更新）。此前的 Server 20261018 返回缓存的存储桶列表。
 
-在 [Console v2.7.0](/zh/blog/release/console-2.7.0/)（内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)）中，**计算文件夹大小**与 SSE-C 解密密钥复制按钮在普通 HTTP（`http://<ip>:9001`）下无需浏览器安全上下文即可正常工作；畸形或截断的分段上传会返回 `400` 客户端错误，而不会导致请求处理器 panic。
+在 [Console v2.7.0](/zh/release/console-2.7.0/)（内嵌于 [SILO Server 20261109](/zh/release/silo-20261109/)）中，**计算文件夹大小**与 SSE-C 解密密钥复制按钮在普通 HTTP（`http://<ip>:9001`）下无需浏览器安全上下文即可正常工作；畸形或截断的分段上传会返回 `400` 客户端错误，而不会导致请求处理器 panic。
 
 对象浏览器会列出已认证用户在该部署上有权访问的存储桶和对象。
 
@@ -57,7 +57,7 @@ upstream_modified: true
 
 ### 多对象下载与分享 {#silo-downloads}
 
-[Console v2.4.1](/zh/blog/release/console-2.4.1/) 多选 ZIP 下载使用文件写入器流式保存；
+[Console v2.4.1](/zh/release/console-2.4.1/) 多选 ZIP 下载使用文件写入器流式保存；
 不支持该接口的浏览器由原生下载管理器接管，两者都不在 JavaScript 中缓冲完整归档。
 Console 会明确提示原生下载交接，此后请在浏览器下载管理器中查看进度、取消或处理网络错误。
 递归 ZIP 通常没有可靠总大小，未知大小不显示完成百分比；超过 5 GiB 或大小未知的选择推荐使用 mcli。
@@ -136,7 +136,7 @@ MinIO 不限制单个部署允许创建的存储桶总数。 不过，作为通�
 ## 用量扫描（Console v2.6.0+） {#usage-scans}
 
 > [!NOTE]
-> **组件可用性：** 本节介绍随 [Console v2.6.0](/zh/blog/release/console-2.6.0/)（[PR #70](https://github.com/pgsty/silo-console/pull/70)）发布并在 [Console v2.7.0](/zh/blog/release/console-2.7.0/)（`4e91ae506e70`）中更新的用量扫描与存储桶刷新功能。[SILO Server 20261109](/zh/blog/release/silo-20261109/) 内嵌 [Console v2.7.0](/zh/blog/release/console-2.7.0/)（`4e91ae506e70`）；Server `20261026` 内嵌 Console `v2.5.1`。单独更新独立部署的 Console 不会替换旧版 `silo` 二进制内嵌的 Console。正式支持的集成目标是 `pgsty/silo`；与上游 MinIO 的兼容性属于尽力而为。
+> **组件可用性：** 本节介绍随 [Console v2.6.0](/zh/release/console-2.6.0/)（[PR #70](https://github.com/pgsty/silo-console/pull/70)）发布并在 [Console v2.7.0](/zh/release/console-2.7.0/)（`4e91ae506e70`）中更新的用量扫描与存储桶刷新功能。[SILO Server 20261109](/zh/release/silo-20261109/) 内嵌 [Console v2.7.0](/zh/release/console-2.7.0/)（`4e91ae506e70`）；Server `20261026` 内嵌 Console `v2.5.1`。单独更新独立部署的 Console 不会替换旧版 `silo` 二进制内嵌的 Console。正式支持的集成目标是 `pgsty/silo`；与上游 MinIO 的兼容性属于尽力而为。
 
 <!-- 改编自 pgsty/silo-console PR #70 的 docs/FolderSizes.md。
 Copyright (c) 2026 Urbanize. SPDX-License-Identifier: AGPL-3.0-or-later. -->
@@ -319,6 +319,6 @@ worker 内部接口包括进程存活检查 `/health`、租约观察者及连接
 
 ### 创建失败与配额精度（Console v2.6.0 及后续版本） {#creation-and-quota}
 
-自 [Console v2.6.0](/zh/blog/release/console-2.6.0/) 起，存储桶创建处理链会在创建桶之前拒绝无效的配额与保留期。仅指定保留期也会启用对象锁定和版本控制，`versioning` 对象可以省略。对象锁定不能将前缀或文件夹排除在版本控制之外，因此同时指定锁定或保留期与版本控制排除项的请求，会在创建任何桶之前被拒绝。若创建后应用某项配置失败，API 会返回错误并尝试删除空桶；回滚不会删除对象。若调用者没有删除权限，或桶已不再为空，错误信息会明确提示桶可能仍然存在。重试前应检查实际配置；收到 HTTP 错误并不证明桶没有被创建。
+自 [Console v2.6.0](/zh/release/console-2.6.0/) 起，存储桶创建处理链会在创建桶之前拒绝无效的配额与保留期。仅指定保留期也会启用对象锁定和版本控制，`versioning` 对象可以省略。对象锁定不能将前缀或文件夹排除在版本控制之外，因此同时指定锁定或保留期与版本控制排除项的请求，会在创建任何桶之前被拒绝。若创建后应用某项配置失败，API 会返回错误并尝试删除空桶；回滚不会删除对象。若调用者没有删除权限，或桶已不再为空，错误信息会明确提示桶可能仍然存在。重试前应检查实际配置；收到 HTTP 错误并不证明桶没有被创建。
 
 Console 写入的配额必须大于零且小于 8 PiB（最多 9007199254740991 字节），选定单位下最多支持两位小数。换算使用整数运算，仅舍去不足一个字节的部分。无效数值由表单与请求校验拒绝；这些校验已在 Console 2.6.0 交付，详见[设计记录](/zh/blog/design/console-quota-numeric-validation/)。更大的配额仍可通过 mcli 和现有整数 API 管理。浏览器遇到超出 JSON 安全整数范围的已有配额时，不会填入可编辑的近似值，因此不会因打开后直接保存而悄悄改写配额。仍可清除该配额，或显式输入一个更小的新值。仅用于展示的容量统计可能经过舍入，需要精确的大整数值时请使用 mcli。

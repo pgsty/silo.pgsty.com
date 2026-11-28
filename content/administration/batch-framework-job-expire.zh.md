@@ -45,7 +45,7 @@ MinIO 批处理框架允许你使用 YAML 格式的作业定义文件（“batch
 
 ### SILO 20261109 生命周期、权限与 Object Lock {#silo-lifecycle}
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中：
+在 [SILO 20261109](/zh/release/silo-20261109/) 中：
 
 - 提交批量 `expire` 作业需要 `admin:StartBatchJob`、`s3:ListBucket` 与 `s3:ListBucketVersions`。运行期间，SILO 会持续重新校验提交者凭据，并对每个目标版本强制检查 `s3:GetObject`、`s3:GetObjectVersion`、`s3:DeleteObject` 与 `s3:DeleteObjectVersion`（当任一规则按标签过滤时还需 `s3:GetObjectTagging` 与 `s3:GetObjectVersionTagging`，[#310](https://github.com/pgsty/silo/issues/310)、[#311](https://github.com/pgsty/silo/issues/311)）。禁用、删除、过期或撤销提交者，或移除上述必需权限，都会以 `failureReason` 停止该作业。
 - 临时 IAM 或授权故障以及不完整的存储桶列举会使作业进入暂停（`pausedReason`）并自动重试，而不会把中断扫描记录为已完成（[#313](https://github.com/pgsty/silo/issues/313)）。

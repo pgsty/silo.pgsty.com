@@ -19,7 +19,7 @@ MinIO 还支持将服务日志和审计日志发布到 HTTP Webhook。
 
 MinIO 会将日志作为 JSON 文档，通过 `PUT` 请求发送到每个已配置端点。端点服务器负责处理这些 JSON 文档。MinIO 要求显式配置每个 Webhook 端点，默认情况下 *不会* 向 Webhook 发布日志。
 
-通过 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 配置时，SILO 会在所有集群节点上动态重载 `logger_webhook`、`audit_webhook` 和 `audit_kafka` 目标，无需整集群重启（若启动时通过环境变量覆盖配置，环境变量优先且修改后仍需重启）。在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，对端节点配置重载会在服务端进程生命周期内保持活跃的 `audit_webhook`、`logger_webhook` 和 `audit_kafka` 目标持续运行，修复了重载请求返回后对端节点停止目标工作协程并丢弃日志的问题（[#259](https://github.com/pgsty/silo/issues/259)）。
+通过 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 配置时，SILO 会在所有集群节点上动态重载 `logger_webhook`、`audit_webhook` 和 `audit_kafka` 目标，无需整集群重启（若启动时通过环境变量覆盖配置，环境变量优先且修改后仍需重启）。在 [SILO 20261109](/zh/release/silo-20261109/) 中，对端节点配置重载会在服务端进程生命周期内保持活跃的 `audit_webhook`、`logger_webhook` 和 `audit_kafka` 目标持续运行，修复了重载请求返回后对端节点停止目标工作协程并丢弃日志的问题（[#259](https://github.com/pgsty/silo/issues/259)）。
 
 <a id="minio-logging-publish-server-logs"></a>
 <a id="http-webhook" data-td-print-local></a>
@@ -82,7 +82,7 @@ set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 修改环境变量后需重启 SILO 服务端使其生效，并且必须在部署中的 *所有* SILO 节点上指定相同的环境变量与取值。
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
-SILO 支持使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`logger_webhook`](/zh/reference/minio-server/settings/metrics-and-logging/#mc-conf.logger_webhook) 配置键新增或更新日志 HTTP Webhook 端点。当未被 `MINIO_LOGGER_WEBHOOK_*` 环境变量覆盖时，SILO 会在全部集群节点上动态重载 `logger_webhook` 配置，无需重启整个部署；在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，对端节点重载后保持日志目标持续运行（[#259](https://github.com/pgsty/silo/issues/259)）。
+SILO 支持使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`logger_webhook`](/zh/reference/minio-server/settings/metrics-and-logging/#mc-conf.logger_webhook) 配置键新增或更新日志 HTTP Webhook 端点。当未被 `MINIO_LOGGER_WEBHOOK_*` 环境变量覆盖时，SILO 会在全部集群节点上动态重载 `logger_webhook` 配置，无需重启整个部署；在 [SILO 20261109](/zh/release/silo-20261109/) 中，对端节点重载后保持日志目标持续运行（[#259](https://github.com/pgsty/silo/issues/259)）。
 
 下面的示例设置了配置日志 HTTP Webhook 端点相关的 *全部* 配置项。其中最少 *必须* 配置的项为 [`logger_webhook endpoint`](/zh/reference/minio-server/settings/metrics-and-logging/#mc-conf.logger_webhook.endpoint)：
 
@@ -186,7 +186,7 @@ set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 修改环境变量后需重启 SILO 服务端使其生效，并且必须在部署中的 *所有* SILO 节点上指定相同的环境变量与取值。
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
-SILO 支持使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`audit_webhook`](/zh/reference/minio-server/settings/metrics-and-logging/#mc-conf.audit_webhook) 配置键新增或更新审计日志 HTTP Webhook 端点（`audit_kafka` 审计目标同样支持动态重载）。当未被 `MINIO_AUDIT_WEBHOOK_*` 环境变量覆盖时，SILO 会在所有集群节点上动态应用 `audit_webhook` 变更，无需重启整个部署；在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，对端节点配置重载会在每个节点上保持活跃的 `audit_webhook` 和 `audit_kafka` 工作协程及 `queue_dir` 磁盘投递队列持续运行（[#259](https://github.com/pgsty/silo/issues/259)）。
+SILO 支持使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`audit_webhook`](/zh/reference/minio-server/settings/metrics-and-logging/#mc-conf.audit_webhook) 配置键新增或更新审计日志 HTTP Webhook 端点（`audit_kafka` 审计目标同样支持动态重载）。当未被 `MINIO_AUDIT_WEBHOOK_*` 环境变量覆盖时，SILO 会在所有集群节点上动态应用 `audit_webhook` 变更，无需重启整个部署；在 [SILO 20261109](/zh/release/silo-20261109/) 中，对端节点配置重载会在每个节点上保持活跃的 `audit_webhook` 和 `audit_kafka` 工作协程及 `queue_dir` 磁盘投递队列持续运行（[#259](https://github.com/pgsty/silo/issues/259)）。
 
 下面的示例设置了配置审计日志 HTTP Webhook 端点相关的 *全部* 配置项。其中最少 *必须* 配置的项为 [`audit_webhook endpoint`](/zh/reference/minio-server/settings/metrics-and-logging/#mc-conf.audit_webhook.endpoint)：
 

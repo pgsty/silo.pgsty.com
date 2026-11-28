@@ -3,7 +3,7 @@ columns:
     links:
       - { label: "SILO Download", url: "download/#server" }
       - { label: "MCLI Download", url: "download/#client" }
-      - { label: "Release Notes", url: "blog/release/" }
+      - { label: "Release Notes", url: "release/" }
       - { label: "Security Notes", url: "blog/security/" }
   - title: "Documentation"
     links:

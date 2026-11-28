@@ -9,13 +9,13 @@ weight: 1
 url: "/blog/security/20260916-release-hardening/"
 ---
 
-This bulletin covers three security repairs (`SN-2026-012` through `SN-2026-014`) and adjacent dependency updates shipped in [Server 20260916](/blog/release/silo-20260916/) and [Console v2.4.1](/blog/release/console-2.4.1/). See the [security advisory ledger](/about/security-advisories/) for the complete index.
+This bulletin covers three security repairs (`SN-2026-012` through `SN-2026-014`) and adjacent dependency updates shipped in [Server 20260916](/release/silo-20260916/) and [Console v2.4.1](/release/console-2.4.1/). See the [security advisory ledger](/about/security-advisories/) for the complete index.
 
-| Finding                                      | Fixed source                                                                                                              | Delivery status                                                                                                                      |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `SN-2026-012`: presigned payload integrity   | Server `c4b5e1cb4`, [PR #177](https://github.com/pgsty/silo/pull/177)                                                     | Shipped in [Server 20260916](/blog/release/silo-20260916/) (affected in `RELEASE.2026-09-03T13-18-01Z` and earlier)                  |
-| `SN-2026-013`: durable IAM revocation        | Server [PR #191](https://github.com/pgsty/silo/pull/191) / [PR #192](https://github.com/pgsty/silo/pull/192)              | Shipped in [Server 20260916](/blog/release/silo-20260916/); requires coordinated multi-node/multi-site upgrade                       |
-| `SN-2026-014`: anonymous Console share proxy | [Console PR #56](https://github.com/pgsty/silo-console/pull/56); [Server PR #209](https://github.com/pgsty/silo/pull/209) | Shipped in standalone [Console v2.4.1](/blog/release/console-2.4.1/) and embedded in [Server 20260916](/blog/release/silo-20260916/) |
+| Finding                                      | Fixed source                                                                                                              | Delivery status                                                                                                            |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `SN-2026-012`: presigned payload integrity   | Server `c4b5e1cb4`, [PR #177](https://github.com/pgsty/silo/pull/177)                                                     | Shipped in [Server 20260916](/release/silo-20260916/) (affected in `RELEASE.2026-09-03T13-18-01Z` and earlier)             |
+| `SN-2026-013`: durable IAM revocation        | Server [PR #191](https://github.com/pgsty/silo/pull/191) / [PR #192](https://github.com/pgsty/silo/pull/192)              | Shipped in [Server 20260916](/release/silo-20260916/); requires coordinated multi-node/multi-site upgrade                  |
+| `SN-2026-014`: anonymous Console share proxy | [Console PR #56](https://github.com/pgsty/silo-console/pull/56); [Server PR #209](https://github.com/pgsty/silo/pull/209) | Shipped in standalone [Console v2.4.1](/release/console-2.4.1/) and embedded in [Server 20260916](/release/silo-20260916/) |
 {.wide .expand}
 
 ## Presigned payload integrity — SN-2026-012 {#sn-2026-012}
@@ -42,8 +42,8 @@ Jiri Pejchal reported that the unauthenticated Console shared-download proxy acc
 
 [Console PR #56](https://github.com/pgsty/silo-console/pull/56) restricts scheme, host, and port to the configured S3 origin, requires a valid `/{bucket}/{object}` path, rejects reserved system prefixes, path traversal segments, and operation-changing query parameters, disables upstream HTTP redirects, and forwards caller context cancellation while preserving the exact signed URL bytes for valid object downloads.
 
-Upgrade standalone Console deployments to [Console v2.4.1](/blog/release/console-2.4.1/), and upgrade SILO Server deployments (which embed Console via [Server PR #209](https://github.com/pgsty/silo/pull/209)) to [Server 20260916](/blog/release/silo-20260916/).
+Upgrade standalone Console deployments to [Console v2.4.1](/release/console-2.4.1/), and upgrade SILO Server deployments (which embed Console via [Server PR #209](https://github.com/pgsty/silo/pull/209)) to [Server 20260916](/release/silo-20260916/).
 
 ## Adjacent dependency hardening {#dependencies}
 
-[Server 20260916](/blog/release/silo-20260916/) upgrades `github.com/rabbitmq/amqp091-go` to `v1.14.0` to address [GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp) (fixed upstream in `v1.13.0`), where a malicious AMQP broker could trigger excessive memory allocation when an AMQP bucket notification target is configured. It also adopts [silo-pkg v3.14.1](/blog/release/pkg-3.14.1/) with the updated JWX JSON encoding dependency.
+[Server 20260916](/release/silo-20260916/) upgrades `github.com/rabbitmq/amqp091-go` to `v1.14.0` to address [GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp) (fixed upstream in `v1.13.0`), where a malicious AMQP broker could trigger excessive memory allocation when an AMQP bucket notification target is configured. It also adopts [silo-pkg v3.14.1](/release/pkg-3.14.1/) with the updated JWX JSON encoding dependency.

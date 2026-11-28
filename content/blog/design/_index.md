@@ -15,7 +15,7 @@ Design records document the engineering decisions behind PGSTY SILO: root causes
 
 ## November 11: Pre-Release Audit Repairs {#november-11-pre-release-audit}
 
-All server design records in this section shipped in [SILO Server 20261112](/blog/release/silo-20261112/) (`RELEASE.2026-11-12T00-00-00Z`).
+All server design records in this section shipped in [SILO Server 20261112](/release/silo-20261112/) (`RELEASE.2026-11-12T00-00-00Z`).
 
 - [Site Replication Healing: Lock-Free Snapshots to Prevent Re-Entrant RWMutex Deadlocks](/blog/design/site-replication-lock-snapshots/) ([#341](https://github.com/pgsty/silo/issues/341)): Why `healIAMSystem` re-acquiring `siteReplicationSys.Lock.RLock()` inside six active read-lock scopes permanently deadlocks IAM healing and configuration writes when a writer queues on Go's `sync.RWMutex`, and why snapshotting in-memory peer state before cluster storage I/O is necessary and sufficient.
 - [Pool Decommission: Monotonic Physical Progress, Quorum-Safe Offline Drives, and Corrupted Metadata Guards](/blog/design/pool-decommission-physical-progress/) ([#334](https://github.com/pgsty/silo/issues/334), [PR #335](https://github.com/pgsty/silo/pull/335), [#340](https://github.com/pgsty/silo/issues/340)): Why parent objects (`a/b`) occluding nested child keys (`a/b/c`) stall pool decommission and concurrent sibling-version deletes strand already-migrated versions on source drives, why `checkAfterDecomBucket` failed on offline drives within erasure read tolerance, and how quorum-tolerant physical checks preserve strict corruption guards on online drives.
@@ -28,16 +28,16 @@ All server design records in this section shipped in [SILO Server 20261112](/blo
 
 ## November 9: Console Languages {#november-9-console-languages}
 
-- [Adding Multilingual Support to SILO](/blog/design/console-languages/): Ten UI languages shipped in [Console 2.7.0](/blog/release/console-2.7.0/) and embedded in [SILO Server 20261109](/blog/release/silo-20261109/) ([Console 2.6.0](/blog/release/console-2.6.0/) shipped English and Chinese only; includes Portuguese from [#83](https://github.com/pgsty/silo-console/pull/83) and Turkish requested in [silo#277](https://github.com/pgsty/silo/issues/277)), maintenance tiers, English fallback, and Arabic RTL, with measured gzip and cache tradeoffs behind per-language assets and eager loading.
+- [Adding Multilingual Support to SILO](/blog/design/console-languages/): Ten UI languages shipped in [Console 2.7.0](/release/console-2.7.0/) and embedded in [SILO Server 20261109](/release/silo-20261109/) ([Console 2.6.0](/release/console-2.6.0/) shipped English and Chinese only; includes Portuguese from [#83](https://github.com/pgsty/silo-console/pull/83) and Turkish requested in [silo#277](https://github.com/pgsty/silo/issues/277)), maintenance tiers, English fallback, and Arabic RTL, with measured gzip and cache tradeoffs behind per-language assets and eager loading.
 
 ## November 6: Found in Release Acceptance {#november-6-found-in-release}
 
-- [A Partial View Must Not Report an Existing Object as Missing](/blog/design/partial-view-read-404/) (shipped in [SILO Server 20261109](/blog/release/silo-20261109/)): Why a node that reaches only some drives can answer 404 for an object that exists, and why "not found" must require an answer from every drive.
-- [A Failed Multipart Completion Can Strand the Upload](/blog/design/multipart-complete-retry/) (deferred past [SILO Server 20261109](/blog/release/silo-20261109/)): Why a completion that misses write quorum can strand the upload until stale-upload cleanup, and why the repair is deferred past `SILO Server 20261109` alongside storage RPC fencing.
+- [A Partial View Must Not Report an Existing Object as Missing](/blog/design/partial-view-read-404/) (shipped in [SILO Server 20261109](/release/silo-20261109/)): Why a node that reaches only some drives can answer 404 for an object that exists, and why "not found" must require an answer from every drive.
+- [A Failed Multipart Completion Can Strand the Upload](/blog/design/multipart-complete-retry/) (deferred past [SILO Server 20261109](/release/silo-20261109/)): Why a completion that misses write quorum can strand the upload until stale-upload cleanup, and why the repair is deferred past `SILO Server 20261109` alongside storage RPC fencing.
 
 ## November 4: Release-Blocking Lifecycle Fixes {#november-4-release-blocking-lifecycle}
 
-All server design records in this section shipped in [SILO Server 20261109](/blog/release/silo-20261109/); the Console quota validation repair shipped in standalone [Console 2.6.0](/blog/release/console-2.6.0/) and [Console 2.7.0](/blog/release/console-2.7.0/) and embedded in [SILO Server 20261109](/blog/release/silo-20261109/).
+All server design records in this section shipped in [SILO Server 20261109](/release/silo-20261109/); the Console quota validation repair shipped in standalone [Console 2.6.0](/release/console-2.6.0/) and [Console 2.7.0](/release/console-2.7.0/) and embedded in [SILO Server 20261109](/release/silo-20261109/).
 
 - [Multi-Pool Lifecycle Expiry: Decide on the Whole Object](/blog/design/multi-pool-lifecycle-expiry/) ([#278](https://github.com/pgsty/silo/issues/278), [#279](https://github.com/pgsty/silo/pull/279)): Why an expiry decided on the versions of one pool hides, deletes, or resurrects versions in another pool, and why a recheck on the merged version list under the object lock is the minimum complete repair.
 - [Restored Copies: Expire the Copy, Not the Object](/blog/design/restored-copy-expiry/) ([#281](https://github.com/pgsty/silo/issues/281), [#282](https://github.com/pgsty/silo/pull/282)): Why the expiry of a restored current version hid the object or stripped an older null version, and which storage and native-restore safeguards ship with the exact-version fix.
@@ -46,12 +46,12 @@ All server design records in this section shipped in [SILO Server 20261109](/blo
 - [Failed Writes and Phantom Empty Prefixes](/blog/design/failed-rename-empty-prefix/) ([#285](https://github.com/pgsty/silo/issues/285), [#286](https://github.com/pgsty/silo/pull/286)): Why a write whose staged data vanished before the remote rename leaves an empty object directory that later lists as an empty prefix, and why removing it on both rename failure paths is sufficient.
 - [Heal Dry Run Must Not Delete Data](/blog/design/heal-dry-run-safety/) (from [#280](https://github.com/pgsty/silo/pull/280)): Why a dry-run heal could delete the last metadata copies of a dangling object and run a real bucket heal on remote nodes, and why an early return plus forwarding the dry-run flag to peers closes both paths.
 - [Lifecycle Delete-All Must Stay on One Key](/blog/design/ilm-delete-all-exact-key/) (found during review of [#278](https://github.com/pgsty/silo/issues/278)): Why ExpiredObjectAllVersions, DelMarkerExpiration, and the default batch-expiration purge delete every other key under the expired key's name, and why purging the key's own versions by ID after a recheck is the minimum safe repair.
-- [Bucket Quota in the Console: List Display and Numeric Validation](/blog/design/console-quota-numeric-validation/) ([silo-console#72](https://github.com/pgsty/silo-console/issues/72), [silo-console#73](https://github.com/pgsty/silo-console/issues/73)): Why a Console-set quota showed as "-" in the bucket list, why bucket creation could turn a huge quota into one byte, where both came from, and what shipped in standalone [Console 2.6.0](/blog/release/console-2.6.0/) and [Console 2.7.0](/blog/release/console-2.7.0/) and embedded in [SILO Server 20261109](/blog/release/silo-20261109/).
+- [Bucket Quota in the Console: List Display and Numeric Validation](/blog/design/console-quota-numeric-validation/) ([silo-console#72](https://github.com/pgsty/silo-console/issues/72), [silo-console#73](https://github.com/pgsty/silo-console/issues/73)): Why a Console-set quota showed as "-" in the bucket list, why bucket creation could turn a huge quota into one byte, where both came from, and what shipped in standalone [Console 2.6.0](/release/console-2.6.0/) and [Console 2.7.0](/release/console-2.7.0/) and embedded in [SILO Server 20261109](/release/silo-20261109/).
 - [Lock Domains of Large Single-Pool Clusters](/blog/design/single-pool-lock-domains/): Why DELETE and CopyObject fail to exclude PUT on the same key in single-pool clusters of 18 or more hosts, which layouts that covers, and the routing change that closes it.
 
 ## November 1: Pool Migration Integrity Review {#november-1-pool-migration-integrity}
 
-All pool-migration and tier-cleanup fixes in this section shipped in [SILO Server 20261109](/blog/release/silo-20261109/).
+All pool-migration and tier-cleanup fixes in this section shipped in [SILO Server 20261109](/release/silo-20261109/).
 
 - [Pool Migration Integrity Review: #261, #263, and #265](/blog/design/pool-migration-integrity-review/): A maintainer review of three reports and their fixes, including the contributor merge of #266 and maintainer follow-up #276.
 - [Mixed EC Layouts and Migration Listing](/blog/design/mixed-ec-migration-listing/) ([#261](https://github.com/pgsty/silo/issues/261), [#262](https://github.com/pgsty/silo/pull/262)): Why a readable object can disappear from decommission and rebalance listings after an interrupted degraded overwrite, and why the narrow recount in #262 is sufficient.
@@ -79,7 +79,7 @@ All pool-migration and tier-cleanup fixes in this section shipped in [SILO Serve
 
 ## Server 20261018 Key Design Notes {#server-20261018-key-design-notes}
 
-For the [Server 20261018 release](/blog/release/silo-20261018/), see these core architecture notes:
+For the [Server 20261018 release](/release/silo-20261018/), see these core architecture notes:
 
 - [Object Lock Governance & Overwrite Protection](/blog/design/governance-retention-bypass-repair/) (`SN-2026-015`, `SN-2026-016`)
 - [IAM Admin Credential Authorization](/blog/design/iam-admin-authorization/) (`SN-2026-017`)

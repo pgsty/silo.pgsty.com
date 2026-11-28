@@ -15,7 +15,7 @@ upstream_modified: true
 
 MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_model/) 发布指标。你可以使用任意抓取工具从 SILO 拉取指标数据，以执行进一步分析和配置告警。
 
-[SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）、[Console 2.7.0](/zh/blog/release/console-2.7.0/) 与 [mcli 20261109](/zh/blog/release/mcli-20261109/) 将 Metrics V3（`/minio/metrics/v3`）作为推荐抓取契约。在 SILO 20261109 中，复制工作协程指标在复制工作池不存在时不会触发 panic，并继续保留历史均值和峰值计数（[`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)）；实时批处理作业指标保留暂停原因以及跳过或拒绝计数（[#325](https://github.com/pgsty/silo/issues/325)）。
+[SILO 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）、[Console 2.7.0](/zh/release/console-2.7.0/) 与 [mcli 20261109](/zh/release/mcli-20261109/) 将 Metrics V3（`/minio/metrics/v3`）作为推荐抓取契约。在 SILO 20261109 中，复制工作协程指标在复制工作池不存在时不会触发 panic，并继续保留历史均值和峰值计数（[`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)）；实时批处理作业指标保留暂停原因以及跳过或拒绝计数（[#325](https://github.com/pgsty/silo/issues/325)）。
 
 > [!NOTE]
 > **Metrics version 2**
@@ -41,7 +41,7 @@ http://HOSTNAME:PORT/minio/metrics/v3/audit
 
 将 `HOSTNAME:PORT` 替换为 SILO 部署的 <abbr title="Fully Qualified Domain Name">FQDN</abbr> 与端口。对于使用负载均衡器管理节点间连接的部署，请指定负载均衡器地址。
 
-默认情况下，SILO 要求在抓取指标端点时进行身份验证。请使用 [`mcli admin prometheus generate --api-version v3`](/zh/reference/minio-mc-admin/mc-admin-prometheus-generate/#command-mc.admin.prometheus.generate)（[mcli 20261109](/zh/blog/release/mcli-20261109/)）生成所需的 bearer token。你也可以将 [`MINIO_PROMETHEUS_AUTH_TYPE`](/zh/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_PROMETHEUS_AUTH_TYPE) 设置为 `public` 以禁用指标端点认证。
+默认情况下，SILO 要求在抓取指标端点时进行身份验证。请使用 [`mcli admin prometheus generate --api-version v3`](/zh/reference/minio-mc-admin/mc-admin-prometheus-generate/#command-mc.admin.prometheus.generate)（[mcli 20261109](/zh/release/mcli-20261109/)）生成所需的 bearer token。你也可以将 [`MINIO_PROMETHEUS_AUTH_TYPE`](/zh/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_PROMETHEUS_AUTH_TYPE) 设置为 `public` 以禁用指标端点认证。
 
 相对于基础 URL，SILO 提供以下抓取端点：
 

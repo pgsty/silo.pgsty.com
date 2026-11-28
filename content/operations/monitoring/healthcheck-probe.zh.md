@@ -114,7 +114,7 @@ curl -I https://minio.example.net:9000/minio/health/cluster?maintenance=true
 
 ## 重启后的就绪窗口 {#startup-readiness-window}
 
-[SILO 20261109](/zh/blog/release/silo-20261109/) 保留这一机制：[集群健康检查实现](https://github.com/pgsty/silo/blob/d998292387ccf1d2907749e0fb1575ef5fb93fda/cmd/erasure-server-pool.go#L3162)根据各对端节点上报的磁盘状态评估仲裁。恢复业务流量前，请先检查两个集群端点，再验证真实 S3 读写。完整的探针规格见[健康检查探针语义](/zh/compatibility/feature/healthcheck/)。
+[SILO 20261109](/zh/release/silo-20261109/) 保留这一机制：[集群健康检查实现](https://github.com/pgsty/silo/blob/d998292387ccf1d2907749e0fb1575ef5fb93fda/cmd/erasure-server-pool.go#L3162)根据各对端节点上报的磁盘状态评估仲裁。恢复业务流量前，请先检查两个集群端点，再验证真实 S3 读写。完整的探针规格见[健康检查探针语义](/zh/compatibility/feature/healthcheck/)。
 
 上述 HTTP 健康端点均不能证明收到请求的节点在重启后已能立即服务对象读写。每个节点通过后台监控循环连接对端节点的远端纠删码磁盘。启动时未能连上的远端磁盘会在本节点保持未挂载状态，直到后续轮次重连成功。监控循环在每轮结束后等待 15 秒，因此 15 秒只是两次重连尝试之间的最短间隔，而非恢复耗时上限。
 

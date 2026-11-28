@@ -118,4 +118,4 @@ SILO 是 PGSTY mcli 正式支持的服务器；与上游 MinIO 和其他 S3 服�
 
 要启动作业，必须在该部署上具有 [`admin:StartBatchJob`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-StartBatchJob) 权限。
 
-[SILO 20261109](/zh/blog/release/silo-20261109/) 还会在作业列举或修改对象时强制校验已认证提交者的本地数据权限。作业定义中的凭据仅另行授权远端操作，详见[授权与重试](/zh/administration/batch-framework/#silo-lifecycle)。
+[SILO 20261109](/zh/release/silo-20261109/) 还会在作业列举或修改对象时强制校验已认证提交者的本地数据权限。作业定义中的凭据仅另行授权远端操作，详见[授权与重试](/zh/administration/batch-framework/#silo-lifecycle)。

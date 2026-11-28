@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/replica-metadata-normalization/"
 ---
 
-Shipped in [SILO Server 20260916](/blog/release/silo-20260916/) (`40220bd836cbd066ca424fa4dc5dbb90057fb55a`), [PR #194](https://github.com/pgsty/silo/pull/194) (commit [`4fcdf37ce`](https://github.com/pgsty/silo/commit/4fcdf37ce), merged as [`9f3037e941`](https://github.com/pgsty/silo/commit/9f3037e941a49ab4cd8a0eed7c0f01083fbe4bbe), retaining Mikhail Khadarenka's original implementation from [PR #187](https://github.com/pgsty/silo/pull/187)) fixes a regression where a trusted replication receiver re-extracted raw request headers through the permissive metadata extractor, re-injecting transport-only `aws-chunked` `Content-Encoding` tokens and GHSA-redacted user metadata into stored replica objects.
+Shipped in [SILO Server 20260916](/release/silo-20260916/) (`40220bd836cbd066ca424fa4dc5dbb90057fb55a`), [PR #194](https://github.com/pgsty/silo/pull/194) (commit [`4fcdf37ce`](https://github.com/pgsty/silo/commit/4fcdf37ce), merged as [`9f3037e941`](https://github.com/pgsty/silo/commit/9f3037e941a49ab4cd8a0eed7c0f01083fbe4bbe), retaining Mikhail Khadarenka's original implementation from [PR #187](https://github.com/pgsty/silo/pull/187)) fixes a regression where a trusted replication receiver re-extracted raw request headers through the permissive metadata extractor, re-injecting transport-only `aws-chunked` `Content-Encoding` tokens and GHSA-redacted user metadata into stored replica objects.
 
 ## What Went Wrong {#problem}
 
@@ -59,7 +59,7 @@ Note that `aws-chunked, gzip` (with a space after the comma) continues to store 
 
 ## Why Upgrading Does Not Rewrite Existing Polluted Objects {#existing}
 
-Upgrading to [SILO Server 20260916](/blog/release/silo-20260916/) stops new metadata pollution on incoming writes, but does not scan or rewrite existing objects on disk. Two operational consequences follow:
+Upgrading to [SILO Server 20260916](/release/silo-20260916/) stops new metadata pollution on incoming writes, but does not scan or rewrite existing objects on disk. Two operational consequences follow:
 
 1. **Authoritative source vs. normalized replica divergence:** If an authoritative source object still carries polluted metadata (for example, from an earlier bidirectional replication cycle) while its replica has been normalized, resync or healing comparisons may detect a metadata mismatch and repeatedly schedule metadata replication. Always remediate the authoritative source version first so replicas converge from the clean source.
 2. **Limits of ordinary S3 self-`COPY`:** Issuing a standard S3 `CopyObject` to self is not a universal in-place repair tool for versioned buckets because it creates a new object version (or shifts modification timestamps) rather than rewriting a specific historical `versionId`'s metadata in place.

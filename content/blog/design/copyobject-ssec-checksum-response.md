@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/copyobject-ssec-checksum-response/"
 ---
 
-This note documents the `CopyObject` SSE-C checksum response repair committed as `e73436c99` and shipped in [Server 20260903](/blog/release/silo-20260903/). It covers the successful `CopyObject` XML and HTTP response after the destination object has committed; stored object bytes, checksum metadata, encryption formats, source decryption, federation, and replication remain unchanged.
+This note documents the `CopyObject` SSE-C checksum response repair committed as `e73436c99` and shipped in [Server 20260903](/release/silo-20260903/). It covers the successful `CopyObject` XML and HTTP response after the destination object has committed; stored object bytes, checksum metadata, encryption formats, source decryption, federation, and replication remain unchanged.
 
 ## Overview {#tldr}
 

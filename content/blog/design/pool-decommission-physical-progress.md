@@ -14,7 +14,7 @@ url: "/blog/design/pool-decommission-physical-progress/"
 
 This record covers three upstream-inherited pool migration and retirement defects across `cmd/erasure-server-pool-decom.go`, `cmd/erasure-server-pool-rebalance.go`, and `cmd/erasure-server-pool-migration.go` ([#334](https://github.com/pgsty/silo/issues/334), [PR #335](https://github.com/pgsty/silo/pull/335), [#340](https://github.com/pgsty/silo/issues/340)), continuing the [November 1 Pool Migration Integrity Review](/blog/design/pool-migration-integrity-review/).
 
-**Status:** Shipped in **[SILO 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`; commits [`ce5d19107`](https://github.com/pgsty/silo/commit/ce5d19107707c44973c75f7999fbf2fa8606d142), [`5dc4bd6a1`](https://github.com/pgsty/silo/commit/5dc4bd6a1d286608783529ba871e5eadd76a03c9), [`322cd8d2c`](https://github.com/pgsty/silo/commit/322cd8d2c1ac0574aae9534473e58620ea3666e2), and [`8587e061b`](https://github.com/pgsty/silo/commit/8587e061bb7a407e6c98f7020f6475a96500e700)).
+**Status:** Shipped in **[SILO 20261112](/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`; commits [`ce5d19107`](https://github.com/pgsty/silo/commit/ce5d19107707c44973c75f7999fbf2fa8606d142), [`5dc4bd6a1`](https://github.com/pgsty/silo/commit/5dc4bd6a1d286608783529ba871e5eadd76a03c9), [`322cd8d2c`](https://github.com/pgsty/silo/commit/322cd8d2c1ac0574aae9534473e58620ea3666e2), and [`8587e061b`](https://github.com/pgsty/silo/commit/8587e061bb7a407e6c98f7020f6475a96500e700)).
 
 ## Short Answer {#tldr}
 

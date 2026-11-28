@@ -169,7 +169,7 @@ mc od if=file.zip of=myminio/mybucket/file.zip parts=5
 
 ### 分片下载与参数校验（`mcli 20261109`） {#multipart-validation}
 
-在 [`mcli 20261109`](/zh/blog/release/mcli-20261109/) 中：
+在 [`mcli 20261109`](/zh/release/mcli-20261109/) 中：
 
 - 分片 `mc od` 下载按顺序读取所请求的分片序列，不再重复最后一个分片，并在完成或失败时关闭已打开的分片读取器。
 - `mc od` 在修改目标前校验操作数、零分片大小、负值大小与算术溢出，并正确处理空复制而不输出无效速率。

@@ -6,12 +6,12 @@ summary: "梳理对象锁保留期鉴权短路缺陷（SN-2026-015）与版本�
 tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 ---
 
-本文档完整记录针对外部报告与内部关联排查发现的两处对象锁（Object Lock / WORM）安全缺陷——**`SN-2026-015`（`PutObjectRetention` 绕过请求头越权与条件策略失灵）**与 **`SN-2026-016`（版本寻址写入覆写绕过及写路径锁缺口）**——的事实核验、Git 历史溯源、修复设计、关键路径影响评估与候选方案的权衡取舍。完整修复（`#234`、`#235`、`#241`）已随 [Server 20261018](/zh/blog/release/silo-20261018/#security) 正式发布。
+本文档完整记录针对外部报告与内部关联排查发现的两处对象锁（Object Lock / WORM）安全缺陷——**`SN-2026-015`（`PutObjectRetention` 绕过请求头越权与条件策略失灵）**与 **`SN-2026-016`（版本寻址写入覆写绕过及写路径锁缺口）**——的事实核验、Git 历史溯源、修复设计、关键路径影响评估与候选方案的权衡取舍。完整修复（`#234`、`#235`、`#241`）已随 [Server 20261018](/zh/release/silo-20261018/#security) 正式发布。
 
 关联公开安全公告：
 - [SN-2026-015 / SN-2026-016：对象锁保留期授权绕过与带版本写入覆写漏洞](/zh/blog/security/20260926-governance-retention-bypass/)
 
-配套的删除路径与归档恢复 Object Lock 加固已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 发布：复制删除保留目标端保留期与法务锁定（[`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)）、目录对象 `null` 版本批量删除锁检查（[`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)）、变更锁下跨池复检 S3 `DeleteObjects` 物理版本清除（[`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)），以及[两阶段原生恢复](/zh/blog/design/native-restore-two-phase/)。
+配套的删除路径与归档恢复 Object Lock 加固已随 [SILO Server 20261109](/zh/release/silo-20261109/) 发布：复制删除保留目标端保留期与法务锁定（[`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)）、目录对象 `null` 版本批量删除锁检查（[`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)）、变更锁下跨池复检 S3 `DeleteObjects` 物理版本清除（[`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)），以及[两阶段原生恢复](/zh/blog/design/native-restore-two-phase/)。
 
 ---
 
@@ -396,7 +396,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 
 | 操作路径                                                                     | 修改后的执行路径与开销说明                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`GetObject` / `HeadObject` / `ListObjects` / `DeleteObject`**              | **Server 20261018 未触及**，读路径与删除路径不经过 `#234`–`#241` 的任何修改点（配套的删除路径 Object Lock 加固已在 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 中独立发布）                                                                                                                                                    |
+| **`GetObject` / `HeadObject` / `ListObjects` / `DeleteObject`**              | **Server 20261018 未触及**，读路径与删除路径不经过 `#234`–`#241` 的任何修改点（配套的删除路径 Object Lock 加固已在 [SILO Server 20261109](/zh/release/silo-20261109/) 中独立发布）                                                                                                                                                         |
 | **普通桶（未开启对象锁）的 `PutObject` / `CopyObject`**                      | `putOpts` 增加一次内存空串判断 `vid != ""`；写锁内 `checkObjectLockedForOverwrite` 读取进程内 `globalBucketObjectLockSys.Get(bucket)` 缓存发现 `!retentionCfg.LockEnabled` 后立即返回，**无额外磁盘 I/O 或跨池请求**                                                                                                                       |
 | **对象锁桶中的常规对象 `PutObject` / `CopyObject`（非 `/` 结尾）**           | 对象锁桶强制开启版本控制，常规单次对象写入生成的 `fi.VersionID` 为非空 UUID，不满足 `fi.VersionID == "" \|\| fi.VersionID == nullVersionID`，**既不在预检也不在写锁内触发额外的 `getObjectInfo` 磁盘读取**                                                                                                                                 |
 | **对象锁桶中的目录对象写入（`PUT dir/`）或暂停版本控制下的 `null` 版本覆写** | 在预检与对象写锁内读取 `null` 版本元数据进行锁校验，并在读取失败时立即拒绝写入，防止慢速请求体竞态与读仲裁故障下的锁覆写                                                                                                                                                                                                                   |
@@ -472,7 +472,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
    - **旧行为**：目录对象强制共用 `null` 版本且跳过了存量锁检查，重复 `PUT dir/` 会静默覆盖并重置其保留期。
    - **新行为**：当对象锁桶设置了默认保留期、或有人对 `dir/`（`versionId=null`）设置了保留期/法务保留时，在该锁到期前再次写入 `dir/` 会返回 `400 InvalidRequest`（`ObjectLocked`）。
 7. **独立跟踪的相邻议题（未并入 Server 20261018）**
-   - `PostRestoreObjectHandler`（归档对象恢复）先读快照再调用 `CopyObject` 回写完整元数据映射的并发竞态已作为独立议题在 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 中通过[两阶段原生恢复](/zh/blog/design/native-restore-two-phase/)与[已恢复副本到期](/zh/blog/design/restored-copy-expiry/)完成修复。
+   - `PostRestoreObjectHandler`（归档对象恢复）先读快照再调用 `CopyObject` 回写完整元数据映射的并发竞态已作为独立议题在 [SILO Server 20261109](/zh/release/silo-20261109/) 中通过[两阶段原生恢复](/zh/blog/design/native-restore-two-phase/)与[已恢复副本到期](/zh/blog/design/restored-copy-expiry/)完成修复。
 
 ---
 

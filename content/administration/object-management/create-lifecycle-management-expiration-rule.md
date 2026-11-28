@@ -101,7 +101,7 @@ mc ilm rule add ALIAS/PATH \
 
 ## Expiration Behavior {#expiration-behavior}
 
-Starting in [SILO 20261109](/blog/release/silo-20261109/), lifecycle expiration enforces the following behavior (see [Object Lifecycle Management](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) for details):
+Starting in [SILO 20261109](/release/silo-20261109/), lifecycle expiration enforces the following behavior (see [Object Lifecycle Management](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) for details):
 
 - **Multi-pool quorum recheck:** Expiry evaluates under the object lock across all server pools and requires an authoritative quorum before removing versions ([#278](https://github.com/pgsty/silo/issues/278)). Upgrade all serving nodes so every pool applies the same check.
 - **Exact-key delete-all and marker-only rules:** `ExpiredObjectAllVersions` and `DelMarkerExpiration` act only on the exact expired key rather than child keys below its prefix, and refuse keys with tiered or Object Lock protected versions ([#297](https://github.com/pgsty/silo/issues/297)). Rules whose sole action is `DelMarkerExpiration` execute as configured ([#268](https://github.com/pgsty/silo/issues/268)).

@@ -14,7 +14,7 @@ url: "/zh/blog/design/single-pool-lock-domains/"
 
 本文覆盖在审查恢复副本修复（[恢复副本：过期的是副本，不是对象](/zh/blog/design/restored-copy-expiry/)）时发现的锁域缺陷，评估基线为 main 上的 [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc)。对应 [#298](https://github.com/pgsty/silo/issues/298)。
 
-**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+**状态：** 已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短结论 {#tldr}
 

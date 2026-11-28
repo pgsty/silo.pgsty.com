@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/config-env-file/"
 ---
 
-This note defines the startup contract for `MINIO_CONFIG_ENV_FILE` and documents the compatibility repair committed as `2aea7fe9c` and shipped in [Server 20260903](/blog/release/silo-20260903/). The file is a SILO input format; supporting an optional `export` prefix for operator convenience does not make it a POSIX shell script.
+This note defines the startup contract for `MINIO_CONFIG_ENV_FILE` and documents the compatibility repair committed as `2aea7fe9c` and shipped in [Server 20260903](/release/silo-20260903/). The file is a SILO input format; supporting an optional `export` prefix for operator convenience does not make it a POSIX shell script.
 
 ## Overview {#tldr}
 
@@ -133,7 +133,7 @@ Four visible behaviors are intentional:
 - Malformed lines stop startup with a redacted, line-numbered diagnostic.
 - Valid punctuation-bearing target names are no longer rejected merely because POSIX `sh` cannot assign them with literal `NAME=value` syntax.
 
-The original [#65](https://github.com/pgsty/silo/issues/65) investigation also uncovered a subtle warm-restart trap: the legacy parser split on `=` without trimming key whitespace, storing `KEY = new` as the trailing-space key `KEY `. A `systemd` cold start often masked this bug because `systemd` parses `EnvironmentFile=` itself and strips spaces around `=`. However, when an operator triggered an in-place warm restart (`mcli admin service restart`), the re-executed SILO process inherited `KEY=old` from the parent environment, and the newly parsed `KEY ` entry failed to overwrite `KEY`. The server could therefore restart and continue running with stale root credentials, KMS settings, or identity provider configuration. With key trimming restored in [Server 20260903](/blog/release/silo-20260903/), `KEY = new` overwrites `KEY` on both cold start and warm restart; operators who had space-padded assignments in `MINIO_CONFIG_ENV_FILE` should verify that those values match their intended active configuration before upgrading.
+The original [#65](https://github.com/pgsty/silo/issues/65) investigation also uncovered a subtle warm-restart trap: the legacy parser split on `=` without trimming key whitespace, storing `KEY = new` as the trailing-space key `KEY `. A `systemd` cold start often masked this bug because `systemd` parses `EnvironmentFile=` itself and strips spaces around `=`. However, when an operator triggered an in-place warm restart (`mcli admin service restart`), the re-executed SILO process inherited `KEY=old` from the parent environment, and the newly parsed `KEY ` entry failed to overwrite `KEY`. The server could therefore restart and continue running with stale root credentials, KMS settings, or identity provider configuration. With key trimming restored in [Server 20260903](/release/silo-20260903/), `KEY = new` overwrites `KEY` on both cold start and warm restart; operators who had space-padded assignments in `MINIO_CONFIG_ENV_FILE` should verify that those values match their intended active configuration before upgrading.
 
 ## Conclusion {#conclusion}
 

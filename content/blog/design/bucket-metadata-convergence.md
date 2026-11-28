@@ -12,11 +12,11 @@ draft: false
 url: "/blog/design/bucket-metadata-convergence/"
 ---
 
-[#77](https://github.com/pgsty/silo/issues/77) is a site-replication correctness defect repaired in [Server 20260916](/blog/release/silo-20260916/) ([PR #180](https://github.com/pgsty/silo/pull/180), commit [`48ec10312`](https://github.com/pgsty/silo/commit/48ec10312f98b494f75989615a5d24eae3207e44)). Before this repair, a receiving site overwrote the peer's source timestamp with local arrival time (`UTCNow`) and could then reject a genuinely newer deletion. In addition, several configuration types stopped exporting their timestamp once deleted, preventing heal from recovering a deletion missed during an outage. Adding a `DELETE` branch alone cannot solve both problems; convergence requires preserved source times, durable deletion tombstones, canonical comparison keys, and whole-record locking.
+[#77](https://github.com/pgsty/silo/issues/77) is a site-replication correctness defect repaired in [Server 20260916](/release/silo-20260916/) ([PR #180](https://github.com/pgsty/silo/pull/180), commit [`48ec10312`](https://github.com/pgsty/silo/commit/48ec10312f98b494f75989615a5d24eae3207e44)). Before this repair, a receiving site overwrote the peer's source timestamp with local arrival time (`UTCNow`) and could then reject a genuinely newer deletion. In addition, several configuration types stopped exporting their timestamp once deleted, preventing heal from recovering a deletion missed during an outage. Adding a `DELETE` branch alone cannot solve both problems; convergence requires preserved source times, durable deletion tombstones, canonical comparison keys, and whole-record locking.
 
 ## Existing Work and Scope {#scope}
 
-Earlier [release notes](/blog/release/silo-20260903/), the [20260903 hardening record](/blog/security/20260903-server-hardening/), and the [Server compatibility page](/compatibility/server/#limits) noted the [#77](https://github.com/pgsty/silo/issues/77) deletion limitation. This page records the state model, design trade-offs, and verification evidence (archived in [`docs/investigations/issue-77.md`](https://github.com/pgsty/silo/blob/114dc10529f242e1e22bafd0a08b1a096d69d4bc/docs/investigations/issue-77.md)).
+Earlier [release notes](/release/silo-20260903/), the [20260903 hardening record](/blog/security/20260903-server-hardening/), and the [Server compatibility page](/compatibility/server/#limits) noted the [#77](https://github.com/pgsty/silo/issues/77) deletion limitation. This page records the state model, design trade-offs, and verification evidence (archived in [`docs/investigations/issue-77.md`](https://github.com/pgsty/silo/blob/114dc10529f242e1e22bafd0a08b1a096d69d4bc/docs/investigations/issue-77.md)).
 
 | Prior work                                                                                     | What it repaired                                                                 | Remaining gap addressed by #77                                                        |
 | :--------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
@@ -135,7 +135,7 @@ Unupgraded peers cannot safely consume all newly exposed deletion timestamps. Fo
 
 ### Coordinated Upgrade and Rollback {#coordinated-upgrade-and-rollback}
 
-1. Upgrade every node at every participating site to [Server 20260916](/blog/release/silo-20260916/) or later, verify consistent settings within each site, and drain in-flight requests.
+1. Upgrade every node at every participating site to [Server 20260916](/release/silo-20260916/) or later, verify consistent settings within each site, and drain in-flight requests.
 2. Set `MINIO_SITE_REPLICATION_METADATA_TOMBSTONES=on` across all sites and restart.
 3. Before rolling back to an earlier release, set `MINIO_SITE_REPLICATION_METADATA_TOMBSTONES=off` on every node, restart, and only then downgrade the binary.
 

@@ -14,7 +14,7 @@ url: "/zh/blog/design/multi-pool-copy-placement/"
 
 本文记录 `cmd/erasure-server-pool.go` 与 `cmd/object-handlers.go` 中一组继承自上游 MinIO 的多存储池 `CopyObject` 缺陷及其修复设计，对应 [#343](https://github.com/pgsty/silo/issues/343)。
 
-**状态：** 已随 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`；提交 [`a8824b341`](https://github.com/pgsty/silo/commit/a8824b341fce071cdd48356caaed37d76580c39e)、[`e36ea51d9`](https://github.com/pgsty/silo/commit/e36ea51d9c3a28df7d60f1d105226b1d0049342e) 与 [`cd3e46a2b`](https://github.com/pgsty/silo/commit/cd3e46a2b7dee00b64c323d35ebdd32aab0fe644)）发布。`SILO Server 20261109` 及更早版本，以及自 `2020-08-03` 以来的上游原版 MinIO 均受影响。
+**状态：** 已随 **[SILO 20261112](/zh/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`；提交 [`a8824b341`](https://github.com/pgsty/silo/commit/a8824b341fce071cdd48356caaed37d76580c39e)、[`e36ea51d9`](https://github.com/pgsty/silo/commit/e36ea51d9c3a28df7d60f1d105226b1d0049342e) 与 [`cd3e46a2b`](https://github.com/pgsty/silo/commit/cd3e46a2b7dee00b64c323d35ebdd32aab0fe644)）发布。`SILO Server 20261109` 及更早版本，以及自 `2020-08-03` 以来的上游原版 MinIO 均受影响。
 
 ## 简短回答 {#tldr}
 

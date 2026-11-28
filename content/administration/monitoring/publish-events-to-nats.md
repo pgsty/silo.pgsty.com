@@ -28,7 +28,7 @@ The following procedure adds a new NATS service endpoint for supporting [bucket 
 
 This procedure uses the [`mc`](/reference/minio-mc/#command-mc) command line tool for certain actions. See the `mc` [Quickstart](/reference/minio-mc/#mc-install) for installation instructions.
 
-[SILO 20261109](/blog/release/silo-20261109/) updates `github.com/nats-io/jwt/v2` to `v2.8.3` and `github.com/nats-io/nkeys` to `v0.4.17` (validated against `nats-server v2.15.2`), rejecting identity-point and small-order Ed25519 public keys in NATS credentials.
+[SILO 20261109](/release/silo-20261109/) updates `github.com/nats-io/jwt/v2` to `v2.8.3` and `github.com/nats-io/nkeys` to `v0.4.17` (validated against `nats-server v2.15.2`), rejecting identity-point and small-order Ed25519 public keys in NATS credentials.
 
 ### 1) Add the NATS Endpoint to MinIO {#add-the-nats-endpoint-to-minio}
 

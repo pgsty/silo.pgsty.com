@@ -11,13 +11,13 @@ draft: false
 url: "/zh/blog/design/multi-pool-object-consistency/"
 ---
 
-随 [SILO Server 20260916](/zh/blog/release/silo-20260916/) 发布的 [PR #178](https://github.com/pgsty/silo/pull/178) 修复了多存储池修改顺序问题，[PR #207](https://github.com/pgsty/silo/pull/207) 将当前逻辑对象选择扩展至条件 `PUT`（关闭 [#133](https://github.com/pgsty/silo/issues/133) 与 [#144](https://github.com/pgsty/silo/issues/144)），提交 [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) 则修复了跨池再平衡（rebalance）与退役（decommission）迁移丢失对象标签的缺陷。随后的 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 进一步合入 [`60c7179dd`](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)（纳入 [PR #248](https://github.com/pgsty/silo/pull/248)）与 [`1748f62c7`](https://github.com/pgsty/silo/commit/1748f62c7ec4f2e9afcdce276193ad401719b951)，修复了跨池迁移期间旧数据覆盖新副本以及删除标记（Delete Marker）丢失的问题。
+随 [SILO Server 20260916](/zh/release/silo-20260916/) 发布的 [PR #178](https://github.com/pgsty/silo/pull/178) 修复了多存储池修改顺序问题，[PR #207](https://github.com/pgsty/silo/pull/207) 将当前逻辑对象选择扩展至条件 `PUT`（关闭 [#133](https://github.com/pgsty/silo/issues/133) 与 [#144](https://github.com/pgsty/silo/issues/144)），提交 [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) 则修复了跨池再平衡（rebalance）与退役（decommission）迁移丢失对象标签的缺陷。随后的 [SILO Server 20261018](/zh/release/silo-20261018/) 进一步合入 [`60c7179dd`](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)（纳入 [PR #248](https://github.com/pgsty/silo/pull/248)）与 [`1748f62c7`](https://github.com/pgsty/silo/commit/1748f62c7ec4f2e9afcdce276193ad401719b951)，修复了跨池迁移期间旧数据覆盖新副本以及删除标记（Delete Marker）丢失的问题。
 
 <span id="maintenance-20261025"></span>
 
 ## 10 月 26 日：存储超时与回滚边界 {#maintenance-20261026}
 
-[Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 完整保留了下文的多池删除保护，并转发覆盖写回滚所需的存储 RPC 删除选项（旧数据目录）。在最终发版前，提交 [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038) 撤回了 10 月维护草稿中的已接纳 I/O 排空等待、逐对象变更锁（mutation guard）、回滚所有权校验与备份互斥方案，维持既有的磁盘/RPC 超时、请求取消、对象锁、读仲裁与自愈行为。
+[Server 20261026](/zh/release/silo-20261026/#server-20261026) 完整保留了下文的多池删除保护，并转发覆盖写回滚所需的存储 RPC 删除选项（旧数据目录）。在最终发版前，提交 [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038) 撤回了 10 月维护草稿中的已接纳 I/O 排空等待、逐对象变更锁（mutation guard）、回滚所有权校验与备份互斥方案，维持既有的磁盘/RPC 超时、请求取消、对象锁、读仲裁与自愈行为。
 
 需要注意：**客户端收到超时响应并不代表底层磁盘或 RPC I/O 已经停止，也不代表写入未提交。** 在部分磁盘故障、锁租约失效或网络分区后，仍可能出现迟到提交、延迟回滚，或在部分元数据更新后短暂读到旧值与旧标签；对象锁本身不提供跨节点分布式 fencing，升级也不会自动修复存量不一致对象（更严格的诊断检查仍保留在非默认的 `consistency_strict` 构建标签下）。
 
@@ -27,7 +27,7 @@ url: "/zh/blog/design/multi-pool-object-consistency/"
 
 ## 10 月 18 日更新：在池迁移期间保护数据与删除标记 {#migration-20261018}
 
-[SILO Server 20261018](/zh/blog/release/silo-20261018/) 新增的 [`60c7179dd`](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)（[PR #248](https://github.com/pgsty/silo/pull/248)）与 [`1748f62c7`](https://github.com/pgsty/silo/commit/1748f62c7ec4f2e9afcdce276193ad401719b951)，补齐了九月修复尚未覆盖的两类 rebalance / decommission 迁移竞态：旧载荷覆盖新副本以及删除标记丢失。
+[SILO Server 20261018](/zh/release/silo-20261018/) 新增的 [`60c7179dd`](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)（[PR #248](https://github.com/pgsty/silo/pull/248)）与 [`1748f62c7`](https://github.com/pgsty/silo/commit/1748f62c7ec4f2e9afcdce276193ad401719b951)，补齐了九月修复尚未覆盖的两类 rebalance / decommission 迁移竞态：旧载荷覆盖新副本以及删除标记丢失。
 
 在向目标池提交迁移版本前，池协调层会在共享命名空间对象锁内检查所有池中的当前副本，拒绝源快照已消失、已被替换或其他存储池中已存在更新副本的搬迁操作。若修改时间戳完全相同，则沿用读取路径的池索引决胜规则。验证通过的元数据快照会直接复用于后续字段协调，避免重复读取；多段上传（Multipart）完成阶段会在复制完所有分片后再次复核，分层对象（Tiered Object）搬迁同样启用该保护。
 
@@ -35,7 +35,7 @@ url: "/zh/blog/design/multi-pool-object-consistency/"
 
 **运行时成本与边界：** 迁移流程增加了逐池元数据读取与逐版本清理。对于 $P$ 个存储池和 $V$ 个源版本，清理阶段至少执行 $\mathcal{O}(P \times V)$ 次元数据操作，且解码与重写版本元数据的开销随版本历史长度增长。普通已解析的读取请求不会进入该迁移检查路径；本修复未引入新的磁盘格式、公开 S3 参数或外部依赖。历史版本迁移中已经丢失的数据、标签或删除标记无法自动重建，跨站点延迟到达的删除标记问题（[#217](https://github.com/pgsty/silo/issues/217)）仍属独立议题。
 
-版本验收测试实际运行了 2 池与 3 池的 rebalance 和 decommission，完整覆盖普通对象、多段对象、`null`/UUID 版本与删除标记、并发写删以及双池迁移中断恢复四组场景（详见 [20261018 发布验证记录](/zh/blog/release/silo-20261018/#delivery)）。在生产环境正式退役源池前，应通过公开 S3 API 核对已确认的版本 ID、字节数、ETag、标签及删除状态。
+版本验收测试实际运行了 2 池与 3 池的 rebalance 和 decommission，完整覆盖普通对象、多段对象、`null`/UUID 版本与删除标记、并发写删以及双池迁移中断恢复四组场景（详见 [20261018 发布验证记录](/zh/release/silo-20261018/#delivery)）。在生产环境正式退役源池前，应通过公开 S3 API 核对已确认的版本 ID、字节数、ETag、标签及删除状态。
 
 ## 为什么同一个键会存在多份物理副本 {#problem}
 
@@ -61,7 +61,7 @@ url: "/zh/blog/design/multi-pool-object-consistency/"
 
 对于条件 `DELETE`，协调层在执行跨池清理前针对选定的逻辑对象统一校验一次前置条件，并在调用下层各池删除接口前清除条件回调；若请求指定了显式 `versionId`，则针对该特定版本进行比对。
 
-对于条件 `PUT`，[PR #207](https://github.com/pgsty/silo/pull/207) 在外层命名空间锁保护下先跨所有可用池选出最新的逻辑对象表示（包括删除标记状态），再写入新内容。这修复了目标池中残留的陈旧副本导致 `If-Match` / `If-None-Match` 判断结果与集群当前逻辑对象不一致的缺陷。在 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（[PR #292](https://github.com/pgsty/silo/pull/292)，提交 [`1f3377862`](https://github.com/pgsty/silo/commit/1f3377862b3157b8a4f07815cbf4e453d4b6f1a6) 与 [`af3064f2b`](https://github.com/pgsty/silo/commit/af3064f2b54fe90c4b0f14a0c54c2507bf7b29d4)）中，`PutObject`、`NewMultipartUpload` 与 `CompleteMultipartUpload` 共用 `checkCurrentPreconditions`：条件分片上传初始化同样在池协调层写锁保护下跨池评估当前逻辑对象的前置条件，并在放置上传记录期间持续持有写锁；分片完成前置条件失败时保留已上传分片以便重试。
+对于条件 `PUT`，[PR #207](https://github.com/pgsty/silo/pull/207) 在外层命名空间锁保护下先跨所有可用池选出最新的逻辑对象表示（包括删除标记状态），再写入新内容。这修复了目标池中残留的陈旧副本导致 `If-Match` / `If-None-Match` 判断结果与集群当前逻辑对象不一致的缺陷。在 [SILO Server 20261109](/zh/release/silo-20261109/)（[PR #292](https://github.com/pgsty/silo/pull/292)，提交 [`1f3377862`](https://github.com/pgsty/silo/commit/1f3377862b3157b8a4f07815cbf4e453d4b6f1a6) 与 [`af3064f2b`](https://github.com/pgsty/silo/commit/af3064f2b54fe90c4b0f14a0c54c2507bf7b29d4)）中，`PutObject`、`NewMultipartUpload` 与 `CompleteMultipartUpload` 共用 `checkCurrentPreconditions`：条件分片上传初始化同样在池协调层写锁保护下跨池评估当前逻辑对象的前置条件，并在放置上传记录期间持续持有写锁；分片完成前置条件失败时保留已上传分片以便重试。
 
 若跨池清理或元数据传播在修改了部分物理副本后遇到存储错误，恢复后应重新核对对象状态并重试。批量 XML `DeleteObjects` 的 ETag 条件仍不受支持，详见[条件 DELETE 设计说明](/zh/blog/design/conditional-delete/)。
 

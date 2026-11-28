@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/kes-openbao/"
 ---
 
-SILO 通过 [PGSTY KES](https://github.com/pgsty/kes)（`MINIO_KMS_KES_ENDPOINT`）接入外部密钥管理系统。当前最新版本为 **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**（使用 Go 1.27.3 构建并更新云服务依赖，保持本文的 API、配置与密钥格式不变）；此前的 [PGSTY KES 20261018](/zh/blog/release/kes-20261018/)（源码 [`2f7e741db905`](https://github.com/pgsty/kes/commit/2f7e741db905d7ea755967b29666657d819d7ad0)）完成了将 AWS Secrets Manager 后端迁移至 AWS SDK for Go v2 的主体改造。
+SILO 通过 [PGSTY KES](https://github.com/pgsty/kes)（`MINIO_KMS_KES_ENDPOINT`）接入外部密钥管理系统。当前最新版本为 **[KES 20261026](/zh/release/silo-20261026/#kes)**（使用 Go 1.27.3 构建并更新云服务依赖，保持本文的 API、配置与密钥格式不变）；此前的 [PGSTY KES 20261018](/zh/release/kes-20261018/)（源码 [`2f7e741db905`](https://github.com/pgsty/kes/commit/2f7e741db905d7ea755967b29666657d819d7ad0)）完成了将 AWS Secrets Manager 后端迁移至 AWS SDK for Go v2 的主体改造。
 
 ## 三个服务的职责边界 {#architecture}
 
@@ -101,7 +101,7 @@ path "secret/metadata/kes/*" {
 
 ## SDK 迁移与兼容性 {#sdk}
 
-[PGSTY KES 20261018](/zh/blog/release/kes-20261018/)（`2f7e741db905`）将 `keystore/aws/secretsmanager` 从已归档的 `github.com/aws/aws-sdk-go`（v1）迁移至模块化的 AWS SDK for Go v2（`github.com/aws/aws-sdk-go-v2`、`config`、`credentials`、`service/secretsmanager` 与 `github.com/aws/smithy-go`）。
+[PGSTY KES 20261018](/zh/release/kes-20261018/)（`2f7e741db905`）将 `keystore/aws/secretsmanager` 从已归档的 `github.com/aws/aws-sdk-go`（v1）迁移至模块化的 AWS SDK for Go v2（`github.com/aws/aws-sdk-go-v2`、`config`、`credentials`、`service/secretsmanager` 与 `github.com/aws/smithy-go`）。
 
 迁移保持以下兼容性不变量：
 - 完整保留既有密钥存储格式与 YAML 配置字段。
@@ -114,7 +114,7 @@ path "secret/metadata/kes/*" {
 ## 升级与恢复检查 {#verification}
 
 1. 记录当前 SILO 与 KES 版本、主密钥名称、后端端点及客户端证书 Identity，并在确认恢复成功前保留既有密钥与后端备份。
-2. 变更前读取一个既有加密对象并记录其预期摘要（Digest）；基于同一持久化后端将 KES 升级为 [PGSTY KES 20261026](/zh/blog/release/silo-20261026/#kes) 二进制。
+2. 变更前读取一个既有加密对象并记录其预期摘要（Digest）；基于同一持久化后端将 KES 升级为 [PGSTY KES 20261026](/zh/release/silo-20261026/#kes) 二进制。
 3. 重启 KES 与 SILO（清空热缓存），读取旧加密对象、写入新加密对象并校验两者摘要，验证生产环境实际使用的 TLS 身份与访问策略。
 4. 在隔离演练环境中，基于同一密钥存储恢复旧版 KES 二进制，重启两项服务并重复验证加密对象回读。
 

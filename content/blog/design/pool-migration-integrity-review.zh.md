@@ -14,7 +14,7 @@ url: "/zh/blog/design/pool-migration-integrity-review/"
 
 本文审查 [#261](https://github.com/pgsty/silo/issues/261)、[#263](https://github.com/pgsty/silo/issues/263)、[#265](https://github.com/pgsty/silo/issues/265) 及其对应的修复 [#262](https://github.com/pgsty/silo/pull/262)、[#264](https://github.com/pgsty/silo/pull/264)、[#266](https://github.com/pgsty/silo/pull/266)，并记录维护者后续修复 [#276](https://github.com/pgsty/silo/pull/276)。这是设计与审查记录，不是发布说明。
 
-**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。PR [#267](https://github.com/pgsty/silo/pull/267)（取代 #262）、[#264](https://github.com/pgsty/silo/pull/264)、[#266](https://github.com/pgsty/silo/pull/266) 与 [#276](https://github.com/pgsty/silo/pull/276)（已在发布前移除生命周期删除复制）均已随 `RELEASE.2026-11-09T00-00-00Z` 一并交付。
+**状态：** 已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。PR [#267](https://github.com/pgsty/silo/pull/267)（取代 #262）、[#264](https://github.com/pgsty/silo/pull/264)、[#266](https://github.com/pgsty/silo/pull/266) 与 [#276](https://github.com/pgsty/silo/pull/276)（已在发布前移除生命周期删除复制）均已随 `RELEASE.2026-11-09T00-00-00Z` 一并交付。
 
 ## 先看结论 {#decision}
 
@@ -53,7 +53,7 @@ url: "/zh/blog/design/pool-migration-integrity-review/"
 
 ## 受影响的发布范围与公告 {#advisory}
 
-对于截至 [RELEASE.2026-10-26](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z) 的版本，这三个问题按存储完整性公告处理，因为这些版本均早于上述修复。全部四项修复（[#264](https://github.com/pgsty/silo/pull/264)、[#267](https://github.com/pgsty/silo/pull/267)、[#266](https://github.com/pgsty/silo/pull/266) 与移除生命周期删除复制后的 [#276](https://github.com/pgsty/silo/pull/276)）已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）正式发布；仍运行 `20261026` 或更早版本的部署应在执行存储池 decommission 或 rebalance 前升级到 `SILO Server 20261109`。
+对于截至 [RELEASE.2026-10-26](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z) 的版本，这三个问题按存储完整性公告处理，因为这些版本均早于上述修复。全部四项修复（[#264](https://github.com/pgsty/silo/pull/264)、[#267](https://github.com/pgsty/silo/pull/267)、[#266](https://github.com/pgsty/silo/pull/266) 与移除生命周期删除复制后的 [#276](https://github.com/pgsty/silo/pull/276)）已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）正式发布；仍运行 `20261026` 或更早版本的部署应在执行存储池 decommission 或 rebalance 前升级到 `SILO Server 20261109`。
 
 两类问题的代码窗口不同：
 
@@ -70,16 +70,16 @@ url: "/zh/blog/design/pool-migration-integrity-review/"
 | 旧版 decommission/rebalance 扫描到混合 EC 元数据 | 可读对象可能被漏掉；旧池删除后对象可能丢失。                     | 源池仍在时用修复版重新迁移并执行 heal；源池已删除时只能从副本或备份恢复。 |
 {.wide .expand}
 
-仍在运行 `SILO Server 20261026` 或更早版本的操作员应暂停 pool decommission 和 rebalance（尤其是在磁盘降级、tier 清理未完成或生命周期规则生效时），保留旧池和备份，升级到 [SILO Server 20261109](/zh/blog/release/silo-20261109/)，并在迁移后核对 GET、ListObjectsV2、ListObjectVersions 和对象数量。这一风险以复合条件为前提，且 rebalance 按设计仍跳过 transitioned version。除非项目把存储完整性问题统一归入安全漏洞，否则不需要 CVE 风格的安全标签；`SILO Server 20261109` 发布说明与运维指南已明确升级边界。
+仍在运行 `SILO Server 20261026` 或更早版本的操作员应暂停 pool decommission 和 rebalance（尤其是在磁盘降级、tier 清理未完成或生命周期规则生效时），保留旧池和备份，升级到 [SILO Server 20261109](/zh/release/silo-20261109/)，并在迁移后核对 GET、ListObjectsV2、ListObjectVersions 和对象数量。这一风险以复合条件为前提，且 rebalance 按设计仍跳过 transitioned version。除非项目把存储完整性问题统一归入安全漏洞，否则不需要 CVE 风格的安全标签；`SILO Server 20261109` 发布说明与运维指南已明确升级边界。
 
 `SILO Server 20261109` 完整交付了这四个问题的 decommission 修复（#264、#267、#266 与 #276，并配合[多池生命周期过期](/zh/blog/design/multi-pool-lifecycle-expiry/)与[整对象精确 key](/zh/blog/design/ilm-delete-all-exact-key/) 修复）；仅包含 #264 与 #267 的构建不足以保证带生命周期迁移场景的安全。已在 `20261026` 或更早版本上完成过池迁移的部署，仍应结合源端副本、复制目标、备份与审计记录做历史核查。
 
 ## 合并与交付总结 {#plan}
 
-1. #264、#267、#266 和 #276 已一并随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）发布，覆盖逻辑对象视图、mixed-EC 迁移列表、生命周期 action 语义和外部清理合同。
+1. #264、#267、#266 和 #276 已一并随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）发布，覆盖逻辑对象视图、mixed-EC 迁移列表、生命周期 action 语义和外部清理合同。
 2. 保留“版本桶当前 Expiration”“只删除一个版本的 purge”“删除整个对象”三类 action 的区分，不退化为“一律跳过所有 ILM action”。
 3. 保留以下回归测试：配置了复制时生命周期删除不得排队任何复制，以及 transitioned version 清理、生命周期配置变化、整对象过期和可恢复 decommission。
-4. 迁移完整性指引已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 同步发布；在旧版本上执行过池迁移的部署仍应对照备份或副本核查历史状态。
+4. 迁移完整性指引已随 [SILO Server 20261109](/zh/release/silo-20261109/) 同步发布；在旧版本上执行过池迁移的部署仍应对照备份或副本核查历史状态。
 5. 单独跟踪 rebalance 对 transitioned version 的支持；#276 有意没有扩大这个范围。
 
 三篇专题记录如下：

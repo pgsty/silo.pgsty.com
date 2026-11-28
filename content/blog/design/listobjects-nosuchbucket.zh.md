@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/listobjects-nosuchbucket/"
 ---
 
-随 [SILO Server 20260903](/zh/blog/release/silo-20260903/) 发布的 [PR #37](https://github.com/pgsty/silo/pull/37)（PR 提交 [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377)，合并提交 [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef)，关闭 [SILO #32](https://github.com/pgsty/silo/issues/32)），修复了 `ListObjects`、`ListObjectsV2` 与 `ListObjectVersions` 中三条提前返回（early-return）快捷路径在目标桶不存在时错误返回 HTTP `200 OK` 空列表、而非 HTTP `404 NoSuchBucket` 的 S3 兼容性回归。
+随 [SILO Server 20260903](/zh/release/silo-20260903/) 发布的 [PR #37](https://github.com/pgsty/silo/pull/37)（PR 提交 [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377)，合并提交 [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef)，关闭 [SILO #32](https://github.com/pgsty/silo/issues/32)），修复了 `ListObjects`、`ListObjectsV2` 与 `ListObjectVersions` 中三条提前返回（early-return）快捷路径在目标桶不存在时错误返回 HTTP `200 OK` 空列表、而非 HTTP `404 NoSuchBucket` 的 S3 兼容性回归。
 
 ## 太长不看（TL;DR） {#tldr}
 
@@ -240,7 +240,7 @@ Handler 测试使用真实签名请求验证三个公开列表 API：
 
 ## 验收决策 {#decision}
 
-补强后的 PR #37（保留 Jason Lin 在 [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377) 上的共同作者署名）已合并为 [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef)，包含类型化错误断言、V1/V2/版本列表对象层覆盖及 HTTP 404 `NoSuchBucket` 验证，并随 [SILO Server 20260903](/zh/blog/release/silo-20260903/) 正式发布。
+补强后的 PR #37（保留 Jason Lin 在 [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377) 上的共同作者署名）已合并为 [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef)，包含类型化错误断言、V1/V2/版本列表对象层覆盖及 HTTP 404 `NoSuchBucket` 验证，并随 [SILO Server 20260903](/zh/release/silo-20260903/) 正式发布。
 
 ## 总结 {#conclusion}
 

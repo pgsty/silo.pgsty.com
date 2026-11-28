@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`，软件包版本 `20261109000000.0.0`）为基准；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261109/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [Server 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`，软件包版本 `20261109000000.0.0`）为基准；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/release/silo-20261109/#upgrade)。
 
 <a id="redhat-linux-minio"></a>
 <a id="deploy-minio-on-redhat-linux"></a>

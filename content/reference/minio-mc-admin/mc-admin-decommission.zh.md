@@ -89,7 +89,7 @@ https://minio-{01...04}.example.net:9000/mnt/disk{1...4}
 
 ## 行为说明 {#behavior}
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，存储池退役具备以下迁移安全保障：
+在 [SILO 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，存储池退役具备以下迁移安全保障：
 
 - 迁移跨池纠删码布局不同的对象（[#261](https://github.com/pgsty/silo/issues/261)）、已被 ILM 判定过期的当前版本（[#265](https://github.com/pgsty/silo/issues/265)）以及跨池生命周期过期无法安全完成的版本（[#278](https://github.com/pgsty/silo/issues/278)）。
 - 当其他存储池仍引用远端分层载荷时保留远端对象（[#306](https://github.com/pgsty/silo/issues/306)、[#308](https://github.com/pgsty/silo/issues/308)）；在存储池退役全部完成之前，必须保持已配置的远端存储层可用。

@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/list-null-version-quorum/"
 ---
 
-This record covers the listing omission investigated on 2026-09-16: an unversioned bucket under concurrent overwrites returned HTTP 200 listings that lacked keys the same endpoint could still `GET`. It describes the confirmed mechanism, the targeted repair in commit [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1) (shipped in [Server 20260916](/blog/release/silo-20260916/)), what that repair proves, and the rolling-restart counterexample tracked in [`#218`](https://github.com/pgsty/silo/issues/218) that was subsequently closed by PR [`#239`](https://github.com/pgsty/silo/pull/239) in [Server 20261018](/blog/release/silo-20261018/#listing) (see the [LIST recovery design](/blog/design/listing-recovery-lock-cost/)).
+This record covers the listing omission investigated on 2026-09-16: an unversioned bucket under concurrent overwrites returned HTTP 200 listings that lacked keys the same endpoint could still `GET`. It describes the confirmed mechanism, the targeted repair in commit [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1) (shipped in [Server 20260916](/release/silo-20260916/)), what that repair proves, and the rolling-restart counterexample tracked in [`#218`](https://github.com/pgsty/silo/issues/218) that was subsequently closed by PR [`#239`](https://github.com/pgsty/silo/pull/239) in [Server 20261018](/release/silo-20261018/#listing) (see the [LIST recovery design](/blog/design/listing-recovery-lock-cost/)).
 
 ## The defect {#defect}
 
@@ -38,4 +38,4 @@ That rolling-restart failure occurred before or around `mergeXLV2Versions`, wher
 - a resolver with fewer valid entries than quorum or no cached metadata when a peer drive disconnected mid-stream;
 - the partial-resolution callback dropping an entry when individual readers failed without crossing the set-wide failure threshold.
 
-Issue [`#218`](https://github.com/pgsty/silo/issues/218) tracked that rolling-restart investigation, and PR [`#239`](https://github.com/pgsty/silo/pull/239) in [Server 20261018](/blog/release/silo-20261018/#listing) resolved it by removing the 1-second `listPathRaw` read-lock timeout and adding bounded metacache stream recovery. See [LIST Recovery Under Node Restart and NSLock Contention](/blog/design/listing-recovery-lock-cost/) for the complete `#239` design and benchmarks.
+Issue [`#218`](https://github.com/pgsty/silo/issues/218) tracked that rolling-restart investigation, and PR [`#239`](https://github.com/pgsty/silo/pull/239) in [Server 20261018](/release/silo-20261018/#listing) resolved it by removing the 1-second `listPathRaw` read-lock timeout and adding bounded metacache stream recovery. See [LIST Recovery Under Node Restart and NSLock Contention](/blog/design/listing-recovery-lock-cost/) for the complete `#239` design and benchmarks.

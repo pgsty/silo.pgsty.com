@@ -865,7 +865,7 @@ s3:ExistingObjectTag/<key>
 
 作为 MinIO 服务器端复制的一部分，在同步 [删除操作](/zh/administration/object-management/object-delete/#minio-object-delete) 时需要此权限。
 
-自 [SILO 20261109](/zh/blog/release/silo-20261109/)（`7e9ee6bef`）起，复制删除会严格遵守目标对象版本上的 Object Lock 法律保留（legal hold）与保留期（retention）。源端绕过 `GOVERNANCE` 保留期执行的物理版本删除不会在目标端绕过仍在生效的保留期，受保护的目标副本会拒绝复制删除，源端将持续重试直至目标端保护到期或解除。
+自 [SILO 20261109](/zh/release/silo-20261109/)（`7e9ee6bef`）起，复制删除会严格遵守目标对象版本上的 Object Lock 法律保留（legal hold）与保留期（retention）。源端绕过 `GOVERNANCE` 保留期执行的物理版本删除不会在目标端绕过仍在生效的保留期，受保护的目标副本会拒绝复制删除，源端将持续重试直至目标端保护到期或解除。
 
 支持以下附加 [condition keys](#minio-policy-conditions)：
 
@@ -1405,7 +1405,7 @@ SILO 配合 Console v2.4.1 与 pkg v3.14.1 后，修改自己的密码检查此�
 
 允许用户启动批处理作业运行。
 
-自 [SILO 20261109](/zh/blog/release/silo-20261109/)（[#310](https://github.com/pgsty/silo/issues/310)）起，批处理 `expire` 与 `keyrotate` 作业会绑定已认证提交者的身份，并在整个执行期间持续校验该提交者在本地具备相应的 S3 数据操作权限，同时保留受 Object Lock 保护的版本。提交者凭证被吊销或禁用会终止作业；临时 IAM 或外部授权服务中断则会使作业暂停并在受限范围内重试。批处理鉴权会跳过策略映射中仍引用的已删除策略，仅当命中的 `Deny` 语句依赖后台执行时不存在的请求期上下文时才拒绝作业，并且在保持提交者凭证有效的元数据编辑与 LDAP 组成员刷新后继续正常运行（[#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)）。
+自 [SILO 20261109](/zh/release/silo-20261109/)（[#310](https://github.com/pgsty/silo/issues/310)）起，批处理 `expire` 与 `keyrotate` 作业会绑定已认证提交者的身份，并在整个执行期间持续校验该提交者在本地具备相应的 S3 数据操作权限，同时保留受 Object Lock 保护的版本。提交者凭证被吊销或禁用会终止作业；临时 IAM 或外部授权服务中断则会使作业暂停并在受限范围内重试。批处理鉴权会跳过策略映射中仍引用的已删除策略，仅当命中的 `Deny` 语句依赖后台执行时不存在的请求期上下文时才拒绝作业，并且在保持提交者凭证有效的元数据编辑与 LDAP 组成员刷新后继续正常运行（[#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)）。
 
 <a id="policy-action.admin:CancelBatchJob"></a>
 

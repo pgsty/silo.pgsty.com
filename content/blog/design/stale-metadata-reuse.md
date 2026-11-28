@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/stale-metadata-reuse/"
 ---
 
-This article records the design and verification of [PR #233](https://github.com/pgsty/silo/pull/233) (tested head [`86c5a92eef3d`](https://github.com/pgsty/silo/commit/86c5a92eef3d5667c83bdbc59a033b955bdbf146), merged as [`d94b3b3c9251`](https://github.com/pgsty/silo/commit/d94b3b3c9251af5a9dbdb2d178e892c4de75204a)), which shipped in [Server 20261018](/blog/release/silo-20261018/). It fixes stale fields carried over when legacy `xl.meta` version headers and remote namespace-scanner responses are reused.
+This article records the design and verification of [PR #233](https://github.com/pgsty/silo/pull/233) (tested head [`86c5a92eef3d`](https://github.com/pgsty/silo/commit/86c5a92eef3d5667c83bdbc59a033b955bdbf146), merged as [`d94b3b3c9251`](https://github.com/pgsty/silo/commit/d94b3b3c9251af5a9dbdb2d178e892c4de75204a)), which shipped in [Server 20261018](/release/silo-20261018/). It fixes stale fields carried over when legacy `xl.meta` version headers and remote namespace-scanner responses are reused.
 
 ## Overview {#problem}
 

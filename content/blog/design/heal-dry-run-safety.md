@@ -14,7 +14,7 @@ url: "/blog/design/heal-dry-run-safety/"
 
 This record covers the dry-run part of [PR #280](https://github.com/pgsty/silo/pull/280) by Jasper Bernhardt ([`@dihmandrake`](https://github.com/dihmandrake)), evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). The same PR also verifies an object's drives concurrently during deep scans. That optimization is reviewed separately and is outside the scope of this record.
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 

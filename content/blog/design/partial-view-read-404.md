@@ -14,7 +14,7 @@ url: "/blog/design/partial-view-read-404/"
 
 This record covers a defect found during local acceptance of `SILO Server 20261109`. It reproduced on the pre-release `SILO Server 20261109` integration branch and on [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). Tracked as [#302](https://github.com/pgsty/silo/issues/302).
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 

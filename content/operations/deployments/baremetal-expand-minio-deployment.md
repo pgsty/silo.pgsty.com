@@ -151,7 +151,7 @@ MinIO calculates the probability of a write operation to each of the pools as:
 
 In addition to the free space calculation, if a write option (with parity) would bring a drive usage above 99% or a known free inode count below 1000, MinIO does not write to the pool.
 
-If desired, you can manually initiate a rebalance procedure with [`mc admin rebalance`](/reference/minio-mc-admin/mc-admin-rebalance/#command-mc.admin.rebalance). For more about how rebalancing works, see [managing objects across a deployment](/operations/concepts/#minio-rebalance). [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) includes several rebalance fixes:
+If desired, you can manually initiate a rebalance procedure with [`mc admin rebalance`](/reference/minio-mc-admin/mc-admin-rebalance/#command-mc.admin.rebalance). For more about how rebalancing works, see [managing objects across a deployment](/operations/concepts/#minio-rebalance). [SILO 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) includes several rebalance fixes:
 
 - Moves objects whose copies across pools have different erasure layouts ([#261](https://github.com/pgsty/silo/issues/261)) and moves ILM-expired current versions ([#265](https://github.com/pgsty/silo/issues/265)).
 - Moves versions whose lifecycle expiry cannot safely complete across pools instead of dropping them ([#278](https://github.com/pgsty/silo/issues/278)).
@@ -195,7 +195,7 @@ Complete any planned hardware expansion prior to [decommissioning older hardware
 
 ### 1) Install the Silo Binary on Each Node in the New Server Pool {#install-the-minio-binary-on-each-node-in-the-new-server-pool}
 
-Install the **same published Silo release** used by the existing pool (for example, [SILO 20261109](/blog/release/silo-20261109/), tag `RELEASE.2026-11-09T00-00-00Z`, package `20261109000000.0.0`). Download the x86-64 or ARM64 RPM, DEB, or standalone archive from [Download & Install](/download/#server), and verify its SHA-256 checksum before installation. The Silo release publishes those two Linux architectures; inherited references to unsupported `ppc64le` and `s390x` downloads have been removed.
+Install the **same published Silo release** used by the existing pool (for example, [SILO 20261109](/release/silo-20261109/), tag `RELEASE.2026-11-09T00-00-00Z`, package `20261109000000.0.0`). Download the x86-64 or ARM64 RPM, DEB, or standalone archive from [Download & Install](/download/#server), and verify its SHA-256 checksum before installation. The Silo release publishes those two Linux architectures; inherited references to unsupported `ppc64le` and `s390x` downloads have been removed.
 
 {{< tabs group="tabs-0082ddfa" >}}
 {{< tab label="RPM (RHEL family)" value="rpm-rhel-family" >}}

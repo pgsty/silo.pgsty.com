@@ -9,7 +9,7 @@ weight: 1
 url: "/blog/security/20260926-governance-retention-bypass/"
 ---
 
-**`SN-2026-015`** and **`SN-2026-016`** cover two S3 Object Lock retention and immutability vulnerabilities fixed in [SILO Server 20261018](/blog/release/silo-20261018/) via PR [`#234`](https://github.com/pgsty/silo/pull/234) (`14042b5aa`) and PR [`#235`](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`), as detailed in the companion [repair design note](/blog/design/governance-retention-bypass-repair/). While the single-object delete path already enforced `s3:BypassGovernanceRetention` ([CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63)), the retention-write path (`PutObjectRetention`) and four in-place version overwrite paths remained bypassable; [SILO Server 20261109](/blog/release/silo-20261109/#authorization) (`7e9ee6bef`, `aa2d79daf`, `6ef3a52fc`) subsequently closed companion delete-path gaps on replicated `DELETE` requests, directory `null`-version bulk deletes, and concurrent S3 `DeleteObjects` physical version purges.
+**`SN-2026-015`** and **`SN-2026-016`** cover two S3 Object Lock retention and immutability vulnerabilities fixed in [SILO Server 20261018](/release/silo-20261018/) via PR [`#234`](https://github.com/pgsty/silo/pull/234) (`14042b5aa`) and PR [`#235`](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`), as detailed in the companion [repair design note](/blog/design/governance-retention-bypass-repair/). While the single-object delete path already enforced `s3:BypassGovernanceRetention` ([CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63)), the retention-write path (`PutObjectRetention`) and four in-place version overwrite paths remained bypassable; [SILO Server 20261109](/release/silo-20261109/#authorization) (`7e9ee6bef`, `aa2d79daf`, `6ef3a52fc`) subsequently closed companion delete-path gaps on replicated `DELETE` requests, directory `null`-version bulk deletes, and concurrent S3 `DeleteObjects` physical version purges.
 
 ## Advisory Scope: `SN-2026-015` and `SN-2026-016` {#advisory-scope-sn-2026-015}
 
@@ -177,4 +177,4 @@ PR [`#234`](https://github.com/pgsty/silo/pull/234) and PR [`#235`](https://gith
 
 ### Delivery Status {#delivery}
 
-Both **`SN-2026-015`** (`0d3ba5d4c`, PR `#235`) and **`SN-2026-016`** (`14042b5aa`, PR `#234`) are shipped in [SILO Server 20261018](/blog/release/silo-20261018/). Operators relying on S3 Object Lock WORM governance or compliance retention should upgrade to `20261018` immediately.
+Both **`SN-2026-015`** (`0d3ba5d4c`, PR `#235`) and **`SN-2026-016`** (`14042b5aa`, PR `#234`) are shipped in [SILO Server 20261018](/release/silo-20261018/). Operators relying on S3 Object Lock WORM governance or compliance retention should upgrade to `20261018` immediately.

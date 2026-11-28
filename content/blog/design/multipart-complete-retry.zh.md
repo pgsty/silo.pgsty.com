@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/multipart-complete-retry/"
 ---
 
-本记录说明在 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 发布验收中发现的一个缺陷。它在 [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 与 `SILO Server 20261109`（`d998292387cc`）上都能复现，继承自上游 MinIO，尚无单独的 GitHub issue 编号。
+本记录说明在 [SILO Server 20261109](/zh/release/silo-20261109/) 发布验收中发现的一个缺陷。它在 [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 与 `SILO Server 20261109`（`d998292387cc`）上都能复现，继承自上游 MinIO，尚无单独的 GitHub issue 编号。
 
 **状态：** 已在 `SILO Server 20261109` 发布验收中完成分析与复现。曾起草一版候选修复，但对抗评审认定其对 `SILO Server 20261109` 风险过高而予以否决。`SILO Server 20261109` 将该缺陷记录为已知限制，修复推迟至 `20261109` 之后的版本，与存储 RPC 完成确认（fencing）一并交付。
 

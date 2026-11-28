@@ -14,7 +14,7 @@ url: "/blog/design/tier-free-version-semantics/"
 
 This record covers [issue #263](https://github.com/pgsty/silo/issues/263) and [PR #264](https://github.com/pgsty/silo/pull/264), updated after the #276 follow-up ([0fc5a0b5](https://github.com/pgsty/silo/commit/0fc5a0b5278980b0960abf26566ce3272f85227b)), with the #264 merge recorded at [0cfca29c](https://github.com/pgsty/silo/commit/0cfca29cb2f16e43cb8266d9259f0dc5298c53b3). The PR is three linked repairs, not three unrelated workarounds.
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`), together with the free-version cleanup ownership and decommission-cancellation follow-ups below.
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`), together with the free-version cleanup ownership and decommission-cancellation follow-ups below.
 
 ## Short answer {#tldr}
 
@@ -27,7 +27,7 @@ That mismatch causes four failures:
 - ListObjectsV2 hides the key;
 - decommission and rebalance move the free record as a real delete marker, so removing the old pool can make the object unreadable.
 
-PR #264 fixes the lifecycle view, the latest-marker checks, ordinary listing, and pool cleanup as one semantic boundary. Healing retains a separate all-entries view. The PR merged as the required base for reviewing #266 and shipped in [SILO Server 20261109](/blog/release/silo-20261109/).
+PR #264 fixes the lifecycle view, the latest-marker checks, ordinary listing, and pool cleanup as one semantic boundary. Healing retains a separate all-entries view. The PR merged as the required base for reviewing #266 and shipped in [SILO Server 20261109](/release/silo-20261109/).
 
 ## What a free version means {#meaning}
 

@@ -369,11 +369,11 @@ MinIO 支持在单个存储桶中保留对象的多个 [版本](/zh/administrati
 
 ### PGSTY mcli 安全与退出码（`mcli 20261109`） {#mcli-safety}
 
-在 [`mcli 20261109`](/zh/blog/release/mcli-20261109/) 中：
+在 [`mcli 20261109`](/zh/release/mcli-20261109/) 中：
 
 - `--purge` 与 [`--dry-run`](#mc.rm.-dry-run)（`--fake`）同时使用时保持只读，仅预览目标前缀而不发送 `?purge=true` `DELETE` 请求。
 - 命名空间删除保护适用于每个命令行目标与每个 [`--stdin`](#mc.rm.-stdin) 目标。多参数调用会在执行删除前预先校验全部命令行目标，避免前置存储桶或路径绕过后续站点根目标所需的 [`--dangerous`](#mc.rm.-dangerous)；`--stdin` 也会在删除每个输入目标前强制校验 `--dangerous`。
-- 批量删除会在继续删除其他独立、未受保护对象的同时，将权限错误（`mcli 20260916+`）与 WORM 保护错误（[`mcli 20261109`](/zh/blog/release/mcli-20261109/)）保留到最终退出状态（返回退出码 `1`）。
+- 批量删除会在继续删除其他独立、未受保护对象的同时，将权限错误（`mcli 20260916+`）与 WORM 保护错误（[`mcli 20261109`](/zh/release/mcli-20261109/)）保留到最终退出状态（返回退出码 `1`）。
 
 ### S3 兼容性 {#s3-compatibility}
 

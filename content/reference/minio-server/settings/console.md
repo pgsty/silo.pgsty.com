@@ -11,7 +11,7 @@ upstream_modified: true
 
 ## Embedded and standalone Console (SILO 20261109 / Console v2.7.0) {#embedded-compatibility}
 
-[SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) embeds [Console v2.7.0](/blog/release/console-2.7.0/) (`4e91ae506e70`). Standalone deployments use `docker.io/pgsty/silo-console:v2.7.0`. Updating a standalone Console binary or container does **not** replace the Console embedded inside an older `silo` server binary.
+[SILO 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) embeds [Console v2.7.0](/release/console-2.7.0/) (`4e91ae506e70`). Standalone deployments use `docker.io/pgsty/silo-console:v2.7.0`. Updating a standalone Console binary or container does **not** replace the Console embedded inside an older `silo` server binary.
 
 Console `v2.7.0` includes the following runtime and operational capabilities:
 
@@ -58,7 +58,7 @@ Values must be integers from 1 to 1048576. Each anonymous cap must be strictly b
 ## Object sharing {#object-sharing}
 
 > [!NOTE]
-> **Console v2.4.1:** [#56](https://github.com/pgsty/silo-console/pull/56) implements the boundary below, released in [v2.4.1](/blog/release/console-2.4.1/). [Server #209](https://github.com/pgsty/silo/pull/209) integrates the corresponding embedded behavior. See the [component notes](/compatibility/versions/#console-sharing).
+> **Console v2.4.1:** [#56](https://github.com/pgsty/silo-console/pull/56) implements the boundary below, released in [v2.4.1](/release/console-2.4.1/). [Server #209](https://github.com/pgsty/silo/pull/209) integrates the corresponding embedded behavior. See the [component notes](/compatibility/versions/#console-sharing).
 
 The fix requires no new setting. Its request restrictions always apply, and normal sharing remains available. `CONSOLE_SHARE_MINIO_URL` continues to select only the generated link format. The anonymous proxy is limited to object-content GET requests:
 

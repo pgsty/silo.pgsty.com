@@ -62,7 +62,7 @@ upstream_modified: true
 
 以下部分介绍将 [`silo server`](/zh/reference/minio-server/#command-minio.server) 日志发布到 HTTP webhook 端点的 MinIO 配置设置。 有关这些设置的更完整文档和使用教程，请参见 [将服务日志发布到 HTTP Webhook](/zh/operations/monitoring/minio-logging/#minio-logging-publish-server-logs)。
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，动态重新加载配置后，`logger_webhook` 与 `audit_webhook` 目标会在所有对端服务器节点上持续运行（[#259](https://github.com/pgsty/silo/issues/259)）。
+在 [SILO 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，动态重新加载配置后，`logger_webhook` 与 `audit_webhook` 目标会在所有对端服务器节点上持续运行（[#259](https://github.com/pgsty/silo/issues/259)）。
 
 ### 定义多个端点 {#defining-multiple-endpoints}
 
@@ -331,7 +331,7 @@ export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 以下部分介绍用于将审计日志发布到 HTTP webhook 端点的 MinIO 环境变量。 有关这些环境变量的更完整文档和使用教程，请参见 [将审计日志发布到 HTTP Webhook](/zh/operations/monitoring/minio-logging/#minio-logging-publish-audit-logs)。
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，动态重新加载配置后，`audit_webhook` 与 `logger_webhook` 目标会在每个对端服务器节点上保持激活（[#259](https://github.com/pgsty/silo/issues/259)）。
+在 [SILO 20261109](/zh/release/silo-20261109/) 中，动态重新加载配置后，`audit_webhook` 与 `logger_webhook` 目标会在每个对端服务器节点上保持激活（[#259](https://github.com/pgsty/silo/issues/259)）。
 
 ### 多个目标 {#multiple-targets}
 

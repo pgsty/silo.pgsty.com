@@ -109,7 +109,7 @@ mc [GLOBALFLAGS] admin rebalance ALIAS
 
 *mc-cmd*
 
-结束指定部署上正在进行中的再平衡任务。在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，当部署不存在再平衡元数据时，`mc admin rebalance stop` 会正常返回而不会触发 panic（[#270](https://github.com/pgsty/silo/issues/270)）。
+结束指定部署上正在进行中的再平衡任务。在 [SILO 20261109](/zh/release/silo-20261109/) 中，当部署不存在再平衡元数据时，`mc admin rebalance stop` 会正常返回而不会触发 panic（[#270](https://github.com/pgsty/silo/issues/270)）。
 
 {{< tabs group="examples-syntax" >}}
 {{< tab label="EXAMPLES" value="examples" >}}
@@ -150,7 +150,7 @@ mc [GLOBALFLAGS] admin rebalance stop ALIAS
 
 SILO 再平衡**不会**丢弃删除标记，也不会在跨池生命周期状态尚未确认时静默跳过对象版本。保留删除标记与待确认版本可防止其他存储池中的旧版本在迁移期间或迁移后意外重新显现。
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，再平衡具备以下迁移安全行为：
+在 [SILO 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，再平衡具备以下迁移安全行为：
 
 - 跨存储池保留 `null` 与 UUID [删除标记](/zh/administration/object-management/object-versioning/#minio-bucket-versioning-delete)，而不是将其丢弃。
 - 迁移跨池纠删码布局混合的对象（[#261](https://github.com/pgsty/silo/issues/261)）、已被 ILM 判定过期的当前版本（[#265](https://github.com/pgsty/silo/issues/265)）以及因缺少权威仲裁或锁保护状态无法安全执行跨池[生命周期](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)过期而被拒绝删除的版本（[#278](https://github.com/pgsty/silo/issues/278)）。

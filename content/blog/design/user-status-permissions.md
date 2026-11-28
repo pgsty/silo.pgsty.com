@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/user-status-permissions/"
 ---
 
-This article records the authorization design and verification for [upstream issue minio/minio#21478](https://github.com/minio/minio/issues/21478), [SILO PR #73](https://github.com/pgsty/silo/pull/73) (commits [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) / [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)), and the `set-group-status` follow-up (`229fe2b3c`), which shipped in [Server 20260903](/blog/release/silo-20260903/).
+This article records the authorization design and verification for [upstream issue minio/minio#21478](https://github.com/minio/minio/issues/21478), [SILO PR #73](https://github.com/pgsty/silo/pull/73) (commits [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) / [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)), and the `set-group-status` follow-up (`229fe2b3c`), which shipped in [Server 20260903](/release/silo-20260903/).
 
 ## Too Long; Didn't Read (TL;DR) {#tldr}
 
@@ -307,10 +307,10 @@ Upstream issue #21478 and PR #21482 remain on the archived `minio/minio` reposit
 
 ### Delivery State {#delivery}
 
-| Milestone         | User repair                                                                                                                                                                                           | Group follow-up                                 |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Signed-off commit | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) (merged as [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)) | `229fe2b3c`                                     |
-| Shipped release   | [Server 20260903](/blog/release/silo-20260903/)                                                                                                                                                       | [Server 20260903](/blog/release/silo-20260903/) |
+| Milestone         | User repair                                                                                                                                                                                           | Group follow-up                            |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Signed-off commit | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) (merged as [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)) | `229fe2b3c`                                |
+| Shipped release   | [Server 20260903](/release/silo-20260903/)                                                                                                                                                            | [Server 20260903](/release/silo-20260903/) |
 {.wide .expand}
 
 ## Conclusion {#conclusion}

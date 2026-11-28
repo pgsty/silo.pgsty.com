@@ -17,7 +17,7 @@ draft: false
 url: "/blog/design/request-header-timeouts/"
 ---
 
-This article records the repair of Server's HTTP read deadlines, merged in [PR #196](https://github.com/pgsty/silo/pull/196) (fix [`055030ea5`](https://github.com/pgsty/silo/commit/055030ea5)) and shipped in [Server 20260916](/blog/release/silo-20260916/) (`40220bd836cbd066ca424fa4dc5dbb90057fb55a`).
+This article records the repair of Server's HTTP read deadlines, merged in [PR #196](https://github.com/pgsty/silo/pull/196) (fix [`055030ea5`](https://github.com/pgsty/silo/commit/055030ea5)) and shipped in [Server 20260916](/release/silo-20260916/) (`40220bd836cbd066ca424fa4dc5dbb90057fb55a`).
 
 The investigation was prompted by a slow-HTTP DoS scanner report ([#183](https://github.com/pgsty/silo/issues/183)) and verified via a direct TCP comparison (with the header limited to 100 ms and arriving over 400 ms, standard Go refuses where the pre-fix server returned 204) and a single-drive process probe where both flag and environment settings rejected a 400 ms slow header while healthy requests continued.
 

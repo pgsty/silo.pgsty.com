@@ -34,7 +34,7 @@ The fork is a means, not an identity. If upstream restores its community edition
 The product and its trademark are renamed; the protocol and your data are not.
 
 - The S3 API, `MINIO_*` environment variables, `minio_*` metrics, `x-minio-*` headers, `/minio/*` routes, and the on-disk format (including `.minio.sys`) are preserved, and held in place by a CI compatibility check.
-- Every release documents its tested rollback target and path in the [release notes](/blog/release/).
+- Every release documents its tested rollback target and path in the [release notes](/release/).
 - New capabilities do not touch the on-disk format. Any exception must be explicitly marked as **non-reversible** before you can enable it.
 - The [migration guide](/compatibility/migration/), which includes how to leave Silo, and the per-component [compatibility audits](/compatibility/) are public and maintained.
 
@@ -76,7 +76,7 @@ Severe, remotely exploitable issues are expedited on a best-effort basis, but we
 
 ## Article 7 · Release cadence {#releases}
 
-Releases ship typically every one to two months, and at most a quarter apart. Security and defect fixes are batched into these releases. The history is [public](/blog/release/); judge the promise against it.
+Releases ship typically every one to two months, and at most a quarter apart. Security and defect fixes are batched into these releases. The history is [public](/release/); judge the promise against it.
 
 Version tags keep the `RELEASE.YYYY-MM-DDTHH-MM-SSZ` format, and each release documents its upstream baseline.
 Deprecations get at least six months' notice and a migration path. The exception is a removal that security requires immediately; the removal and its justification are then published in the [security advisories](/blog/security/).
@@ -104,5 +104,5 @@ Additions and strengthenings of this manifesto take effect immediately. Weakenin
 Where to check:
 
 - [Security advisories](/blog/security/): every CVE investigated and fixed, one article per incident.
-- [Release notes](/blog/release/): every release, with its baseline, rollback target, and acceptance record.
+- [Release notes](/release/): every release, with its baseline, rollback target, and acceptance record.
 - [Compatibility audits](/compatibility/): where Silo matches MinIO, and where it deliberately differs.

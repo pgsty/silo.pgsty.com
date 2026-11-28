@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/signed-header-coverage/"
 ---
 
-本文记录 SILO 的未签名请求头覆盖修复（核心提交 [`123325430`](https://github.com/pgsty/silo/commit/123325430)，经 [PR #173](https://github.com/pgsty/silo/pull/173) 合入，安全通告编号 `SN-2026-011`）以及 [PR #177](https://github.com/pgsty/silo/pull/177) 中的后续签名与载荷校验修复（安全通告编号 `SN-2026-012`）。上述修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布。该漏洞由 Oren Yomtov 报告，并在本地预签名与 `Authorization` 请求头两条 SigV4 路径上复现。
+本文记录 SILO 的未签名请求头覆盖修复（核心提交 [`123325430`](https://github.com/pgsty/silo/commit/123325430)，经 [PR #173](https://github.com/pgsty/silo/pull/173) 合入，安全通告编号 `SN-2026-011`）以及 [PR #177](https://github.com/pgsty/silo/pull/177) 中的后续签名与载荷校验修复（安全通告编号 `SN-2026-012`）。上述修复已随 [Server 20260916](/zh/release/silo-20260916/) 发布。该漏洞由 Oren Yomtov 报告，并在本地预签名与 `Authorization` 请求头两条 SigV4 路径上复现。
 
 ## 核心结论（TL;DR） {#tldr}
 
@@ -106,4 +106,4 @@ AWS S3 对未签名请求头返回 `403 Forbidden`，而 SILO 沿用上游 `ErrU
 
 ## 总结 {#conclusion}
 
-SigV4 验签不仅要确认签名头列表声明的请求头悉数到达，还必须反向确认实际收到的每一个 `x-amz-*` 请求头都已纳入签名列表。在业务处理器执行前拒绝未签名的 `x-amz-*` 请求头，从根源上闭合了普通签名与预签名 SigV4 路径上的混淆代理漏洞。虽然签名校验改动本身不涉及存储格式变更，但升级至 [Server 20260916](/zh/blog/release/silo-20260916/) 同时包含[需要协调升级的 IAM 变更](/zh/operations/replication/iam-upgrade/)。
+SigV4 验签不仅要确认签名头列表声明的请求头悉数到达，还必须反向确认实际收到的每一个 `x-amz-*` 请求头都已纳入签名列表。在业务处理器执行前拒绝未签名的 `x-amz-*` 请求头，从根源上闭合了普通签名与预签名 SigV4 路径上的混淆代理漏洞。虽然签名校验改动本身不涉及存储格式变更，但升级至 [Server 20260916](/zh/release/silo-20260916/) 同时包含[需要协调升级的 IAM 变更](/zh/operations/replication/iam-upgrade/)。

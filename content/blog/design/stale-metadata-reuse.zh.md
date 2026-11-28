@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/stale-metadata-reuse/"
 ---
 
-本文记录 [PR #233](https://github.com/pgsty/silo/pull/233)（验证提交 [`86c5a92eef3d`](https://github.com/pgsty/silo/commit/86c5a92eef3d5667c83bdbc59a033b955bdbf146)，合并提交 [`d94b3b3c9251`](https://github.com/pgsty/silo/commit/d94b3b3c9251af5a9dbdb2d178e892c4de75204a)，随 [Server 20261018](/zh/blog/release/silo-20261018/) 发布）的设计与验证。该补丁修复了旧版 `xl.meta` 版本头部与远程命名空间扫描响应在复用结构体时带入残留字段的问题。
+本文记录 [PR #233](https://github.com/pgsty/silo/pull/233)（验证提交 [`86c5a92eef3d`](https://github.com/pgsty/silo/commit/86c5a92eef3d5667c83bdbc59a033b955bdbf146)，合并提交 [`d94b3b3c9251`](https://github.com/pgsty/silo/commit/d94b3b3c9251af5a9dbdb2d178e892c4de75204a)，随 [Server 20261018](/zh/release/silo-20261018/) 发布）的设计与验证。该补丁修复了旧版 `xl.meta` 版本头部与远程命名空间扫描响应在复用结构体时带入残留字段的问题。
 
 ## 问题概述 {#problem}
 

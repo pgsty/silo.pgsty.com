@@ -32,7 +32,7 @@ MinIO 支持将 [存储桶通知](/zh/administration/monitoring/bucket-notificat
 
 此过程中的某些操作需要使用 [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具。 安装说明请参见 `mc` [快速入门](/zh/reference/minio-mc/#mc-install)。
 
-[SILO 20261109](/zh/blog/release/silo-20261109/) 将 `github.com/nats-io/jwt/v2` 升级至 `v2.8.3`、将 `github.com/nats-io/nkeys` 升级至 `v0.4.17`（并已针对 `nats-server v2.15.2` 完成集成验证），在解析 NATS 凭据时拒绝单位元点（identity-point）与小阶（small-order）Ed25519 公钥。
+[SILO 20261109](/zh/release/silo-20261109/) 将 `github.com/nats-io/jwt/v2` 升级至 `v2.8.3`、将 `github.com/nats-io/nkeys` 升级至 `v0.4.17`（并已针对 `nats-server v2.15.2` 完成集成验证），在解析 NATS 凭据时拒绝单位元点（identity-point）与小阶（small-order）Ed25519 公钥。
 
 <a id="nats-minio" data-td-print-local></a>
 

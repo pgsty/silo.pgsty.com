@@ -14,7 +14,7 @@ url: "/zh/blog/design/failed-rename-empty-prefix/"
 
 本文覆盖 [issue #285](https://github.com/pgsty/silo/issues/285) 和 Denis Babchuk 提交的 [PR #286](https://github.com/pgsty/silo/pull/286)，基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 与 PR head [ed05d982a](https://github.com/pgsty/silo/commit/ed05d982a1d26502e3ed2c7c5605bcf422f5d228) 评估。
 
-**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+**状态：** 已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短结论 {#tldr}
 

@@ -11,6 +11,7 @@ outputs:
   - HTML
   - RSS
   - print
+blog_index_toggle: true
 cascade:
   type: blog
   images: [/images/blog/silo.webp]

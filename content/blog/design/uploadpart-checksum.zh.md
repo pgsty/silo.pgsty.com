@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/uploadpart-checksum/"
 ---
 
-本文记录 [SILO #46](https://github.com/pgsty/silo/issues/46)（合并提交 [`7fea6d5a5`](https://github.com/pgsty/silo/commit/7fea6d5a5)，随 [Server 20260903](/zh/blog/release/silo-20260903/) 发布，后续延伸修复见 [#63](https://github.com/pgsty/silo/issues/63) 与 [#64](https://github.com/pgsty/silo/issues/64)）的设计与实现：如何围绕 S3 分片上传的可选校验和请求头，同时理顺分片合并（completion）语义、复制响应、压缩与加密数据流以及兼容性基线守卫。
+本文记录 [SILO #46](https://github.com/pgsty/silo/issues/46)（合并提交 [`7fea6d5a5`](https://github.com/pgsty/silo/commit/7fea6d5a5)，随 [Server 20260903](/zh/release/silo-20260903/) 发布，后续延伸修复见 [#63](https://github.com/pgsty/silo/issues/63) 与 [#64](https://github.com/pgsty/silo/issues/64)）的设计与实现：如何围绕 S3 分片上传的可选校验和请求头，同时理顺分片合并（completion）语义、复制响应、压缩与加密数据流以及兼容性基线守卫。
 
 ## 太长不看（TL;DR） {#tldr}
 

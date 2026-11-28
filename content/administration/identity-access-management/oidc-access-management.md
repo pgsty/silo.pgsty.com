@@ -73,7 +73,7 @@ SILO provides an example Go application [web-identity.go](https://github.com/pgs
 > [!NOTE]
 > **OIDC JWK Validation, JOSE Hardening, and Group Claim Parsing**
 >
-> [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) adopts `github.com/go-jose/go-jose/v4 v4.1.9` via [`silo-pkg v3.16.0`](/blog/release/pkg-3.16.0/), hardening RSA certificate-verification limits, JWS signature and JWE recipient bounds, and JWE protected/unprotected header handling. Since `silo-pkg v3.14.2` and [SILO 20261018](/blog/release/silo-20261018/), OIDC JWKS validation rejects RSA public keys larger than 4096 bits and enforces bounded JWK key parameters. Embedded Console ([Console v2.7.0](/blog/release/console-2.7.0/) in SILO 20261109; introduced in [Console v2.5.1](/blog/release/console-2.5.1/)) parses string-array group claims alongside comma-separated strings. See [TLS and OIDC Discovery](/blog/design/go127-tls-oidc-discovery/).
+> [SILO 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) adopts `github.com/go-jose/go-jose/v4 v4.1.9` via [`silo-pkg v3.16.0`](/release/pkg-3.16.0/), hardening RSA certificate-verification limits, JWS signature and JWE recipient bounds, and JWE protected/unprotected header handling. Since `silo-pkg v3.14.2` and [SILO 20261018](/release/silo-20261018/), OIDC JWKS validation rejects RSA public keys larger than 4096 bits and enforces bounded JWK key parameters. Embedded Console ([Console v2.7.0](/release/console-2.7.0/) in SILO 20261109; introduced in [Console v2.5.1](/release/console-2.5.1/)) parses string-array group claims alongside comma-separated strings. See [TLS and OIDC Discovery](/blog/design/go127-tls-oidc-discovery/).
 
 #### Identifying the JWT Claim Value {#identifying-the-jwt-claim-value}
 

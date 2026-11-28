@@ -9,7 +9,7 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-SILO **20261112** 是当前正式公开的服务端版本，基于 **Go 1.27.4** 构建，内嵌 **[Console 2.7.2](/zh/blog/release/console-2.7.2/)**、**[mcli 20261112](/zh/blog/release/mcli-20261112/)** 与 **[silo-pkg 3.16.1](/zh/blog/release/pkg-3.16.1/)**。KES 20261026 是独立、可选的外部密钥服务。正式支持维护的 PGSTY 组件组合，对原厂 MinIO/MC 尽最大努力兼容。
+SILO **20261112** 是当前正式公开的服务端版本，基于 **Go 1.27.4** 构建，内嵌 **[Console 2.7.2](/zh/release/console-2.7.2/)**、**[mcli 20261112](/zh/release/mcli-20261112/)** 与 **[silo-pkg 3.16.1](/zh/release/pkg-3.16.1/)**。KES 20261026 是独立、可选的外部密钥服务。正式支持维护的 PGSTY 组件组合，对原厂 MinIO/MC 尽最大努力兼容。
 
 ## Server 20261112 {#server-20261112}
 
@@ -36,7 +36,7 @@ SILO **20261112** 是当前正式公开的服务端版本，基于 **Go 1.27.4**
 | `docker.io/pgsty/kes`                | `RELEASE.2026-10-26T00-00-00Z`、`latest`                                                                  | `sha256:ea36fcdd260c606eb89e693b0949aea73b149359605273a98fcf13c8433049cd` |
 {.wide .expand}
 
-KES 不内嵌于 Server，独立维护版本节奏。[20261112 发布与升级说明](/zh/blog/release/silo-20261112/)与 [Server 20261112 升级检查](/zh/compatibility/server/#maintenance-20261112)记录 `.minio.sys` 仲裁校验、多存储池混合版本写排空、多站点服务账号编辑冻结、严格策略 JSON 解析与逐节点 S3 就绪检查；从 `20261026` 及更早版本升级时，[20261109 升级边界](/zh/blog/release/silo-20261109/#upgrade)继续适用。
+KES 不内嵌于 Server，独立维护版本节奏。[20261112 发布与升级说明](/zh/release/silo-20261112/)与 [Server 20261112 升级检查](/zh/compatibility/server/#maintenance-20261112)记录 `.minio.sys` 仲裁校验、多存储池混合版本写排空、多站点服务账号编辑冻结、严格策略 JSON 解析与逐节点 S3 就绪检查；从 `20261026` 及更早版本升级时，[20261109 升级边界](/zh/release/silo-20261109/#upgrade)继续适用。
 
 ## Server 20261109 {#server-20261109}
 
@@ -52,39 +52,39 @@ KES 不内嵌于 Server，独立维护版本节奏。[20261112 发布与升级�
 | Go / 平台归档      | **Go 1.27.3**                                                                                       | Windows ZIP；Linux/macOS tar.gz（Console Windows 仅含 amd64） |
 {.wide .expand}
 
-20261109 历史 Docker Hub 摘要：`pgsty/silo:RELEASE.2026-11-09T00-00-00Z`（`sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d`）、`pgsty/silo:RELEASE.2026-11-09T00-00-00Z-distroless`（`sha256:fdf726815e38c2d1cb06c640e237daa83b3914e58099aecd073fef9d8e42cb00`）、`pgsty/silo-console:v2.7.0`（`sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`）与 `pgsty/mc:RELEASE.2026-11-09T00-00-00Z`（`sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`）。见 [20261109 发布说明](/zh/blog/release/silo-20261109/)与 [Server 20261109 升级检查](/zh/compatibility/server/#maintenance-20261109)。
+20261109 历史 Docker Hub 摘要：`pgsty/silo:RELEASE.2026-11-09T00-00-00Z`（`sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d`）、`pgsty/silo:RELEASE.2026-11-09T00-00-00Z-distroless`（`sha256:fdf726815e38c2d1cb06c640e237daa83b3914e58099aecd073fef9d8e42cb00`）、`pgsty/silo-console:v2.7.0`（`sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`）与 `pgsty/mc:RELEASE.2026-11-09T00-00-00Z`（`sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`）。见 [20261109 发布说明](/zh/release/silo-20261109/)与 [Server 20261109 升级检查](/zh/compatibility/server/#maintenance-20261109)。
 
 ## 独立 Console {#console}
 
 <span id="console-2-6-0"></span>
 
-最新正式发布的独立及内嵌 Console 为 [2.7.2](/zh/blog/release/console-2.7.2/)，
+最新正式发布的独立及内嵌 Console 为 [2.7.2](/zh/release/console-2.7.2/)，
 源码提交为 `0e7953ff59c4a1eb77c7d203b265e6783ff18d01`（`v0.0.0-20261112031746-0e7953ff59c4`），
-在 [2.7.1](/zh/blog/release/console-2.7.1/)（`3825ebc44451fdc8eefda3d4ec523a79dfecb236`）基础上同步发布元数据与优化后的前端静态资源，配套 [SILO Server 20261112](/zh/blog/release/silo-20261112/) 交付。
+在 [2.7.1](/zh/release/console-2.7.1/)（`3825ebc44451fdc8eefda3d4ec523a79dfecb236`）基础上同步发布元数据与优化后的前端静态资源，配套 [SILO Server 20261112](/zh/release/silo-20261112/) 交付。
 该版本在编辑元数据时保留服务账号策略继承关系、拦截各类空内联策略变体、在编辑弹窗内直接显示保存报错、在 `--host 0.0.0.0` HTTP→HTTPS 重定向时保留请求主机名（或使用 `CONSOLE_SECURE_TLS_HOST`）并执行严格策略 JSON 校验，
-使用 Go 1.27.4、[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/) 与 [mcli 20261112](/zh/blog/release/mcli-20261112/)（Go 伪版本 `v0.0.0-20261111180825-a37a9f054fba`）构建。
-[2.7.0](/zh/blog/release/console-2.7.0/)（源码 `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`）加入了十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复，以及用量后台任务、普通 HTTP 浏览器操作与上传修复；
-[2.6.0](/zh/blog/release/console-2.6.0/)（源码 `f8ab146695fd1df74e4b84128a286d552921bf00`）加入了用量扫描、保留版本统计与存储桶管理修复。
+使用 Go 1.27.4、[silo-pkg v3.16.1](/zh/release/pkg-3.16.1/) 与 [mcli 20261112](/zh/release/mcli-20261112/)（Go 伪版本 `v0.0.0-20261111180825-a37a9f054fba`）构建。
+[2.7.0](/zh/release/console-2.7.0/)（源码 `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`）加入了十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复，以及用量后台任务、普通 HTTP 浏览器操作与上传修复；
+[2.6.0](/zh/release/console-2.6.0/)（源码 `f8ab146695fd1df74e4b84128a286d552921bf00`）加入了用量扫描、保留版本统计与存储桶管理修复。
 已发布的 Server 20261112 内嵌 Console 2.7.2；历史 Server 20261109 内嵌 Console 2.7.0，Server 20261026 保留 Console 2.5.1。
 
 ## mcli 20261112 {#mcli-20261112}
 
 <span id="mcli-20261109"></span>
 
-最新[独立客户端发布](/zh/blog/release/mcli-20261112/)使用标签
+最新[独立客户端发布](/zh/release/mcli-20261112/)使用标签
 `RELEASE.2026-11-12T00-00-00Z`，包版本为 `20261112000000.0.0`，源码为
 [`a37a9f054fba828a0bbbceb4e9ff247ccf09c28d`](https://github.com/pgsty/mc/commit/a37a9f054fba828a0bbbceb4e9ff247ccf09c28d)
-（`v0.0.0-20261111180825-a37a9f054fba`），基于 Go 1.27.4、[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/) 与上游 minio-go
+（`v0.0.0-20261111180825-a37a9f054fba`），基于 Go 1.27.4、[silo-pkg v3.16.1](/zh/release/pkg-3.16.1/) 与上游 minio-go
 `v7.4.2-0.20261025165926-320af050c445` 构建，对齐各访问密钥编辑命令的显式空内联策略重置行为并启用严格策略 JSON 校验。
-Server 20261112 与 Console 2.7.2 已采用 mcli 20261112；历史 Server 20261109 保留 [mcli 20261109](/zh/blog/release/mcli-20261109/)（`e1d4cc5abfe00b674eb36347399e7398990be467`），更早二进制仍保留各自原有的内嵌客户端构建。
+Server 20261112 与 Console 2.7.2 已采用 mcli 20261112；历史 Server 20261109 保留 [mcli 20261109](/zh/release/mcli-20261109/)（`e1d4cc5abfe00b674eb36347399e7398990be467`），更早二进制仍保留各自原有的内嵌客户端构建。
 
 ## 共享包 v3.16.1 {#pkg-3-16-1}
 
 <span id="pkg-3-16-0"></span>
 
-[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/)（`433f7eefa714a30b72ca70c4dffcd5faca25804f`）是独立的源码库发布，要求
+[silo-pkg v3.16.1](/zh/release/pkg-3.16.1/)（`433f7eefa714a30b72ca70c4dffcd5faca25804f`）是独立的源码库发布，要求
 Go 1.27.4。该版本收紧 `ParseConfigStrict` 与 `ParseBucketPolicyConfig` 的严格 JSON 策略解码，并升级基础 `golang.org/x/*`、gRPC 与 `go-humanize` 依赖，保持公开 API 与合法策略语义兼容。Server 20261112、Console 2.7.2 与 mcli 20261112 已使用
-`github.com/pgsty/silo-pkg/v3 v3.16.1` 构建；历史 Server 20261109 保留 [silo-pkg v3.16.0](/zh/blog/release/pkg-3.16.0/)（`b7aeea85e84e8888d6ab424c7123a1297711bc3f`），外部 Go 调用方需选择 `v3.16.1` 并重新构建。
+`github.com/pgsty/silo-pkg/v3 v3.16.1` 构建；历史 Server 20261109 保留 [silo-pkg v3.16.0](/zh/release/pkg-3.16.0/)（`b7aeea85e84e8888d6ab424c7123a1297711bc3f`），外部 Go 调用方需选择 `v3.16.1` 并重新构建。
 
 ## 20261026 正式组件 {#server-20261026}
 
@@ -103,15 +103,15 @@ Go 1.27.4。该版本收紧 `ParseConfigStrict` 与 `ParseBucketPolicyConfig` �
 
 20261026 的 Server、mcli 与 KES 制品使用软件包版本号 `20261026000000.0.0`。单独升级独立部署的 Console 不会替换旧版 Server 内嵌的控制台或服务端逻辑；内置策略 Reset、实时存储桶清单、生命周期过期与复制修复均需配合 Server 20261026 生效。
 
-[三合一发布日志](/zh/blog/release/silo-20261026/) · [Console 2.5](/zh/blog/release/console-2.5.1/) · [pkg 3.15](/zh/blog/release/pkg-3.15.2/) · [升级检查](/zh/compatibility/server/#maintenance-20261026) · [下载](/zh/download/)
+[三合一发布日志](/zh/release/silo-20261026/) · [Console 2.5](/zh/release/console-2.5.1/) · [pkg 3.15](/zh/release/pkg-3.15.2/) · [升级检查](/zh/compatibility/server/#maintenance-20261026) · [下载](/zh/download/)
 
 官方容器镜像发布于 Docker Hub：`pgsty/silo`、`pgsty/mc`、`pgsty/silo-console` 与 `pgsty/kes`（软件源镜像同步可能略晚于 GitHub Release）。下文保留各历史版本的依赖矩阵，供升级与回滚核对。
 
 ## Server 20261018 正式发布 {#october-release}
 
-目标标签为 `RELEASE.2026-10-18T00-00-00Z`，包版本为 `20261018000000.0.0`，选定源码为 [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce)。GitHub Release 已**正式发布**，匿名下载与 Docker Hub 镜像于 2026-10-19 完成核验。完整功能、安全、兼容性与剩余限制见 [20261018 发布说明](/zh/blog/release/silo-20261018/)。
+目标标签为 `RELEASE.2026-10-18T00-00-00Z`，包版本为 `20261018000000.0.0`，选定源码为 [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce)。GitHub Release 已**正式发布**，匿名下载与 Docker Hub 镜像于 2026-10-19 完成核验。完整功能、安全、兼容性与剩余限制见 [20261018 发布说明](/zh/release/silo-20261018/)。
 
-[20261015](/zh/blog/release/silo-20261015/) 保留为历史未发布草稿，由 [20261018 正式版](/zh/blog/release/silo-20261018/#delivery)取代并交付 10 月的 Object Lock、IAM 与 LIST 修复（Server 20260916 不含这些修复）。
+[20261015](/zh/release/silo-20261015/) 保留为历史未发布草稿，由 [20261018 正式版](/zh/release/silo-20261018/#delivery)取代并交付 10 月的 Object Lock、IAM 与 LIST 修复（Server 20260916 不含这些修复）。
 
 ## 10 月组件依赖图 {#october-components}
 
@@ -124,11 +124,11 @@ Go 1.27.4。该版本收紧 `ParseConfigStrict` 与 `ParseBucketPolicyConfig` �
 | 构建工具链             | Go 1.27.2；Console 前端使用 Node 24.22.0 LTS   |
 {.wide .expand}
 
-历史版本 Console v2.4.2 与 mcli 20261018 声明 pkg v3.14.2；Server 的模块图选用 v3.14.3。v3.14.2 的[依赖更新](/zh/blog/release/pkg-3.14.2/)与 v3.14.3 的 [admin action 分类优化](/zh/blog/release/pkg-3.14.3/)保持 API、策略格式和授权语义。Server 必须显式选择 Console 与 MC 的 replacement，Go 不会继承依赖的替换配置。正式支持 PGSTY 四组件组合，对原厂 MinIO/MC 兼容尽最大努力。
+历史版本 Console v2.4.2 与 mcli 20261018 声明 pkg v3.14.2；Server 的模块图选用 v3.14.3。v3.14.2 的[依赖更新](/zh/release/pkg-3.14.2/)与 v3.14.3 的 [admin action 分类优化](/zh/release/pkg-3.14.3/)保持 API、策略格式和授权语义。Server 必须显式选择 Console 与 MC 的 replacement，Go 不会继承依赖的替换配置。正式支持 PGSTY 四组件组合，对原厂 MinIO/MC 兼容尽最大努力。
 
 ## 9 月 16 日依赖图 {#source}
 
-[Console v2.4.1](/zh/blog/release/console-2.4.1/) 选择以下已发布的 pkg 与 MC 源码，
+[Console v2.4.1](/zh/release/console-2.4.1/) 选择以下已发布的 pkg 与 MC 源码，
 各模块身份已通过公共 Go proxy 与校验和数据库验证。
 
 - **Console：** `v0.0.0-20260916075814-1360e26d976d` →
@@ -186,7 +186,7 @@ Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没�
 通过查询参数选择的非下载操作。没有新增关闭分享的环境变量，正常公共对象、
 预签名和版本下载继续可用，详见[行为与设计权衡](/zh/reference/minio-server/settings/console/#object-sharing)。
 
-修复已随 [Console v2.4.1](/zh/blog/release/console-2.4.1/) 发布。
+修复已随 [Console v2.4.1](/zh/release/console-2.4.1/) 发布。
 精确发布源码通过完整 CI 矩阵、漏洞检查与发布工作流；真实 API 和浏览器分享测试
 覆盖独立与内嵌部署，实际下载的独立二进制也连接 SILO 测试服务通过了分享回归。
 
@@ -212,7 +212,7 @@ Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没�
 - **升级与存量准备：** [#200](https://github.com/pgsty/silo/issues/200) 跟踪 [IAM 升级及恢复演练](/zh/operations/replication/iam-upgrade/)；[#201](https://github.com/pgsty/silo/issues/201) 跟踪[历史复制状态检查及修复验证](/zh/operations/replication/replica-metadata-audit/)。
 - **发布交付：** [#202](https://github.com/pgsty/silo/issues/202) 汇总说明和组件身份；[#203](https://github.com/pgsty/silo/issues/203) 跟踪最终制品与多进程栈验证。
 - **多站删除标记收敛：** `254b19ac0` 的源端复核覆盖不了已经在网络上在途、或由另一站点重放的创建；多数确认的清除之后崩溃留下的少数标记副本，也没有证明持久的清理责任人。[#217](https://github.com/pgsty/silo/issues/217) 跟踪接收端方案；见[设计记录](/zh/blog/design/replication-reliability/#third-round-limits)。
-- **滚动重启期间的列举：** [#239](https://github.com/pgsty/silo/pull/239)（已随 [Server 20261018](/zh/blog/release/silo-20261018/) 发布）承接 [#218](https://github.com/pgsty/silo/issues/218)，对符合条件的最新对象分歧进行确认，区分真实删除与读取故障，并把最终错误传递到分页响应。不增加磁盘格式、客户端参数或迁移开关；详见[最新设计与验收边界](/zh/blog/design/listing-recovery-lock-cost/)。
+- **滚动重启期间的列举：** [#239](https://github.com/pgsty/silo/pull/239)（已随 [Server 20261018](/zh/release/silo-20261018/) 发布）承接 [#218](https://github.com/pgsty/silo/issues/218)，对符合条件的最新对象分歧进行确认，区分真实删除与读取故障，并把最终错误传递到分页响应。不增加磁盘格式、客户端参数或迁移开关；详见[最新设计与验收边界](/zh/blog/design/listing-recovery-lock-cost/)。
 - **跨池迁移与历史标签：**最终 20261018 制品通过四组本地 2/3 池 rebalance/decommission，覆盖标签、版本、删除标记和中断恢复，见[十月迁移修复](/zh/blog/design/multi-pool-object-consistency/#migration-20261018)。修复前已丢失的标签须单独审计。
 - **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 保留开放。Server 20261018 撤回默认持久扫描，并退役可选 strict 模式；公开列表重新使用节点本地缓存或精确 key 查询，完整发现、前缀／分页语义和迟到创建写入仍未解决。详见[当前契约与容量证据](/zh/blog/design/list-multipart-uploads/#implementation)。
 
@@ -261,10 +261,10 @@ Server 20260916 源码 [`2a4d51406b7e`](https://github.com/pgsty/silo/commit/2a4
 合入，修复旧版 `xl.meta` 头部复用时的缺失字段残留，并使扫描更新与最终缓存保持互斥。
 存储格式、RPC 字段与依赖版本均未变化。[问题与修复说明](/zh/blog/design/stale-metadata-reuse/)
 记录了确定性回归测试、双进程扫描验证、合并后 CI 和运维核验方法。
-该源码修复已纳入 [Server 20261015](/zh/blog/release/silo-20261015/) 草稿，并随 [Server 20261018](/zh/blog/release/silo-20261018/) 正式发布。
+该源码修复已纳入 [Server 20261015](/zh/release/silo-20261015/) 草稿，并随 [Server 20261018](/zh/release/silo-20261018/) 正式发布。
 
 ## 20261015 之后纳入 20261018 的修复 {#post-20261015}
 
 20261018 在早期草稿基础上纳入提交元数据错误分类（#232）、上传时间解析（#236）、校验和与 Console 错误（#229/#238）、IAM 管理授权及批量自查询（#242、`995439260`）、LIST 恢复与目录保留（#239、`3dd53eb81`、`2080b3d03`）、空上传父目录清理（`0f9199e0c`），以及撤回公开持久扫描（`4733e1423`）。共享包已升至 v3.14.3。最终候选还包含跨池迁移旧副本覆盖与删除标记修复（`60c7179dd`、`1748f62c7`），以及持久 STS 枚举、撤销传播和漏通知恢复（`0cd388c66`）。
 
-具体行为、升级步骤与未完成事项以 [20261018 发布说明](/zh/blog/release/silo-20261018/)为准。原 strict 用户会失去持久列表与严格取消能力；#79 与 #217 仍未解决。
+具体行为、升级步骤与未完成事项以 [20261018 发布说明](/zh/release/silo-20261018/)为准。原 strict 用户会失去持久列表与严格取消能力；#79 与 #217 仍未解决。

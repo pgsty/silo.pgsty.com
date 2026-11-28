@@ -14,7 +14,7 @@ url: "/zh/blog/design/ilm-migration-ordering/"
 
 本文记录 [issue #265](https://github.com/pgsty/silo/issues/265)、贡献者修复 [PR #266](https://github.com/pgsty/silo/pull/266) 与维护者后续修复 [#276](https://github.com/pgsty/silo/pull/276)，并说明已经合入的 [#264](https://github.com/pgsty/silo/pull/264) 与 [#267](https://github.com/pgsty/silo/pull/267) 是相关前置修复。#266 的 decommission 提交是 [19910230a](https://github.com/pgsty/silo/commit/19910230a)，rebalance 提交是 [a995921e5](https://github.com/pgsty/silo/commit/a995921e5)。
 
-**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+**状态：** 已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 **更新（2026-11-06）。** 生命周期删除不复制，S3 如此，SILO 的每个发布版本也是如此。#276 曾在 `main` 上短暂地让它们复制：scanner、transitioned version 的 expiry 和批量 noncurrent purge 会评估删除复制决策，并为目标端排队删除标记或 version purge。这正是仍未合入的 [PR #240](https://github.com/pgsty/silo/pull/240) 的内容。`SILO Server 20261109` 已在发布前移除这一部分。#276 的其余部分保留：先删 hot-tier 再删远端、free-version 重试记录、生命周期变化栅栏，以及迁移完成检查。通过 S3 API 发出的删除仍按配置复制。decommission 在退役已过期版本之前，不再等待复制目标。下文已据此更正。
 

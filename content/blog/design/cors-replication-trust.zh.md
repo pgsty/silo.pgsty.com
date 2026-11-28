@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/cors-replication-trust/"
 ---
 
-本文记录通过 [PR #101](https://github.com/pgsty/silo/pull/101)（提交 `938603458` 至 `04b097fd9`）合入 SILO、编号为 [SN-2026-008](/zh/about/security-advisories/#sn-2026-008) 并随 [Server 20260903](/zh/blog/release/silo-20260903/) 发布的 CORS 热路径与复制请求信任边界修复。
+本文记录通过 [PR #101](https://github.com/pgsty/silo/pull/101)（提交 `938603458` 至 `04b097fd9`）合入 SILO、编号为 [SN-2026-008](/zh/about/security-advisories/#sn-2026-008) 并随 [Server 20260903](/zh/release/silo-20260903/) 发布的 CORS 热路径与复制请求信任边界修复。
 
 ## 概览 {#tldr}
 
@@ -210,4 +210,4 @@ X-Minio-Source-Replication-Request: true
 
 ## 结论 {#conclusion}
 
-该修复于 [`0079723d3`](https://github.com/pgsty/silo/commit/0079723d35d29a0134d81a7d8d502b1040cec64f)（[PR #159](https://github.com/pgsty/silo/pull/159)）合入主分支并随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，通过纯内存驻留 CORS 查询与鉴权后统一计算的复制信任边界，彻底消除了未认证桶元数据磁盘探测与未受信任复制请求头注入。
+该修复于 [`0079723d3`](https://github.com/pgsty/silo/commit/0079723d35d29a0134d81a7d8d502b1040cec64f)（[PR #159](https://github.com/pgsty/silo/pull/159)）合入主分支并随 [Server 20260916](/zh/release/silo-20260916/) 发布，通过纯内存驻留 CORS 查询与鉴权后统一计算的复制信任边界，彻底消除了未认证桶元数据磁盘探测与未受信任复制请求头注入。

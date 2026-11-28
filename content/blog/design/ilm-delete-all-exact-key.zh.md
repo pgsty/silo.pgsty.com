@@ -14,7 +14,7 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
 
 本文记录的缺陷是在审查 [#278](https://github.com/pgsty/silo/issues/278) 的修复（[多池生命周期过期](/zh/blog/design/multi-pool-lifecycle-expiry/)）时发现的。评估基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc)，以及 #278 和 #281 的维护者集成分支；保留当时的评估快照。
 
-**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+**状态：** 已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短结论 {#tldr}
 

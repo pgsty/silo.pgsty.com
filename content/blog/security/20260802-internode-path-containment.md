@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/internode-path-containment/"
 ---
 
-**Status:** Released in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) ([release notes](/blog/release/silo-20260804/#sn-2026-002))\
+**Status:** Released in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) ([release notes](/release/silo-20260804/#sn-2026-002))\
 **Identifier:** `SN-2026-002` ([Security Advisories](/about/security-advisories/#sn-2026-002))\
 **Fix commits:** [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670), [`b6f70ab08`](https://github.com/pgsty/silo/commit/b6f70ab08), [`80e8eaa42`](https://github.com/pgsty/silo/commit/80e8eaa42), [`1af351a70`](https://github.com/pgsty/silo/commit/1af351a70), [`a36fd8fff`](https://github.com/pgsty/silo/commit/a36fd8fff)\
 **Affected scope:** Distributed erasure deployments only; cluster-root / internode JWT required\
@@ -138,7 +138,7 @@ Five successive rounds of independent code review each uncovered one real flaw b
 
 ## Follow-up fixes in Server 20260804 {#open}
 
-Five companion commits shipped alongside [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670) in [Server 20260804](/blog/release/silo-20260804/#sn-2026-002):
+Five companion commits shipped alongside [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670) in [Server 20260804](/release/silo-20260804/#sn-2026-002):
 
 - **`ReadFileHandler` read-length cap (`b6f70ab08`)**: Commit [`b6f70ab08`](https://github.com/pgsty/silo/commit/b6f70ab08) rejects declared read lengths above 5 GiB (the maximum size of a single S3 part on this legacy whole-file bitrot path), preventing arbitrary caller-declared multi-tens-of-GiB allocations.
 - **Negative part size rejection (`80e8eaa42`)**: Commit [`80e8eaa42`](https://github.com/pgsty/silo/commit/80e8eaa42) rejects negative part sizes at the `AddVersion` write funnel and again in `CheckParts`, `VerifyFile`, and internode `guardErasureParams`, protecting both new writes and already-stored metadata.

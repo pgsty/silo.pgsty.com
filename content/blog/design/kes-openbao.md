@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/kes-openbao/"
 ---
 
-SILO integrates with external key-management systems through [PGSTY KES](https://github.com/pgsty/kes) (`MINIO_KMS_KES_ENDPOINT`). The current release is **[KES 20261026](/blog/release/silo-20261026/#kes)** (built with Go 1.27.3 and updated cloud dependencies while retaining the API, configuration, and key formats described below); the earlier [PGSTY KES 20261018](/blog/release/kes-20261018/) release (source [`2f7e741db905`](https://github.com/pgsty/kes/commit/2f7e741db905d7ea755967b29666657d819d7ad0)) migrated the KES AWS Secrets Manager backend to AWS SDK for Go v2 while preserving existing SILO/KES key formats and OpenBao KV v2 compatibility.
+SILO integrates with external key-management systems through [PGSTY KES](https://github.com/pgsty/kes) (`MINIO_KMS_KES_ENDPOINT`). The current release is **[KES 20261026](/release/silo-20261026/#kes)** (built with Go 1.27.3 and updated cloud dependencies while retaining the API, configuration, and key formats described below); the earlier [PGSTY KES 20261018](/release/kes-20261018/) release (source [`2f7e741db905`](https://github.com/pgsty/kes/commit/2f7e741db905d7ea755967b29666657d819d7ad0)) migrated the KES AWS Secrets Manager backend to AWS SDK for Go v2 while preserving existing SILO/KES key formats and OpenBao KV v2 compatibility.
 
 ## Three services, three responsibilities {#architecture}
 
@@ -101,7 +101,7 @@ Keep persistent key-store backups, KES configuration, TLS trust roots, identity/
 
 ## SDK migration and compatibility {#sdk}
 
-[PGSTY KES 20261018](/blog/release/kes-20261018/) (`2f7e741db905`) migrates `keystore/aws/secretsmanager` from the archived `github.com/aws/aws-sdk-go` (v1) to AWS SDK for Go v2 (`github.com/aws/aws-sdk-go-v2`, `config`, `credentials`, `service/secretsmanager`, and `github.com/aws/smithy-go`).
+[PGSTY KES 20261018](/release/kes-20261018/) (`2f7e741db905`) migrates `keystore/aws/secretsmanager` from the archived `github.com/aws/aws-sdk-go` (v1) to AWS SDK for Go v2 (`github.com/aws/aws-sdk-go-v2`, `config`, `credentials`, `service/secretsmanager`, and `github.com/aws/smithy-go`).
 
 The migration preserves stored key formats and YAML configuration fields:
 - Explicit credentials in the KES YAML configuration retain precedence; empty credential fields delegate to the standard SDK credential provider chain.
@@ -113,7 +113,7 @@ The compatibility test matrix ([`testing/kms-compat.sh`](https://github.com/pgst
 ## Upgrade and recovery checks {#verification}
 
 1. Record the SILO and KES versions, key names, backend endpoint, and client certificate identities. Retain existing keys and backend backups until recovery has been verified.
-2. Read an existing encrypted object before upgrading and record its SHA-256 digest. Upgrade KES to the target [PGSTY KES 20261026](/blog/release/silo-20261026/#kes) binary against the same persistent backend.
+2. Read an existing encrypted object before upgrading and record its SHA-256 digest. Upgrade KES to the target [PGSTY KES 20261026](/release/silo-20261026/#kes) binary against the same persistent backend.
 3. Restart KES and SILO (clearing warm key caches), read the existing encrypted object, write a new encrypted object, and verify both digests using the deployment's production TLS identities and access policies.
 4. In an isolated rehearsal, test restoring the prior KES binary against the same key store, restart both services, and repeat encrypted object readback.
 

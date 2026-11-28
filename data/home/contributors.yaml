@@ -816,8 +816,8 @@ reports:
       - repo: "pgsty/silo"
         issuesClosed: [277]
     firstContribution: "2026-11-02"
-    note: "Shipped in [Console v2.7.0](https://silo.pgsty.com/blog/release/console-2.7.0/) and [Server 20261109](https://silo.pgsty.com/blog/release/silo-20261109/)."
-    noteZh: "已随 [Console v2.7.0](https://silo.pgsty.com/zh/blog/release/console-2.7.0/) 与 [Server 20261109](https://silo.pgsty.com/zh/blog/release/silo-20261109/) 发布支持。"
+    note: "Shipped in [Console v2.7.0](https://silo.pgsty.com/release/console-2.7.0/) and [Server 20261109](https://silo.pgsty.com/release/silo-20261109/)."
+    noteZh: "已随 [Console v2.7.0](https://silo.pgsty.com/zh/release/console-2.7.0/) 与 [Server 20261109](https://silo.pgsty.com/zh/release/silo-20261109/) 发布支持。"
   - handle: "seumasdunlop"
     featured: false
     what: "Reported the outdated default server image tag in the Helm chart"

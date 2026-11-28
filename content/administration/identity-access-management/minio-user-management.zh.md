@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> - **SILO 20261109 IAM 持久化与策略加载安全（[#316](https://github.com/pgsty/silo/issues/316)、[#317](https://github.com/pgsty/silo/issues/317)、[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)）：** [SILO 20261109](/zh/blog/release/silo-20261109/) 拒绝不完整的策略加载（不会发布残缺策略集），在惰性重载期间保持缓存认证可用，并将用户、用户组、策略及服务账户的变更直接应用于持久化记录，防止滞后节点恢复已轮换的旧凭据或复活已删除的身份。
+> - **SILO 20261109 IAM 持久化与策略加载安全（[#316](https://github.com/pgsty/silo/issues/316)、[#317](https://github.com/pgsty/silo/issues/317)、[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)）：** [SILO 20261109](/zh/release/silo-20261109/) 拒绝不完整的策略加载（不会发布残缺策略集），在惰性重载期间保持缓存认证可用，并将用户、用户组、策略及服务账户的变更直接应用于持久化记录，防止滞后节点恢复已轮换的旧凭据或复活已删除的身份。
 > - **SILO 20261018 自助管理授权规则：** 自助查询与清理必须遵守显式 `Deny`、会话限制及授权插件决定；内置授权拒绝受限派生凭据创建或更新服务账户，并保护 `root` 派生凭据。普通用户保留既有自助权限，批量自查询别名统一解析至父身份。详见[管理授权契约](/zh/blog/design/iam-admin-authorization/)与 [SN-2026-017](/zh/blog/security/20261018-release-hardening/#sn-2026-017)。
 
 <a id="user-management"></a>
@@ -52,7 +52,7 @@ MinIO 用户可以生成任意数量的访问密钥。 这使应用所有者可�
 
 ## MinIO `root` 用户 {#minio-root-user}
 
-每个 MinIO 部署都具有一个 `root` 用户，可访问该部署上的所有操作和资源，无论配置的是哪种 [身份管理器](/zh/administration/identity-access-management/#minio-authentication-and-identity-management)（包括在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中启用 AD/LDAP 时登录内嵌 Console，[#272](https://github.com/pgsty/silo/issues/272)）。当 [`silo`](/zh/reference/minio-server/#command-minio) 服务器首次启动时，会通过检查以下环境变量的值来设置 `root` 用户凭证：
+每个 MinIO 部署都具有一个 `root` 用户，可访问该部署上的所有操作和资源，无论配置的是哪种 [身份管理器](/zh/administration/identity-access-management/#minio-authentication-and-identity-management)（包括在 [SILO 20261109](/zh/release/silo-20261109/) 中启用 AD/LDAP 时登录内嵌 Console，[#272](https://github.com/pgsty/silo/issues/272)）。当 [`silo`](/zh/reference/minio-server/#command-minio) 服务器首次启动时，会通过检查以下环境变量的值来设置 `root` 用户凭证：
 
 - [`MINIO_ROOT_USER`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER)
 - [`MINIO_ROOT_PASSWORD`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD)

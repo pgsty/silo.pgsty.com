@@ -78,7 +78,7 @@ SILO 提供了一个示例 Go 应用 [web-identity.go](https://github.com/pgsty/
 > [!NOTE]
 > **OIDC JWK 校验、JOSE 加固与组 Claim 解析**
 >
-> [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）通过 [`silo-pkg v3.16.0`](/zh/blog/release/pkg-3.16.0/) 升级采用 `github.com/go-jose/go-jose/v4 v4.1.9`，进一步加固 RSA 证书校验限制、JWS 签名与 JWE 接收方数量上限以及 JWE 受保护/非受保护头部处理。自 `silo-pkg v3.14.2` 及 [SILO 20261018](/zh/blog/release/silo-20261018/) 起，OIDC JWKS 校验拒绝超过 4096 位的 RSA 公钥并强制限制 JWK 密钥参数范围。内嵌 Console（SILO 20261109 内嵌 [Console v2.7.0](/zh/blog/release/console-2.7.0/)；自 [Console v2.5.1](/zh/blog/release/console-2.5.1/) 引入）除逗号分隔字符串外，也支持解析字符串数组形式的组 claim。参见 [TLS 与 OIDC 发现](/zh/blog/design/go127-tls-oidc-discovery/)。
+> [SILO 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）通过 [`silo-pkg v3.16.0`](/zh/release/pkg-3.16.0/) 升级采用 `github.com/go-jose/go-jose/v4 v4.1.9`，进一步加固 RSA 证书校验限制、JWS 签名与 JWE 接收方数量上限以及 JWE 受保护/非受保护头部处理。自 `silo-pkg v3.14.2` 及 [SILO 20261018](/zh/release/silo-20261018/) 起，OIDC JWKS 校验拒绝超过 4096 位的 RSA 公钥并强制限制 JWK 密钥参数范围。内嵌 Console（SILO 20261109 内嵌 [Console v2.7.0](/zh/release/console-2.7.0/)；自 [Console v2.5.1](/zh/release/console-2.5.1/) 引入）除逗号分隔字符串外，也支持解析字符串数组形式的组 claim。参见 [TLS 与 OIDC 发现](/zh/blog/design/go127-tls-oidc-discovery/)。
 
 <a id="jwt-claim" data-td-print-local></a>
 

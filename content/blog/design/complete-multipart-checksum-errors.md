@@ -12,11 +12,11 @@ draft: false
 url: "/blog/design/complete-multipart-checksum-errors/"
 ---
 
-The repairs for [#48](https://github.com/pgsty/silo/issues/48) and [#50](https://github.com/pgsty/silo/issues/50) shipped in [Server 20260903](/blog/release/silo-20260903/), and the streaming-checksum follow-up ([PR #143](https://github.com/pgsty/silo/pull/143)) shipped in [Server 20260916](/blog/release/silo-20260916/). This record supersedes the earlier August proposal to leave `CRC64NVME` canonicalization unchanged.
+The repairs for [#48](https://github.com/pgsty/silo/issues/48) and [#50](https://github.com/pgsty/silo/issues/50) shipped in [Server 20260903](/release/silo-20260903/), and the streaming-checksum follow-up ([PR #143](https://github.com/pgsty/silo/pull/143)) shipped in [Server 20260916](/release/silo-20260916/). This record supersedes the earlier August proposal to leave `CRC64NVME` canonicalization unchanged.
 
 ## 20261018: Message Text and Commit Failures {#october-errors}
 
-[Server 20261018](/blog/release/silo-20261018/#reliability) includes the message fixes from [#225](https://github.com/pgsty/silo/issues/225), [#229](https://github.com/pgsty/silo/issues/229), and [#238](https://github.com/pgsty/silo/issues/238): S3-compatible `Content-MD5` capitalization, known algorithm names for `PutObject` and `UploadPart` mismatches, and removal of redundant "checksum" wording at completion. Unknown algorithms retain the generic description, and operation-specific error codes and validation requirements remain unchanged. The unchanged `UploadPart` mapper described below refers to the August repair scope; October updates its message rendering. Clients should match HTTP and S3 error codes rather than parse the full English message text.
+[Server 20261018](/release/silo-20261018/#reliability) includes the message fixes from [#225](https://github.com/pgsty/silo/issues/225), [#229](https://github.com/pgsty/silo/issues/229), and [#238](https://github.com/pgsty/silo/issues/238): S3-compatible `Content-MD5` capitalization, known algorithm names for `PutObject` and `UploadPart` mismatches, and removal of redundant "checksum" wording at completion. Unknown algorithms retain the generic description, and operation-specific error codes and validation requirements remain unchanged. The unchanged `UploadPart` mapper described below refers to the August repair scope; October updates its message rendering. Clients should match HTTP and S3 error codes rather than parse the full English message text.
 
 Separately, [#232](https://github.com/pgsty/silo/issues/232) classifies staged `xl.meta` loss at final commit as `503 SlowDownWrite`. That status is distinct from the HTTP 400 client-checksum errors in the table below and does not change genuine incomplete-body handling. See the [S3 write-commit reference](/reference/s3-api-compatibility/#write-commit-errors).
 
@@ -53,7 +53,7 @@ The initial completion error mapping landed in [PR #74](https://github.com/pgsty
 
 ## Separate Streaming-Checksum Follow-Up {#streaming}
 
-[PR #143](https://github.com/pgsty/silo/pull/143), resolving [#107](https://github.com/pgsty/silo/issues/107) (reported by `@cbornet`), handles `aws-chunked` requests that advertise `x-amz-trailer` but supply the checksum in a standard HTTP header—a pattern used by the AWS Java SDK v2. It also rejects invalid header-delivered checksum values instead of dropping validation. This streaming-checksum repair shipped in [Server 20260916](/blog/release/silo-20260916/) and is independent of multipart completion error mapping.
+[PR #143](https://github.com/pgsty/silo/pull/143), resolving [#107](https://github.com/pgsty/silo/issues/107) (reported by `@cbornet`), handles `aws-chunked` requests that advertise `x-amz-trailer` but supply the checksum in a standard HTTP header—a pattern used by the AWS Java SDK v2. It also rejects invalid header-delivered checksum values instead of dropping validation. This streaming-checksum repair shipped in [Server 20260916](/release/silo-20260916/) and is independent of multipart completion error mapping.
 
 ## Compatibility and Remaining Boundaries {#impact}
 

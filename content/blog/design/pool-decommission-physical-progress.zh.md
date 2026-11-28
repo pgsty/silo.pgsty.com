@@ -14,7 +14,7 @@ url: "/zh/blog/design/pool-decommission-physical-progress/"
 
 本文记录 `cmd/erasure-server-pool-decom.go`、`cmd/erasure-server-pool-rebalance.go` 与 `cmd/erasure-server-pool-migration.go` 中三项继承自上游 MinIO 的存储池迁移与退役缺陷及其修复设计（[#334](https://github.com/pgsty/silo/issues/334)、[PR #335](https://github.com/pgsty/silo/pull/335)、[#340](https://github.com/pgsty/silo/issues/340)），作为 [11 月 1 日存储池迁移完整性审查](/zh/blog/design/pool-migration-integrity-review/)的延续。
 
-**状态：** 已随 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`；提交 [`ce5d19107`](https://github.com/pgsty/silo/commit/ce5d19107707c44973c75f7999fbf2fa8606d142)、[`5dc4bd6a1`](https://github.com/pgsty/silo/commit/5dc4bd6a1d286608783529ba871e5eadd76a03c9)、[`322cd8d2c`](https://github.com/pgsty/silo/commit/322cd8d2c1ac0574aae9534473e58620ea3666e2) 与 [`8587e061b`](https://github.com/pgsty/silo/commit/8587e061bb7a407e6c98f7020f6475a96500e700)）发布。
+**状态：** 已随 **[SILO 20261112](/zh/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`；提交 [`ce5d19107`](https://github.com/pgsty/silo/commit/ce5d19107707c44973c75f7999fbf2fa8606d142)、[`5dc4bd6a1`](https://github.com/pgsty/silo/commit/5dc4bd6a1d286608783529ba871e5eadd76a03c9)、[`322cd8d2c`](https://github.com/pgsty/silo/commit/322cd8d2c1ac0574aae9534473e58620ea3666e2) 与 [`8587e061b`](https://github.com/pgsty/silo/commit/8587e061bb7a407e6c98f7020f6475a96500e700)）发布。
 
 ## 简短回答 {#tldr}
 

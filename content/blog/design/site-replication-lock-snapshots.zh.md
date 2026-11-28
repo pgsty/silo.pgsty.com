@@ -14,7 +14,7 @@ url: "/zh/blog/design/site-replication-lock-snapshots/"
 
 本文记录 `SiteReplicationSys`（`cmd/site-replication.go`、`cmd/iam-revision.go`、`cmd/site-replication-metadata.go`）中一组继承自上游 MinIO 的递归读锁死锁与共享 Map 数据竞争缺陷及其修复设计，对应 [#341](https://github.com/pgsty/silo/issues/341)。
 
-**状态：** 已随 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`；提交 [`745fbf043`](https://github.com/pgsty/silo/commit/745fbf04376454a3052afb7204856b90cd394f9b)、[`2f228284f`](https://github.com/pgsty/silo/commit/2f228284f31ded34ff34442b239a7e1589caa778) 与 [`ef6efd312`](https://github.com/pgsty/silo/commit/ef6efd3120737506f9dd706e2c8564647b2c5685)）发布。`SILO Server 20261109` 及更早版本，以及自 `2022-04-24` 以来的上游原版 MinIO 均受影响。
+**状态：** 已随 **[SILO 20261112](/zh/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`；提交 [`745fbf043`](https://github.com/pgsty/silo/commit/745fbf04376454a3052afb7204856b90cd394f9b)、[`2f228284f`](https://github.com/pgsty/silo/commit/2f228284f31ded34ff34442b239a7e1589caa778) 与 [`ef6efd312`](https://github.com/pgsty/silo/commit/ef6efd3120737506f9dd706e2c8564647b2c5685)）发布。`SILO Server 20261109` 及更早版本，以及自 `2022-04-24` 以来的上游原版 MinIO 均受影响。
 
 ## 简短回答 {#tldr}
 

@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/listing-recovery-lock-cost/"
 ---
 
-随 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 发布的 [PR #239](https://github.com/pgsty/silo/pull/239)（合并提交 [`fbcb51197`](https://github.com/pgsty/silo/commit/fbcb5119782a3ec0f2198fd9f42891a11dc4183f)，关闭 [#218](https://github.com/pgsty/silo/issues/218) 并保留 mr javad seydi 在 [#221](https://github.com/pgsty/silo/pull/221) 中的原始签署提交）以及 10 月 18 日的目录与公共前缀跟进修复（[`3dd53eb81`](https://github.com/pgsty/silo/commit/3dd53eb81) 与 [`2080b3d03`](https://github.com/pgsty/silo/commit/2080b3d03)），解决了并发读写期间 `ListObjects` 与 `ListObjectsV2` 静默漏报对象的问题。本设计承接[九月的 null 版本仲裁修复](/zh/blog/design/list-null-version-quorum/)，并替代了早期“直接调用普通 `GET` 元数据路径”的恢复方案。
+随 [SILO Server 20261018](/zh/release/silo-20261018/) 发布的 [PR #239](https://github.com/pgsty/silo/pull/239)（合并提交 [`fbcb51197`](https://github.com/pgsty/silo/commit/fbcb5119782a3ec0f2198fd9f42891a11dc4183f)，关闭 [#218](https://github.com/pgsty/silo/issues/218) 并保留 mr javad seydi 在 [#221](https://github.com/pgsty/silo/pull/221) 中的原始签署提交）以及 10 月 18 日的目录与公共前缀跟进修复（[`3dd53eb81`](https://github.com/pgsty/silo/commit/3dd53eb81) 与 [`2080b3d03`](https://github.com/pgsty/silo/commit/2080b3d03)），解决了并发读写期间 `ListObjects` 与 `ListObjectsV2` 静默漏报对象的问题。本设计承接[九月的 null 版本仲裁修复](/zh/blog/design/list-null-version-quorum/)，并替代了早期“直接调用普通 `GET` 元数据路径”的恢复方案。
 
 ## 成功的目录列举可能漏掉真实存在的对象 {#problem}
 

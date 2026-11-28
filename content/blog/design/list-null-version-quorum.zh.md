@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/list-null-version-quorum/"
 ---
 
-本文记录 2026-09-16 调查的对象列举漏项问题：未开启版本控制的存储桶在并发覆盖写下返回 HTTP 200 的列表，却漏掉了同一端点仍能正常 `GET` 的对象键。下文说明已确认的合并缺陷机制、提交 [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1)（随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布）的针对性修复与验证数据，以及在 [`#218`](https://github.com/pgsty/silo/issues/218) 中跟踪、随后在 [Server 20261018](/zh/blog/release/silo-20261018/#listing) 中由 PR [`#239`](https://github.com/pgsty/silo/pull/239) 关闭的滚动重启漏项边界（详见 [LIST 恢复设计](/zh/blog/design/listing-recovery-lock-cost/)）。
+本文记录 2026-09-16 调查的对象列举漏项问题：未开启版本控制的存储桶在并发覆盖写下返回 HTTP 200 的列表，却漏掉了同一端点仍能正常 `GET` 的对象键。下文说明已确认的合并缺陷机制、提交 [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1)（随 [Server 20260916](/zh/release/silo-20260916/) 发布）的针对性修复与验证数据，以及在 [`#218`](https://github.com/pgsty/silo/issues/218) 中跟踪、随后在 [Server 20261018](/zh/release/silo-20261018/#listing) 中由 PR [`#239`](https://github.com/pgsty/silo/pull/239) 关闭的滚动重启漏项边界（详见 [LIST 恢复设计](/zh/blog/design/listing-recovery-lock-cost/)）。
 
 ## 缺陷机制 {#defect}
 
@@ -38,4 +38,4 @@ url: "/zh/blog/design/list-null-version-quorum/"
 - 单块远端磁盘在流式列举中途断连，导致解析器拿到的有效条目少于仲裁数或缺少缓存元数据；
 - 部分解析回调（Partial-Resolution Callback）在失效 reader 数量未超过整集容错阈值时静默丢弃单个条目。
 
-Issue [`#218`](https://github.com/pgsty/silo/issues/218) 专门跟踪了上述滚动重启调查，随后在 [Server 20261018](/zh/blog/release/silo-20261018/#listing) 的 PR [`#239`](https://github.com/pgsty/silo/pull/239) 中通过移除 `listPathRaw` 的 1 秒读锁硬超时并引入有界 metacache 流恢复机制彻底解决。完整根因分析、修复设计与基准测试见[节点重启与 NSLock 锁竞争下的 LIST 恢复设计](/zh/blog/design/listing-recovery-lock-cost/)。
+Issue [`#218`](https://github.com/pgsty/silo/issues/218) 专门跟踪了上述滚动重启调查，随后在 [Server 20261018](/zh/release/silo-20261018/#listing) 的 PR [`#239`](https://github.com/pgsty/silo/pull/239) 中通过移除 `listPathRaw` 的 1 秒读锁硬超时并引入有界 metacache 流恢复机制彻底解决。完整根因分析、修复设计与基准测试见[节点重启与 NSLock 锁竞争下的 LIST 恢复设计](/zh/blog/design/listing-recovery-lock-cost/)。

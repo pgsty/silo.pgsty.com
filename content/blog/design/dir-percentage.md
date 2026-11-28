@@ -13,11 +13,11 @@ url: "/blog/design/dir-percentage/"
 
 SILO Console v2.1.1 displayed `NaN%` in the **Downloads / Uploads** drawer while downloading a folder. Although the streamed ZIP archive continued transferring normally and stored objects were intact, the progress bar entered an invalid determinate state—causing operators to assume the transfer had stalled or failed and to click **Download** repeatedly.
 
-The repair shipped in [Console 2.2.0](/blog/release/console-2.2.0/) (`16960f7ab`, tracking [#62](https://github.com/pgsty/silo/issues/62)) and was embedded in [Server 20260903](/blog/release/silo-20260903/) (`edc8be6ed`). It enforces a single rule:
+The repair shipped in [Console 2.2.0](/release/console-2.2.0/) (`16960f7ab`, tracking [#62](https://github.com/pgsty/silo/issues/62)) and was embedded in [Server 20260903](/release/silo-20260903/) (`edc8be6ed`). It enforces a single rule:
 
 > A download may enter determinate mode only when it has a finite, positive total measured in bytes applicable to that response. Without such a total, it remains indeterminate until completion, failure, or cancellation.
 
-([Console 2.4.1](/blog/release/console-2.4.1/#browser) later evolved folder and multi-selection downloads to use file-stream writers and native browser download handoff; see [Subsequent Evolution](#later-contract) below.)
+([Console 2.4.1](/release/console-2.4.1/#browser) later evolved folder and multi-selection downloads to use file-stream writers and native browser download handoff; see [Subsequent Evolution](#later-contract) below.)
 
 ## Observed Failure {#failure}
 
@@ -295,7 +295,7 @@ Playwright tests against a live SILO + Console instance use Chromium CDP network
 
 ## Delivery and Rollback {#delivery}
 
-Shipped in [Console v2.2.0](/blog/release/console-2.2.0/) ([silo-console#29](https://github.com/pgsty/silo-console/pull/29)) and embedded in [SILO Server 20260903](/blog/release/silo-20260903/), resolving [pgsty/silo#62](https://github.com/pgsty/silo/issues/62). No storage or API migration is required.
+Shipped in [Console v2.2.0](/release/console-2.2.0/) ([silo-console#29](https://github.com/pgsty/silo-console/pull/29)) and embedded in [SILO Server 20260903](/release/silo-20260903/), resolving [pgsty/silo#62](https://github.com/pgsty/silo/issues/62). No storage or API migration is required.
 
 ### Definition of Done {#done}
 
@@ -310,6 +310,6 @@ Shipped in [Console v2.2.0](/blog/release/console-2.2.0/) ([silo-console#29](htt
 
 ## Subsequent Evolution: Browser Streaming Handoff in Console 2.4.1 {#later-contract}
 
-Alongside this progress repair, [Console 2.2.0](/blog/release/console-2.2.0/) also made `size` an always-present JSON field in object listings and hardened server-side ZIP error propagation so unreadable entries abort the stream rather than being silently omitted.
+Alongside this progress repair, [Console 2.2.0](/release/console-2.2.0/) also made `size` an always-present JSON field in object listings and hardened server-side ZIP error propagation so unreadable entries abort the stream rather than being silently omitted.
 
-Subsequently, [Console 2.4.1](/blog/release/console-2.4.1/#browser) eliminated in-memory XHR `Blob` buffering for downloads by handing single-folder and single-object downloads directly to the browser's native download manager and streaming multi-selection archives through file-system writers where supported. Under that newer architecture, the Console transfer row records the handoff to the browser, while ongoing byte progress and cancellation are managed natively by the browser's download manager.
+Subsequently, [Console 2.4.1](/release/console-2.4.1/#browser) eliminated in-memory XHR `Blob` buffering for downloads by handing single-folder and single-object downloads directly to the browser's native download manager and streaming multi-selection archives through file-system writers where supported. Under that newer architecture, the Console transfer row records the handoff to the browser, while ongoing byte progress and cancellation are managed natively by the browser's download manager.

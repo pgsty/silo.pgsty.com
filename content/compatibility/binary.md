@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-box
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261109](/blog/release/silo-20261109/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261109/#upgrade).
+**Version scope:** commands and illustrative output target [Server 20261109](/release/silo-20261109/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/release/silo-20261109/#upgrade).
 
 Silo publishes `silo` packages for RPM, DEB, and APK on `amd64`/`arm64` via [GitHub Releases](https://github.com/pgsty/silo/releases), with SHA-256 sums and build-provenance attestations. This page records what changes relative to a `minio` package installation: the file layout, the service account, and the caveats. General migration scope is in the [migration guide](/compatibility/migration/).
 

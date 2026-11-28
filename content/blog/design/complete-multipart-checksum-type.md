@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/complete-multipart-checksum-type/"
 ---
 
-[PR #57](https://github.com/pgsty/silo/pull/57), contributed by Shooks (`@Dansyuqri`), resolved [#47](https://github.com/pgsty/silo/issues/47) and shipped in [Server 20260903](/blog/release/silo-20260903/). It restores the `ChecksumType` element in `CompleteMultipartUpload` XML responses whenever an object stores an additional S3 checksum.
+[PR #57](https://github.com/pgsty/silo/pull/57), contributed by Shooks (`@Dansyuqri`), resolved [#47](https://github.com/pgsty/silo/issues/47) and shipped in [Server 20260903](/release/silo-20260903/). It restores the `ChecksumType` element in `CompleteMultipartUpload` XML responses whenever an object stores an additional S3 checksum.
 
 ## The Defect and Its Scope {#origin}
 
@@ -41,4 +41,4 @@ The [merged commit (`a96116b12`)](https://github.com/pgsty/silo/commit/a96116b12
 
 XML parsers that ignore unknown elements remain compatible, and SDKs that inspect `ChecksumType` (such as `silo-go` at [`bc3b35f97`](https://github.com/pgsty/silo-go/commit/bc3b35f973d981920cd83e8b5d2b30a45ec1b6dc)) receive the stored value immediately on completion. No new checksum algorithm, on-disk metadata format, or object migration was introduced.
 
-Two adjacent multipart checksum repairs also shipped in [Server 20260903](/blog/release/silo-20260903/): [UploadPart checksum inference](/blog/design/uploadpart-checksum/) and [CompleteMultipartUpload checksum error mapping](/blog/design/complete-multipart-checksum-errors/), where `CRC64NVME + COMPOSITE` is explicitly rejected rather than silently canonicalized.
+Two adjacent multipart checksum repairs also shipped in [Server 20260903](/release/silo-20260903/): [UploadPart checksum inference](/blog/design/uploadpart-checksum/) and [CompleteMultipartUpload checksum error mapping](/blog/design/complete-multipart-checksum-errors/), where `CRC64NVME + COMPOSITE` is explicitly rejected rather than silently canonicalized.

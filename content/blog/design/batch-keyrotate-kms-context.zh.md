@@ -14,7 +14,7 @@ url: "/zh/blog/design/batch-keyrotate-kms-context/"
 
 本文记录 `cmd/batch-rotate.go` 中一处继承自上游 MinIO 的 SSE-KMS 关联数据（Associated Data）静默丢失缺陷及其修复设计，对应 [#346](https://github.com/pgsty/silo/issues/346)。
 
-**状态：** 已随 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`；提交 [`467ce760e`](https://github.com/pgsty/silo/commit/467ce760ed2d77099e8c89cd57514b830acf8780) 与 [`4a9bdb540`](https://github.com/pgsty/silo/commit/4a9bdb54072dbd7e95dd303a190cda7237ce4fcd)）发布。`SILO Server 20261109` 及更早版本，以及自 `RELEASE.2023-04-07T05-28-58Z` 以来的所有上游原版 MinIO 均受影响。
+**状态：** 已随 **[SILO 20261112](/zh/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`；提交 [`467ce760e`](https://github.com/pgsty/silo/commit/467ce760ed2d77099e8c89cd57514b830acf8780) 与 [`4a9bdb540`](https://github.com/pgsty/silo/commit/4a9bdb54072dbd7e95dd303a190cda7237ce4fcd)）发布。`SILO Server 20261109` 及更早版本，以及自 `RELEASE.2023-04-07T05-28-58Z` 以来的所有上游原版 MinIO 均受影响。
 
 ## 简短回答 {#tldr}
 

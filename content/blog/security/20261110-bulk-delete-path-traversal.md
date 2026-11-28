@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/20261110-bulk-delete-path-traversal/"
 ---
 
-**Status:** Shipped in **[SILO Server 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`, [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d))\
+**Status:** Shipped in **[SILO Server 20261112](/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`, [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d))\
 **Identifier:** `SN-2026-020` ([Security Advisory Ledger](/about/security-advisories/#sn-2026-020))\
 **Severity:** Critical\
 **Affected scope:** Single-pool **SILO Server** deployments (`RELEASE.2026-11-09T00-00-00Z` and earlier) and inherited upstream MinIO releases; multi-pool deployments (`2+` pools) are unaffected on SILO `20261026`+\
@@ -29,7 +29,7 @@ On single-pool deployments, `(*erasureServerPools).DeleteObjects` (`cmd/erasure-
 
 ## 1. Discovery {#discovery}
 
-On October 31, 2026, Denis Babchuk ([`@botdeniska`](https://github.com/botdeniska)) privately reported an Object Lock flaw in `DeleteMultipleObjectsHandler` (`cmd/bucket-handlers.go`), showing that S3 `DeleteObjects` decided whether to enforce version retention and legal hold from the cached `hasLockEnabled` state of the request bucket rather than verifying the target version under the storage write lock. In [SILO Server 20261109](/blog/release/silo-20261109/#authorization), [PR #330](https://github.com/pgsty/silo/pull/330) ([`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)) routed physical version deletes in Object Lock buckets through the single-object deletion path under the mutation lock.
+On October 31, 2026, Denis Babchuk ([`@botdeniska`](https://github.com/botdeniska)) privately reported an Object Lock flaw in `DeleteMultipleObjectsHandler` (`cmd/bucket-handlers.go`), showing that S3 `DeleteObjects` decided whether to enforce version retention and legal hold from the cached `hasLockEnabled` state of the request bucket rather than verifying the target version under the storage write lock. In [SILO Server 20261109](/release/silo-20261109/#authorization), [PR #330](https://github.com/pgsty/silo/pull/330) ([`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)) routed physical version deletes in Object Lock buckets through the single-object deletion path under the mutation lock.
 
 During post-release verification of `6ef3a52fc` and the private advisory queue, we audited what happens when `hasLockEnabled` is evaluated on an unlocked bucket `A` named in the request URL (`POST /A?delete`) while an `<Object><Key>` in the XML body uses `../B/secret` to address a locked bucket `B`. Testing against `Server 20261026` and `Server 20261109` confirmed that single-pool deployments executed the cross-bucket deletion, and subsequent analysis identified two further variants—cross-bucket delete-marker creation via `s3:DeleteObject` and `.minio.sys` metadata hiding—along with a self-deadlock when a batch contains multiple traversal aliases for the same target. We thank [`@botdeniska`](https://github.com/botdeniska) for the original `DeleteObjects` Object Lock report that prompted this audit.
 
@@ -174,8 +174,8 @@ if slices.ContainsFunc(derrs, func(err error) bool { return err != nil }) {
 
 ## Remediation and Mitigation {#remediation}
 
-1. **Upgrade SILO Server** on single-pool deployments to **[SILO Server 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`, containing [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)). Updating `silo-console` or `mcli` alone does not remediate the server issue.
-2. **Temporary mitigation prior to upgrade:** No configuration toggle disables this code path on unpatched single-pool servers. Until upgraded, revoke `s3:DeleteObject` and `s3:DeleteObjectVersion` from untrusted principals on single-pool deployments, or isolate untrusted tenants onto separate instances. Multi-pool deployments (`2+` server pools) on [SILO Server 20261026](/blog/release/silo-20261026/) or [20261109](/blog/release/silo-20261109/) are unaffected.
+1. **Upgrade SILO Server** on single-pool deployments to **[SILO Server 20261112](/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`, containing [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)). Updating `silo-console` or `mcli` alone does not remediate the server issue.
+2. **Temporary mitigation prior to upgrade:** No configuration toggle disables this code path on unpatched single-pool servers. Until upgraded, revoke `s3:DeleteObject` and `s3:DeleteObjectVersion` from untrusted principals on single-pool deployments, or isolate untrusted tenants onto separate instances. Multi-pool deployments (`2+` server pools) on [SILO Server 20261026](/release/silo-20261026/) or [20261109](/release/silo-20261109/) are unaffected.
 3. **Post-upgrade audit:** Where untrusted principals held delete permissions on a versioned bucket in an unpatched single-pool deployment, check buckets (`mcli ls --versions`) and `.minio.sys/buckets/<bucket>/.metadata.bin` for unexpected delete markers.
 
 See the [Security Advisory Ledger](/about/security-advisories/#sn-2026-020), [SN-2026-002 Internode Path Containment](/blog/security/internode-path-containment/), and the [Component Version Matrix](/compatibility/versions/).

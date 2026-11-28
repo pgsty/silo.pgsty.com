@@ -11,7 +11,7 @@ draft: false
 url: "/zh/blog/design/ssec-replica-integrity/"
 ---
 
-本文记录由 [#122](https://github.com/pgsty/silo/pull/122)、[#123](https://github.com/pgsty/silo/pull/123)、[#124](https://github.com/pgsty/silo/pull/124)、[#126](https://github.com/pgsty/silo/pull/126) 和 [#134](https://github.com/pgsty/silo/pull/134) 共同构成的 SSE-C 副本完整性契约（随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布），与此前在 [Server 20260903](/zh/blog/release/silo-20260903/) 中发布的零字节/属性读取认证及目标密钥 checksum 响应修复衔接。
+本文记录由 [#122](https://github.com/pgsty/silo/pull/122)、[#123](https://github.com/pgsty/silo/pull/123)、[#124](https://github.com/pgsty/silo/pull/124)、[#126](https://github.com/pgsty/silo/pull/126) 和 [#134](https://github.com/pgsty/silo/pull/134) 共同构成的 SSE-C 副本完整性契约（随 [Server 20260916](/zh/release/silo-20260916/) 发布），与此前在 [Server 20260903](/zh/release/silo-20260903/) 中发布的零字节/属性读取认证及目标密钥 checksum 响应修复衔接。
 
 ## 密文与信任 {#ciphertext}
 

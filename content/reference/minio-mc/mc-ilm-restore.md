@@ -169,13 +169,13 @@ mc ilm restore --recursive myminio/mybucket/data/
 
 ### Restored Objects Expire Automatically {#restored-objects-expire-automatically}
 
-SILO automatically expires the restored local copy after the specified number of days (default: 1 day). In [SILO 20261109](/blog/release/silo-20261109/), expiring a restored copy removes only the temporary local cache while keeping the object version and its remote-tier data intact ([#281](https://github.com/pgsty/silo/issues/281)).
+SILO automatically expires the restored local copy after the specified number of days (default: 1 day). In [SILO 20261109](/release/silo-20261109/), expiring a restored copy removes only the temporary local cache while keeping the object version and its remote-tier data intact ([#281](https://github.com/pgsty/silo/issues/281)).
 
 <a id="restored-objects-become-head"></a>
 
 ### Two-Phase In-Place Version Restore {#two-phase-restore}
 
-Starting in [SILO 20261109](/blog/release/silo-20261109/), native restore (`POST ?restore`, commit [`86dc6ee2e`](https://github.com/pgsty/silo/commit/86dc6ee2e)) runs in two phases; see [Native Restore in Two Phases](/blog/design/native-restore-two-phase/) for design details:
+Starting in [SILO 20261109](/release/silo-20261109/), native restore (`POST ?restore`, commit [`86dc6ee2e`](https://github.com/pgsty/silo/commit/86dc6ee2e)) runs in two phases; see [Native Restore in Two Phases](/blog/design/native-restore-two-phase/) for design details:
 
 - **In-place version restoration:** SILO restores the exact addressed version in place without changing version ordering or creating a new `HEAD` version. Multi-pool restores no longer hang or remain stuck in progress ([#289](https://github.com/pgsty/silo/issues/289)).
 - **Two-phase locking:** Phase 1 downloads and stages the remote-tier data outside the object write lock so concurrent `GET`, `HEAD`, and `PUT` requests on the key do not wait for the download. Phase 2 acquires a short object lock and validates attempt ownership and version metadata before publishing the restored copy ([#284](https://github.com/pgsty/silo/issues/284)).

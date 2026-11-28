@@ -10,11 +10,11 @@ draft: false
 url: "/zh/blog/security/20261110-svcacct-inline-policy-preservation/"
 ---
 
-**发布状态：** 已随 **[SILO Server 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，[`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27)，经 [PR #331](https://github.com/pgsty/silo/pull/331) 合入为 [`244de7ecc`](https://github.com/pgsty/silo/commit/244de7ecc1ce33f4f3e7ec452395993eb2449f11)）发布\
+**发布状态：** 已随 **[SILO Server 20261112](/zh/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，[`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27)，经 [PR #331](https://github.com/pgsty/silo/pull/331) 合入为 [`244de7ecc`](https://github.com/pgsty/silo/commit/244de7ecc1ce33f4f3e7ec452395993eb2449f11)）发布\
 **安全编号：** `SN-2026-021`（[安全公告台账](/zh/about/security-advisories/#sn-2026-021)）\
 **严重程度：** 高危（High）\
 **影响范围：** **SILO Server**（`RELEASE.2026-11-09T00-00-00Z` 及更早版本）与自 `2022-05` 以来的上游原版 MinIO\
-**客户端与控制台说明：** 不带策略的日常编辑无需改动客户端即可保留内联策略；**[mcli 20261112](/zh/blog/release/mcli-20261112/)**（[`d7262c2a`](https://github.com/pgsty/mc/commit/d7262c2a5fbdf2b9503cc0283f1d37ae8da41baf)，[`pgsty/mc#78`](https://github.com/pgsty/mc/issues/78)）将显式空策略重置从 `admin user svcacct set --policy` 扩展至 `svcacct edit`、`admin accesskey edit`、`idp ldap accesskey edit` 与 `idp openid accesskey edit`；**[SILO Console 2.7.1](/zh/blog/release/console-2.7.1/)**（[`SN-2026-025`](/zh/blog/security/20261111-iam-import-status-and-console-policy/)）改为通过关闭 **Restrict beyond user policy** 开关移除内联限制（在旧版 Console v2.7.0 中则输入 `{}` 或 `{"Statement":[]}`）
+**客户端与控制台说明：** 不带策略的日常编辑无需改动客户端即可保留内联策略；**[mcli 20261112](/zh/release/mcli-20261112/)**（[`d7262c2a`](https://github.com/pgsty/mc/commit/d7262c2a5fbdf2b9503cc0283f1d37ae8da41baf)，[`pgsty/mc#78`](https://github.com/pgsty/mc/issues/78)）将显式空策略重置从 `admin user svcacct set --policy` 扩展至 `svcacct edit`、`admin accesskey edit`、`idp ldap accesskey edit` 与 `idp openid accesskey edit`；**[SILO Console 2.7.1](/zh/release/console-2.7.1/)**（[`SN-2026-025`](/zh/blog/security/20261111-iam-import-status-and-console-policy/)）改为通过关闭 **Restrict beyond user policy** 开关移除内联限制（在旧版 Console v2.7.0 中则输入 `{}` 或 `{"Statement":[]}`）
 
 在 SILO（及上游 MinIO）的 IAM 模型中，服务账号（Service Account / Access Key）挂靠在父用户下，可选附加一份内联会话策略（Inline Session Policy / `sub-policy`），将服务账号的实际权限收敛为父用户权限的子集。在提交 [`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27) 之前，`POST /minio/admin/v3/update-service-account` 接口将“请求未携带策略字段”与“显式提交空策略文档以清除内联限制”折叠为同一个 `nil` 状态。任何未指定 `--policy` 的日常管理更新——包括禁用后再启用（`disable` + `enable`）、轮换密钥（`--secret-key`）、修改名称（`--name`）、描述（`--description`）或过期时间（`--expiry`）——都会从持久化凭据令牌中删掉内联策略，并将账号改签为 `inherited-policy`（继承父用户策略），使原本受限的服务账号静默提升为父用户的完整权限。
 
@@ -29,7 +29,7 @@ url: "/zh/blog/security/20261110-svcacct-inline-policy-preservation/"
 
 ## 一、问题的发现 {#discovery}
 
-我们核对了 `pgsty/silo`、`pgsty/mc`、`pgsty/silo-console` 与 `pgsty/silo-pkg` 下的全部 GitHub 私密安全报告（`GHSA-*`）与公开 Issue：本问题并非来自外部提交的 GHSA 报告，而是于 2026 年 11 月 10 日在对 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 开展内部发布后深度安全审查（与私密 GHSA 队列复核同步进行）时由维护团队检出并端到端复现。
+我们核对了 `pgsty/silo`、`pgsty/mc`、`pgsty/silo-console` 与 `pgsty/silo-pkg` 下的全部 GitHub 私密安全报告（`GHSA-*`）与公开 Issue：本问题并非来自外部提交的 GHSA 报告，而是于 2026 年 11 月 10 日在对 [SILO Server 20261109](/zh/release/silo-20261109/) 开展内部发布后深度安全审查（与私密 GHSA 队列复核同步进行）时由维护团队检出并端到端复现。
 
 具体而言，在审查 `Server 20261109` 为修复缓存写回竞态（[#320](https://github.com/pgsty/silo/issues/320)、[#321](https://github.com/pgsty/silo/issues/321)）而抽出的持久化凭据更新函数 `updatedServiceAccountCredentials`（`cmd/iam-store.go`）时，我们排查了部分字段更新（partial update）对 `opts.sessionPolicy` 的影响。在 `Server 20261026` 与 `Server 20261109` 上的实机测试确认：在拥有 `readwrite` 权限的父用户下创建一个仅允许 `s3:GetObject` 的只读服务账号后，只要依次执行 `mcli admin user svcacct disable` 与 `mcli admin user svcacct enable`（不带 `--policy`），该服务账号即可立即执行此前被拒绝的 `PutObject` 与 `DeleteObject`。
 
@@ -217,7 +217,7 @@ if _, ok := m.Lookup(policy.SessionPolicyName); ok && reset {
 
 ## 升级指引与排查建议 {#remediation}
 
-1. **升级全部 SILO Server 节点与复制站点：** 请将所有节点升级至 **[SILO Server 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，包含提交 [`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27) 及内嵌 **[Console 2.7.2](/zh/blog/release/console-2.7.2/)**）。在多站点复制部署中，未升级的对端站点在收到不带策略的更新时仍会清空内联策略，因此必须完成全站点协同升级。
+1. **升级全部 SILO Server 节点与复制站点：** 请将所有节点升级至 **[SILO Server 20261112](/zh/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，包含提交 [`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27) 及内嵌 **[Console 2.7.2](/zh/release/console-2.7.2/)**）。在多站点复制部署中，未升级的对端站点在收到不带策略的更新时仍会清空内联策略，因此必须完成全站点协同升级。
 2. **升级后逐站排查存量服务账号：** 由于代码修复无法恢复升级前已被抹除的内联策略，请在全部站点升级完成后，逐站检查所有服务账号，核对本应受限的账号是否显示为 `Policy: implied`：
    ```shell
    mcli admin user svcacct list myminio/ <username>
@@ -228,10 +228,10 @@ if _, ok := m.Lookup(policy.SessionPolicyName); ok && reset {
    mcli admin user svcacct edit myminio/ <access-key> --policy /path/to/restricted-policy.json
    ```
 3. **显式清空内联策略的操作方法：**
-   - **使用 `mcli`：** 向 `--policy` 传入空策略文档（`{}` 或 `{"Statement":[]}`，`1d714834c`+ 亦支持 `{"Version":"2012-10-17","Statement":[]}`；`mcli 20261109` 中可通过 `admin user svcacct set --policy` 执行，**[mcli 20261112](/zh/blog/release/mcli-20261112/)** 经 [`d7262c2a`](https://github.com/pgsty/mc/commit/d7262c2a5fbdf2b9503cc0283f1d37ae8da41baf) 同步支持 `svcacct edit`、`admin accesskey edit`、`idp ldap accesskey edit` 与 `idp openid accesskey edit`）：
+   - **使用 `mcli`：** 向 `--policy` 传入空策略文档（`{}` 或 `{"Statement":[]}`，`1d714834c`+ 亦支持 `{"Version":"2012-10-17","Statement":[]}`；`mcli 20261109` 中可通过 `admin user svcacct set --policy` 执行，**[mcli 20261112](/zh/release/mcli-20261112/)** 经 [`d7262c2a`](https://github.com/pgsty/mc/commit/d7262c2a5fbdf2b9503cc0283f1d37ae8da41baf) 同步支持 `svcacct edit`、`admin accesskey edit`、`idp ldap accesskey edit` 与 `idp openid accesskey edit`）：
      ```shell
      mcli admin user svcacct edit myminio/ <access-key> --policy /path/to/empty-policy.json
      ```
-   - **使用 SILO Console：** 在 **[Console 2.7.1](/zh/blog/release/console-2.7.1/)**（[`SN-2026-025`](/zh/blog/security/20261111-iam-import-status-and-console-policy/)）中，关闭 **Restrict beyond user policy** 开关并保存即可恢复继承（开关保持开启时将拒绝空策略文档以防误清空）；在旧版 Console v2.7.0 中，请在策略编辑器中输入 `{}` 或 `{"Statement":[]}` 并保存。
+   - **使用 SILO Console：** 在 **[Console 2.7.1](/zh/release/console-2.7.1/)**（[`SN-2026-025`](/zh/blog/security/20261111-iam-import-status-and-console-policy/)）中，关闭 **Restrict beyond user policy** 开关并保存即可恢复继承（开关保持开启时将拒绝空策略文档以防误清空）；在旧版 Console v2.7.0 中，请在策略编辑器中输入 `{}` 或 `{"Statement":[]}` 并保存。
 
 更多信息请参阅[安全公告台账](/zh/about/security-advisories/#sn-2026-021)、[`mcli admin user svcacct edit` 命令参考](/zh/reference/minio-mc-admin/mc-admin-user-svcacct-edit/)与[组件版本矩阵](/zh/compatibility/versions/)。

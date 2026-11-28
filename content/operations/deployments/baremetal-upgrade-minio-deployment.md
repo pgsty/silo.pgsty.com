@@ -20,7 +20,7 @@ This page covers `systemctl`-managed and manually managed bare-metal deployments
 
 ## Before You Upgrade {#prerequisites}
 
-**Upgrading to [SILO 20261109](/blog/release/silo-20261109/):**
+**Upgrading to [SILO 20261109](/release/silo-20261109/):**
 
 - Stop batch submissions and drain or cancel every unfinished job, including paused jobs. New manifests and progress reports use formats unsupported by 20261026; unfinished legacy jobs need resubmission after every node upgrades, while completed jobs remain completed. Do not roll back with new jobs pending. Reconcile completed work using the [batch upgrade and rollback checklist](/administration/batch-framework/#upgrade-20261109).
 - A single pool whose erasure sets do not all share the same hosts (typically 18 or more hosts with automatic layout) requires draining and stopping every old process before starting new ones. Rolling upgrades are unsafe because old and new nodes use different lock domains for deletes and copies.
@@ -31,7 +31,7 @@ This page covers `systemctl`-managed and manually managed bare-metal deployments
 **Upgrading to 20261026:** Upgrade all writer nodes and verify built-in policy Reset, LDAP long-DN login, remote-tier historical reads and multipart replication. Storage timeout and cancellation behavior is retained; a timeout does not prove that underlying I/O stopped or that the write did not commit. Read-quorum and healing rules are unchanged; this release does not add distributed fencing or repair pre-existing inconsistent objects. See the [20261026 upgrade checks](/compatibility/server/#maintenance-20261026).
 
 1. **Back up cluster settings.** Export bucket metadata and IAM configuration with [`mc admin cluster bucket export`](/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) and [`mc admin cluster iam export`](/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export). For versions with durable IAM revocation, also back up complete backend storage and encryption material: live exports omit deletion history. Follow [IAM upgrade and recovery](/operations/replication/iam-upgrade/).
-2. **Choose a published Silo release.** Use [Download & Install](/download/#server), [Silo release notes](/blog/release/), and [GitHub Releases](https://github.com/pgsty/silo/releases). A local tag, branch commit, draft release, or uploaded draft asset is not a published release.
+2. **Choose a published Silo release.** Use [Download & Install](/download/#server), [Silo release notes](/release/), and [GitHub Releases](https://github.com/pgsty/silo/releases). A local tag, branch commit, draft release, or uploaded draft asset is not a published release.
 3. **Verify the artifact.** Check its SHA-256 digest against the checksum published with that exact release. Pin one release across all nodes.
 4. **Read every intervening release note.** Pay particular attention to format, identity, configuration, and downgrade warnings.
 5. **Test the exact upgrade in a lower environment.** Exercise representative reads, writes, policies, lifecycle rules, replication, notifications, and recovery procedures before production.

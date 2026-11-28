@@ -105,7 +105,7 @@ The healthcheck probe alone cannot determine if a MinIO server is offline - only
 
 ## Startup Readiness Window {#startup-readiness-window}
 
-[SILO 20261109](/blog/release/silo-20261109/) retains this behavior: the [cluster health implementation](https://github.com/pgsty/silo/blob/d998292387ccf1d2907749e0fb1575ef5fb93fda/cmd/erasure-server-pool.go#L3162) evaluates reported drive quorum across peers. Check both cluster endpoints, then verify actual S3 reads and writes before you resume application workloads. For the full probe specification, see [Healthcheck Probe Semantics](/compatibility/feature/healthcheck/).
+[SILO 20261109](/release/silo-20261109/) retains this behavior: the [cluster health implementation](https://github.com/pgsty/silo/blob/d998292387ccf1d2907749e0fb1575ef5fb93fda/cmd/erasure-server-pool.go#L3162) evaluates reported drive quorum across peers. Check both cluster endpoints, then verify actual S3 reads and writes before you resume application workloads. For the full probe specification, see [Healthcheck Probe Semantics](/compatibility/feature/healthcheck/).
 
 None of the HTTP health endpoints proves that the receiving node can serve object I/O immediately after a restart. Each node connects to remote peer drives in a background monitor loop. If a remote drive is unreachable at startup, it remains uninstalled on that node until a later monitor pass. The monitor waits 15 seconds after each completed pass, so 15 seconds is a minimum interval between retries rather than an upper bound on recovery.
 

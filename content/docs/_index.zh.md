@@ -11,6 +11,6 @@ upstream_modified: true
 sidebar_expanded: true
 ---
 
-通过左侧导航浏览[部署运维](/zh/operations/)、[日常管理](/zh/administration/)、[应用开发](/zh/developers/)、[命令与配置参考](/zh/reference/)、[兼容性审计](/zh/compatibility/)与[发布说明](/zh/blog/release/)，或前往[下载与安装](/zh/download/)获取各平台制品。
+通过左侧导航浏览[部署运维](/zh/operations/)、[日常管理](/zh/administration/)、[应用开发](/zh/developers/)、[命令与配置参考](/zh/reference/)、[兼容性审计](/zh/compatibility/)与[发布说明](/zh/release/)，或前往[下载与安装](/zh/download/)获取各平台制品。
 
 {{< home-docs >}}

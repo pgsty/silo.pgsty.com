@@ -83,7 +83,7 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ## Behavior {#behavior}
 
-In [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), pool decommissioning enforces the following migration guarantees:
+In [SILO 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), pool decommissioning enforces the following migration guarantees:
 
 - Moves objects whose copies use differing erasure layouts across pools ([#261](https://github.com/pgsty/silo/issues/261)), ILM-expired current versions ([#265](https://github.com/pgsty/silo/issues/265)), and versions whose multi-pool lifecycle expiry cannot safely complete ([#278](https://github.com/pgsty/silo/issues/278)).
 - Retains remote-tier payloads while another pool still references them ([#306](https://github.com/pgsty/silo/issues/306), [#308](https://github.com/pgsty/silo/issues/308)). Keep all configured remote tiers available until decommissioning completes.

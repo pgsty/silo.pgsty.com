@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/replica-metadata-normalization/"
 ---
 
-随 [SILO Server 20260916](/zh/blog/release/silo-20260916/)（`40220bd836cbd066ca424fa4dc5dbb90057fb55a`）发布的 [PR #194](https://github.com/pgsty/silo/pull/194)（修复提交 [`4fcdf37ce`](https://github.com/pgsty/silo/commit/4fcdf37ce)，合并提交 [`9f3037e941`](https://github.com/pgsty/silo/commit/9f3037e941a49ab4cd8a0eed7c0f01083fbe4bbe)，采纳并保留 Mikhail Khadarenka 在 [PR #187](https://github.com/pgsty/silo/pull/187) 中的实现），修复了可信复制接收端在恢复副本内部元数据时重新调用宽松请求头提取器、导致仅用于传输的 `aws-chunked` `Content-Encoding` 标记与 GHSA 已脱敏的用户元数据重新回流至落盘对象中的回归缺陷。
+随 [SILO Server 20260916](/zh/release/silo-20260916/)（`40220bd836cbd066ca424fa4dc5dbb90057fb55a`）发布的 [PR #194](https://github.com/pgsty/silo/pull/194)（修复提交 [`4fcdf37ce`](https://github.com/pgsty/silo/commit/4fcdf37ce)，合并提交 [`9f3037e941`](https://github.com/pgsty/silo/commit/9f3037e941a49ab4cd8a0eed7c0f01083fbe4bbe)，采纳并保留 Mikhail Khadarenka 在 [PR #187](https://github.com/pgsty/silo/pull/187) 中的实现），修复了可信复制接收端在恢复副本内部元数据时重新调用宽松请求头提取器、导致仅用于传输的 `aws-chunked` `Content-Encoding` 标记与 GHSA 已脱敏的用户元数据重新回流至落盘对象中的回归缺陷。
 
 ## 问题根因 {#problem}
 
@@ -59,7 +59,7 @@ url: "/zh/blog/design/replica-metadata-normalization/"
 
 ## 为什么升级服务端不会自动修复存量污染对象 {#existing}
 
-升级至 [SILO Server 20260916](/zh/blog/release/silo-20260916/) 会立即阻断新写入对象的元数据污染，但不会后台扫描或改写磁盘上的存量对象。运维中需注意两点影响：
+升级至 [SILO Server 20260916](/zh/release/silo-20260916/) 会立即阻断新写入对象的元数据污染，但不会后台扫描或改写磁盘上的存量对象。运维中需注意两点影响：
 
 1. **权威源端仍被污染时的反复同步：** 若**权威源对象**仍带有被污染的元数据（例如来自早期的双向复制回流），在与已归一化的目标副本比对时会持续检测到元数据差异，导致在自愈（heal）或重新同步（resync）中反复触发元数据复制。务必先修复权威源端的对象版本，再让下游副本收敛。
 2. **普通 S3 自 `COPY` 的局限性：** 普通 S3 向自身发起 `CopyObject` 并非通用的存量修复 API，因为它在版本化桶中会生成新版本或更新时间戳，而不会原地改写指定历史 `versionId` 的元数据。

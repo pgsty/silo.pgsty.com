@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **Console 2.5.1 – 2.7.0 updates:** The Tasks drawer tracks bounded transfers and bulk operations (canceling a task stops remaining batches without rolling back completed mutations); Text/Markdown/CSV previews display a notice when truncated at `1 MiB`; ZIP preview failures before the first response byte preserve the upstream S3 error status; and sorting, filtering, and Select All operate on the currently loaded page ([Console 2.5.1](/blog/release/console-2.5.1/#objects)). [Console 2.6.0](/blog/release/console-2.6.0/) adds on-demand folder size scans, bucket usage refresh with optional PostgreSQL worker persistence, pre-create bucket validation, and exact integer quota math. [Console 2.7.0](/blog/release/console-2.7.0/) (`4e91ae506e70`, embedded in [SILO Server 20261109](/blog/release/silo-20261109/)) expands the interface to ten languages, enables **Calculate folder sizes** and SSE-C decryption-key copy over plain HTTP (`http://<ip>:9001`), rejects malformed or truncated multipart uploads with HTTP `400`, and fixes `console usage-worker` TLS trust, slice-summed scan budgets, shutdown/deletion persistence, and `HTTP 429` busy-scanner retries.
+> **Console 2.5.1 – 2.7.0 updates:** The Tasks drawer tracks bounded transfers and bulk operations (canceling a task stops remaining batches without rolling back completed mutations); Text/Markdown/CSV previews display a notice when truncated at `1 MiB`; ZIP preview failures before the first response byte preserve the upstream S3 error status; and sorting, filtering, and Select All operate on the currently loaded page ([Console 2.5.1](/release/console-2.5.1/#objects)). [Console 2.6.0](/release/console-2.6.0/) adds on-demand folder size scans, bucket usage refresh with optional PostgreSQL worker persistence, pre-create bucket validation, and exact integer quota math. [Console 2.7.0](/release/console-2.7.0/) (`4e91ae506e70`, embedded in [SILO Server 20261109](/release/silo-20261109/)) expands the interface to ten languages, enables **Calculate folder sizes** and SSE-C decryption-key copy over plain HTTP (`http://<ip>:9001`), rejects malformed or truncated multipart uploads with HTTP `400`, and fixes `console usage-worker` TLS trust, slice-summed scan budgets, shutdown/deletion persistence, and `HTTP 429` busy-scanner retries.
 
 <a id="managing-objects"></a>
 <a id="minio-console-managing-objects"></a>
@@ -22,9 +22,9 @@ You can use the MinIO Console to perform several of the bucket and object manage
 
 ## Object Browser {#object-browser}
 
-In [SILO Server 20261026](/blog/release/silo-20261026/#server-20261026) and later, Console's `account-info` request reads the live bucket inventory so refreshing after creating or deleting a bucket immediately reflects the updated list (bucket usage totals remain scanner-derived). Server 20261018 serves a cached bucket inventory.
+In [SILO Server 20261026](/release/silo-20261026/#server-20261026) and later, Console's `account-info` request reads the live bucket inventory so refreshing after creating or deleting a bucket immediately reflects the updated list (bucket usage totals remain scanner-derived). Server 20261018 serves a cached bucket inventory.
 
-In [Console v2.7.0](/blog/release/console-2.7.0/) (embedded in [SILO Server 20261109](/blog/release/silo-20261109/)), **Calculate folder sizes** and the SSE-C decryption-key copy button work over plain HTTP (`http://<ip>:9001`) without requiring a browser secure context, and malformed or truncated multipart uploads return a `400` client error instead of panicking the request handler.
+In [Console v2.7.0](/release/console-2.7.0/) (embedded in [SILO Server 20261109](/release/silo-20261109/)), **Calculate folder sizes** and the SSE-C decryption-key copy button work over plain HTTP (`http://<ip>:9001`) without requiring a browser secure context, and malformed or truncated multipart uploads return a `400` client error instead of panicking the request handler.
 
 The Object Browser lists the buckets and objects the authenticated user has access to on the deployment.
 
@@ -54,7 +54,7 @@ The user can perform actions on the bucket’s objects, depending on the policie
 
 ### Multi-object downloads and sharing {#silo-downloads}
 
-[Console v2.4.1](/blog/release/console-2.4.1/) streams multi-selection ZIPs to a
+[Console v2.4.1](/release/console-2.4.1/) streams multi-selection ZIPs to a
 file writer where supported; other browsers use their native download manager.
 Neither path buffers the complete archive in JavaScript. Console identifies
 the native handoff explicitly; use the browser download manager for subsequent
@@ -131,7 +131,7 @@ The tiering tab allows users with the appropriate permissions to:
 ## Usage scans (Console v2.6.0+) {#usage-scans}
 
 > [!NOTE]
-> **Component availability:** This section describes the usage scan and bucket refresh functionality shipped in [Console v2.6.0](/blog/release/console-2.6.0/) ([PR #70](https://github.com/pgsty/silo-console/pull/70)) and updated in [Console v2.7.0](/blog/release/console-2.7.0/) (`4e91ae506e70`). [SILO Server 20261109](/blog/release/silo-20261109/) embeds [Console v2.7.0](/blog/release/console-2.7.0/) (`4e91ae506e70`); Server `20261026` embeds Console `v2.5.1`. Updating standalone Console does not replace the Console embedded in an older `silo` binary. The supported integration target is `pgsty/silo`; upstream MinIO compatibility is best effort.
+> **Component availability:** This section describes the usage scan and bucket refresh functionality shipped in [Console v2.6.0](/release/console-2.6.0/) ([PR #70](https://github.com/pgsty/silo-console/pull/70)) and updated in [Console v2.7.0](/release/console-2.7.0/) (`4e91ae506e70`). [SILO Server 20261109](/release/silo-20261109/) embeds [Console v2.7.0](/release/console-2.7.0/) (`4e91ae506e70`); Server `20261026` embeds Console `v2.5.1`. Updating standalone Console does not replace the Console embedded in an older `silo` binary. The supported integration target is `pgsty/silo`; upstream MinIO compatibility is best effort.
 
 <!-- Adapted from pgsty/silo-console PR #70, docs/FolderSizes.md.
 Copyright (c) 2026 Urbanize. SPDX-License-Identifier: AGPL-3.0-or-later. -->
@@ -353,6 +353,6 @@ notifications trigger idempotent work, while reconciliation repairs delivery gap
 
 ### Creation failures and quota precision (Console v2.6.0 and later) {#creation-and-quota}
 
-In [Console v2.6.0](/blog/release/console-2.6.0/) and later, the bucket creation handler rejects invalid quota and retention values before creating a bucket. Retention alone enables object locking and versioning; an explicit versioning object is optional. Object locking cannot exclude prefixes or folders from versioning, so a request that combines locking or retention with versioning exclusions is rejected before any bucket is created. If a requested post-create setting fails, the API reports failure and attempts to remove the empty bucket. It never deletes objects as part of this rollback. If the caller cannot remove the bucket, or the bucket has become nonempty, the error explicitly says it may still exist. Inspect its configuration before retrying; an HTTP error is not proof that no bucket was created.
+In [Console v2.6.0](/release/console-2.6.0/) and later, the bucket creation handler rejects invalid quota and retention values before creating a bucket. Retention alone enables object locking and versioning; an explicit versioning object is optional. Object locking cannot exclude prefixes or folders from versioning, so a request that combines locking or retention with versioning exclusions is rejected before any bucket is created. If a requested post-create setting fails, the API reports failure and attempts to remove the empty bucket. It never deletes objects as part of this rollback. If the caller cannot remove the bucket, or the bucket has become nonempty, the error explicitly says it may still exist. Inspect its configuration before retrying; an HTTP error is not proof that no bucket was created.
 
 Console quota writes must be positive and below 8 PiB (at most 9007199254740991 bytes), with at most two decimal places in the selected unit. Decimal scaling uses integer arithmetic and discards only fractional bytes. Form and request validation reject invalid numeric values; these checks shipped in Console 2.6.0 ([design record](/blog/design/console-quota-numeric-validation/)). Larger quotas remain supported through mcli and the existing integer API. The browser does not populate an editable value from a quota outside its exact JSON integer range, so reopening and saving cannot silently rewrite a rounded value. The UI still permits clearing that quota or explicitly entering a smaller one. Display-only capacity totals may be rounded; use mcli when exact large byte values matter.

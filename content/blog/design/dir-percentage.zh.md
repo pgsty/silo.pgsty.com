@@ -13,11 +13,11 @@ url: "/zh/blog/design/dir-percentage/"
 
 在 SILO Console v2.1.1 中下载文件夹时，**Downloads / Uploads**（下载/上传）抽屉会显示 `NaN%`。尽管后端的流式 ZIP 归档仍在正常传输、底层存储对象也完好无损，但进度条却从“总量未知”错误地跳入了确定进度（determinate）渲染状态——导致运维人员误以为下载已卡死或失败，进而反复点击 **Download**。
 
-该修复已随 [Console 2.2.0](/zh/blog/release/console-2.2.0/)（提交 `16960f7ab`，跟踪议题 [#62](https://github.com/pgsty/silo/issues/62)）发布，并自 [Server 20260903](/zh/blog/release/silo-20260903/)（`edc8be6ed`）起内嵌于服务端。其核心准则只有一条：
+该修复已随 [Console 2.2.0](/zh/release/console-2.2.0/)（提交 `16960f7ab`，跟踪议题 [#62](https://github.com/pgsty/silo/issues/62)）发布，并自 [Server 20260903](/zh/release/silo-20260903/)（`edc8be6ed`）起内嵌于服务端。其核心准则只有一条：
 
 > 只有当下载任务拥有一个有限、正数且适用于当前响应字节流的总量时，才能进入确定百分比（determinate）模式；否则必须保持不确定（indeterminate）动画状态，直至完成、失败或取消。
 
-（后续发布的 [Console 2.4.1](/zh/blog/release/console-2.4.1/#browser) 进一步将文件夹与多选下载演进为文件流写入与浏览器原生下载交接，不再将完整 ZIP 缓存在浏览器内存 `Blob` 中；详见文末[后续演进](#later-contract)。）
+（后续发布的 [Console 2.4.1](/zh/release/console-2.4.1/#browser) 进一步将文件夹与多选下载演进为文件流写入与浏览器原生下载交接，不再将完整 ZIP 缓存在浏览器内存 `Blob` 中；详见文末[后续演进](#later-contract)。）
 
 ## 可观察故障 {#failure}
 
@@ -295,7 +295,7 @@ Playwright 测试在真实 SILO + Console 实例上利用 Chromium CDP 网络限
 
 ## 交付与回滚 {#delivery}
 
-该修复已随 [Console v2.2.0](/zh/blog/release/console-2.2.0/)（[silo-console#29](https://github.com/pgsty/silo-console/pull/29)）发布，并内嵌于 [SILO Server 20260903](/zh/blog/release/silo-20260903/)，关闭 [pgsty/silo#62](https://github.com/pgsty/silo/issues/62)。不涉及任何数据或 API 迁移。
+该修复已随 [Console v2.2.0](/zh/release/console-2.2.0/)（[silo-console#29](https://github.com/pgsty/silo-console/pull/29)）发布，并内嵌于 [SILO Server 20260903](/zh/release/silo-20260903/)，关闭 [pgsty/silo#62](https://github.com/pgsty/silo/issues/62)。不涉及任何数据或 API 迁移。
 
 ### 完成定义 {#done}
 
@@ -310,6 +310,6 @@ Playwright 测试在真实 SILO + Console 实例上利用 Chromium CDP 网络限
 
 ## 后续演进：Console 2.4.1 的浏览器原生流式交接 {#later-contract}
 
-在合入上述进度修复的同时，[Console 2.2.0](/zh/blog/release/console-2.2.0/) 还将对象列表中的 `size` 改为始终输出的 JSON 字段，并加固了服务端 ZIP 错误传播：不可读条目不再被静默跳过，响应头发出前的错误返回 HTTP 500，响应开始后的错误则通过中断流暴露给客户端。
+在合入上述进度修复的同时，[Console 2.2.0](/zh/release/console-2.2.0/) 还将对象列表中的 `size` 改为始终输出的 JSON 字段，并加固了服务端 ZIP 错误传播：不可读条目不再被静默跳过，响应头发出前的错误返回 HTTP 500，响应开始后的错误则通过中断流暴露给客户端。
 
-随后发布的 [Console 2.4.1](/zh/blog/release/console-2.4.1/#browser) 进一步消除了整包 XHR `Blob` 内存缓冲：单文件夹与单对象下载直接交接给浏览器原生下载管理器，多选打包下载则通过文件系统流式写入器（FileSystemWritableFileStream）或原生流交接落盘。在这一新架构下，Console 下载面板中的完成状态代表“已成功交接给浏览器下载管理器”，后续字节传输进度与取消操作均由浏览器原生下载管理器接管。
+随后发布的 [Console 2.4.1](/zh/release/console-2.4.1/#browser) 进一步消除了整包 XHR `Blob` 内存缓冲：单文件夹与单对象下载直接交接给浏览器原生下载管理器，多选打包下载则通过文件系统流式写入器（FileSystemWritableFileStream）或原生流交接落盘。在这一新架构下，Console 下载面板中的完成状态代表“已成功交接给浏览器下载管理器”，后续字节传输进度与取消操作均由浏览器原生下载管理器接管。

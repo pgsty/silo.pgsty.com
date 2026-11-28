@@ -18,7 +18,7 @@ The **`mc`** command-line tool is built for compatibility with the AWS S3 API. I
 
 The Silo project cannot guarantee behavior against every other S3-compatible service because implementations differ. Test the operations your workload relies on before treating another service as compatible.
 
-The current release is [mcli 20261112](/blog/release/mcli-20261112/) (`RELEASE.2026-11-12T00-00-00Z`), using Go 1.27.4, `silo-pkg` [v3.16.1](/blog/release/pkg-3.16.1/), and upstream SDK `v7.4.2-0.20261025165926-320af050c445`. See the [compatibility notes](/compatibility/mcli/#current-release) for behavior changes and the [component matrix](/compatibility/versions/) for Server/Console release boundaries.
+The current release is [mcli 20261112](/release/mcli-20261112/) (`RELEASE.2026-11-12T00-00-00Z`), using Go 1.27.4, `silo-pkg` [v3.16.1](/release/pkg-3.16.1/), and upstream SDK `v7.4.2-0.20261025165926-320af050c445`. See the [compatibility notes](/compatibility/mcli/#current-release) for behavior changes and the [component matrix](/compatibility/versions/) for Server/Console release boundaries.
 
 [`mc`](#command-mc) has the following syntax:
 
@@ -48,7 +48,7 @@ Use [Download & Install](/download/#client) to select a Linux package, an archiv
 
 Standalone archives and Linux packages install the command as **`mcli`**. The container and source build retain **`mc`**. The commands are aliases of the same client; when this reference shows `mc`, substitute `mcli` if that is the name installed on your host.
 
-To run the published multi-architecture container image ([mcli 20261109](/blog/release/mcli-20261109/), which pre-creates `/.mc` with sticky writable permissions for non-root UIDs):
+To run the published multi-architecture container image ([mcli 20261109](/release/mcli-20261109/), which pre-creates `/.mc` with sticky writable permissions for non-root UIDs):
 
 ```shell
 docker pull pgsty/mc:RELEASE.2026-11-09T00-00-00Z

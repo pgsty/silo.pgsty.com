@@ -16,7 +16,7 @@ SILO Console 支持预览图片、PDF、音频和视频，但在 v2.1.1 中却�
 
 恢复旧版浏览器原生 `<iframe>` 预览虽然简单，却是错误的修法。存储桶中的对象内容完全由上传者控制；一旦将其作为同源 HTML 或 XML 文档加载，一个便利的预览功能就会退化为同源脚本执行边界。
 
-随 [Console 2.2.0](/zh/blog/release/console-2.2.0/) 交付的设计（跟踪议题 [#17](https://github.com/pgsty/silo/issues/17)）确立了一条严格的安全不变量：
+随 [Console 2.2.0](/zh/release/console-2.2.0/) 交付的设计（跟踪议题 [#17](https://github.com/pgsty/silo/issues/17)）确立了一条严格的安全不变量：
 
 > SILO Console 仅将符合条件的对象作为有界 UTF-8 纯文本预览，绝不让浏览器将其中的标记、MIME 类型或文件内容解析为可执行文档。
 
@@ -35,7 +35,7 @@ Console 新增独立的 `text` 预览类型与 `PreviewText` 组件，并遵循�
 9. 要么展示完整对象，要么完全不展示；绝不渲染被截断的 JSON 或 XML 半截片段。
 10. 当文件超出大小上限、编码非法或无法加载时，始终保留 **Download**（下载）出口。
 
-本设计不新增 S3 操作或后端预览路由，也不扩大后端的 `inline` MIME 白名单。交付过程中同步收敛了 Console 下载端点的字节范围语义：零字节对象的 `Range` 请求返回空 `200 OK`，不可满足的范围请求返回 `416 Range Not Satisfiable` 及 `Content-Range: bytes */N`，且对象 JSON 元数据始终输出 `size` 字段（详见 [Console 2.2.0](/zh/blog/release/console-2.2.0/#byte-ranges)）。
+本设计不新增 S3 操作或后端预览路由，也不扩大后端的 `inline` MIME 白名单。交付过程中同步收敛了 Console 下载端点的字节范围语义：零字节对象的 `Range` 请求返回空 `200 OK`，不可满足的范围请求返回 `416 Range Not Satisfiable` 及 `Content-Range: bytes */N`，且对象 JSON 元数据始终输出 `size` 字段（详见 [Console 2.2.0](/zh/release/console-2.2.0/#byte-ranges)）。
 
 ## Console 2.1.1 的原有行为 {#current-behavior}
 
@@ -311,7 +311,7 @@ AND 不是目录前缀
 
 ## 交付与完成门禁 {#delivery}
 
-该特性已在 [`pgsty/silo-console` v2.2.0](/zh/blog/release/console-2.2.0/)（[PR #30](https://github.com/pgsty/silo-console/pull/30)）中发布，并随 [SILO Server 20260903](/zh/blog/release/silo-20260903/) 内嵌交付，关闭 [pgsty/silo#17](https://github.com/pgsty/silo/issues/17)。
+该特性已在 [`pgsty/silo-console` v2.2.0](/zh/release/console-2.2.0/)（[PR #30](https://github.com/pgsty/silo-console/pull/30)）中发布，并随 [SILO Server 20260903](/zh/release/silo-20260903/) 内嵌交付，关闭 [pgsty/silo#17](https://github.com/pgsty/silo/issues/17)。
 
 ## 利弊权衡 {#trade-offs}
 

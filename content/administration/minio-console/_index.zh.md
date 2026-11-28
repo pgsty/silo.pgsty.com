@@ -23,9 +23,9 @@ MinIO Console 是一个功能丰富的图形用户界面，提供与 [`mc`](/zh/
 
 您可以使用 MinIO Console 执行多种管理任务，例如身份与访问管理、指标与日志监控或服务器配置。
 
-[SILO 20261109](/zh/blog/release/silo-20261109/) 在服务端内嵌 [Console v2.7.0](/zh/blog/release/console-2.7.0/)（`4e91ae506e70`）。[Silo Console 仓库](https://github.com/pgsty/silo-console)记录下游源码、版本发布与兼容性变化；独立部署属于高级集成路径，必须选择与目标服务端版本兼容的 Console 版本。
+[SILO 20261109](/zh/release/silo-20261109/) 在服务端内嵌 [Console v2.7.0](/zh/release/console-2.7.0/)（`4e91ae506e70`）。[Silo Console 仓库](https://github.com/pgsty/silo-console)记录下游源码、版本发布与兼容性变化；独立部署属于高级集成路径，必须选择与目标服务端版本兼容的 Console 版本。
 
-在 [Console v2.7.0](/zh/blog/release/console-2.7.0/) 中，Console 界面提供十种语言（英语、简体中文、法语、德语、俄语、西班牙语、巴西葡萄牙语、日语、带从右向左布局的阿拉伯语与土耳其语），可通过语言菜单或命令面板切换（详见[设计记录](/zh/blog/design/console-languages/)）。Console 在 `/api/v1/docs` 提供基于 Redoc 3 的交互式 API 文档，其中 `/swagger.json` 直接路由至后端 API 而非前端 SPA 回退页。独立容器镜像 `docker.io/pgsty/silo-console:v2.7.0` 内置 UBI 系统根证书包（`/etc/ssl/certs/ca-certificates.crt`）与可写 `/tmp` 目录（权限 `1777`），支持出站 HTTPS 连接与大请求临时文件落盘。
+在 [Console v2.7.0](/zh/release/console-2.7.0/) 中，Console 界面提供十种语言（英语、简体中文、法语、德语、俄语、西班牙语、巴西葡萄牙语、日语、带从右向左布局的阿拉伯语与土耳其语），可通过语言菜单或命令面板切换（详见[设计记录](/zh/blog/design/console-languages/)）。Console 在 `/api/v1/docs` 提供基于 Redoc 3 的交互式 API 文档，其中 `/swagger.json` 直接路由至后端 API 而非前端 SPA 回退页。独立容器镜像 `docker.io/pgsty/silo-console:v2.7.0` 内置 UBI 系统根证书包（`/etc/ssl/certs/ca-certificates.crt`）与可写 `/tmp` 目录（权限 `1777`），支持出站 HTTPS 连接与大请求临时文件落盘。
 
 <a id="id3" data-td-print-local></a>
 

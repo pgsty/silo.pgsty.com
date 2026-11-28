@@ -35,17 +35,17 @@ console:
   build: 2.7.2
   windows_archive_format: zip
   source: 0e7953ff59c4a1eb77c7d203b265e6783ff18d01
-  notes: "blog/release/console-2.7.2/"
+  notes: "release/console-2.7.2/"
 pkg:
   tag: v3.16.1
   source: 433f7eefa714a30b72ca70c4dffcd5faca25804f
   go_version: "1.27.4"
-  notes: blog/release/pkg-3.16.1/
+  notes: release/pkg-3.16.1/
 kes:
   tag: RELEASE.2026-10-26T00-00-00Z
   build: 20261026000000.0.0
   windows_archive_format: zip
   date: "2026-10-26"
   source: e9b4f1acebc11d61b42f876da8df48f548750cc9
-  notes: "blog/release/silo-20261026/#kes"
+  notes: "release/silo-20261026/#kes"
   docker_tag: RELEASE.2026-10-26T00-00-00Z

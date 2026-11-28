@@ -32,7 +32,7 @@ kubectl apply -k ~/kustomization/TENANT-NAME/
 helm upgrade TENANT-NAME minio-operator/tenant -f values.yaml -n TENANT-NAMESPACE
 ```
 
-上述命令默认使用 MinIO Operator Chart 仓库（`v7.1.1`）。请确保 `tenant.image` 保持固定在已验证的 `docker.io/pgsty/silo` 版本，例如 `RELEASE.2026-11-09T00-00-00Z`（[SILO 20261109](/zh/blog/release/silo-20261109/)）。如果你管理的是独立 [`helm/silo` Chart `7.0.4`](https://github.com/pgsty/silo/tree/RELEASE.2026-11-09T00-00-00Z/helm/silo) 部署（[#296](https://github.com/pgsty/silo/issues/296)）并使用 `helm upgrade --reuse-values`，请显式传入 `--set image.tag=RELEASE.2026-11-09T00-00-00Z`，避免 Helm 继续保留此前存储的标签。
+上述命令默认使用 MinIO Operator Chart 仓库（`v7.1.1`）。请确保 `tenant.image` 保持固定在已验证的 `docker.io/pgsty/silo` 版本，例如 `RELEASE.2026-11-09T00-00-00Z`（[SILO 20261109](/zh/release/silo-20261109/)）。如果你管理的是独立 [`helm/silo` Chart `7.0.4`](https://github.com/pgsty/silo/tree/RELEASE.2026-11-09T00-00-00Z/helm/silo) 部署（[#296](https://github.com/pgsty/silo/issues/296)）并使用 `helm upgrade --reuse-values`，请显式传入 `--set image.tag=RELEASE.2026-11-09T00-00-00Z`，避免 Helm 继续保留此前存储的标签。
 
 分别将 `TENANT-NAME` 和 `TENANT-NAMESPACE` 替换为租户的名称和命名空间。你可以使用 `helm list -n TENANT-NAMESPACE` 验证租户名称。
 {{< /tab >}}

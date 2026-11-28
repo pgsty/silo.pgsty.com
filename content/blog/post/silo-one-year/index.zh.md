@@ -45,7 +45,7 @@ url: "/zh/blog/post/silo-one-year/"
 本次对比的精确基线是上游 MinIO 最后一次公开发布与 SILO 2026 年 10 月统一维护批次：
 
 - **上游基线**：`minio/minio` [`RELEASE.2025-10-15T17-29-55Z`](https://github.com/minio/minio/releases/tag/RELEASE.2025-10-15T17-29-55Z)（提交 `9e49d5e7a648f00e26f2246f4dc28e6b07f8c84a`，2025-10-15）。注：上游在停发 Release 到 2026-02-02 归档前还合入过 9 个未发版提交（如 `fa18589d1c` 的 POST Policy 标签约束、`18f97e70b1` 的条件写读仲裁调整），这些提交不在 `2025-10-15` 正式版内，SILO 也通过独立路径完成了对应修复。
-- **SILO 目标版本**：`pgsty/silo` [`RELEASE.2026-10-26T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z)（源码 `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3`），与 mcli / KES 20261026、Console v2.5.1、silo-pkg v3.15.2 联合发布。详见[本批次发布日志](/zh/blog/release/silo-20261026/)与[组件矩阵](/zh/compatibility/versions/)。
+- **SILO 目标版本**：`pgsty/silo` [`RELEASE.2026-10-26T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z)（源码 `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3`），与 mcli / KES 20261026、Console v2.5.1、silo-pkg v3.15.2 联合发布。详见[本批次发布日志](/zh/release/silo-20261026/)与[组件矩阵](/zh/compatibility/versions/)。
 
 在 `9e49d5e7a648..c3ad836aed0d` 区间内，`pgsty/silo` 共有 **604 个可达提交**（涵盖功能与安全修复、回归测试、构建打包与文档工程）。下文按实际交付的运行时行为逐一归纳。
 
@@ -60,7 +60,7 @@ url: "/zh/blog/post/silo-one-year/"
 | **Client (`pgsty/mc`)**            | `mc` `cf909e1063a9`                   | **[mcli 20261026](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-26T00-00-00Z)**（[`0ceb298cdcd0`](https://github.com/pgsty/mc/commit/0ceb298cdcd05f2ffdc4ea62d7d01a3666c3e8cc)） | 产物命名为 `mcli`（避免与 Midnight Commander `mc` 冲突），新增 `checksum verify` 并修复退出码 |
 | **Shared Pkg (`pgsty/silo-pkg`)**  | `minio/pkg/v3 v3.1.3`                 | **[v3.15.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.15.2)**（[`0416eb1f4505`](https://github.com/pgsty/silo-pkg/commit/0416eb1f450536ca2cc3592c2c2a06a3df88d4e0)）                | 独立模块路径 `github.com/pgsty/silo-pkg/v3`，承载 IAM 策略判定、条件键隔离、证书与 KMS 客户端 |
 | **S3 SDK (`minio/minio-go/v7`)**   | `v7.0.91`                             | **`v7.4.2-0.20261025165926-320af050c445`**                                                                                                                                                  | 唯一直接沿用上游的模块，固定在经验证的提交（含分片截短流、负偏移与批量删除修复）              |
-| **KMS (`pgsty/kes`)**              | 外部可选依赖                          | **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**（[`e9b4f1acebc1`](https://github.com/pgsty/kes/commit/e9b4f1acebc11d61b42f876da8df48f548750cc9)）                                   | Go 1.27.3，验证 OpenBao KV v2 与本地 Moto Secrets Manager 协议；更新 AWS/GCP 客户端           |
+| **KMS (`pgsty/kes`)**              | 外部可选依赖                          | **[KES 20261026](/zh/release/silo-20261026/#kes)**（[`e9b4f1acebc1`](https://github.com/pgsty/kes/commit/e9b4f1acebc11d61b42f876da8df48f548750cc9)）                                        | Go 1.27.3，验证 OpenBao KV v2 与本地 Moto Secrets Manager 协议；更新 AWS/GCP 客户端           |
 {.wide .expand}
 
 ### 刻意保持不变的底层基石 {#foundations-intentionally-preserved}
@@ -115,18 +115,18 @@ url: "/zh/blog/post/silo-one-year/"
 
 在 S3 协议层，SILO 这一年重点解决了三件事：**把上游留下的空壳 API 补齐、把多池条件读写语义拉齐、把分片与加密场景下的校验和及逻辑大小算准。**
 
-| 特性 / 场景                                | 上游 MinIO (`2025-10-15`)                                                                                    | SILO (`20261026`)                                                                                                           | 相关设计记录                                                                                                                              |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| **桶级 CORS 配置**                         | `GetBucketCors`/`PutBucketCors`/`DeleteBucketCors` 直接返回 `NotImplemented`                                 | 完整实现桶级 CORS XML 持久化（最多 100 条规则、64 KiB）、`OPTIONS` 预检匹配、跨站复制与桶元数据导入导出                     | [按桶配置 CORS](/zh/blog/release/silo-20260903/#cors-trust)                                                                               |
-| **条件 `DELETE`**                          | 不支持 `If-Match` 条件删除                                                                                   | 单对象 `DELETE` 支持 `If-Match: "<etag>"` 与 `If-Match: *`，在共享对象锁内校验；批量 `DeleteObjects` 尚不支持逐项 ETag 条件 | [条件删除设计](/zh/blog/design/conditional-delete/)                                                                                       |
-| **多池条件 `PUT` 与分片完成**              | 只检查目标写入池，可能被旧池的过期 ETag 误放行或误拒绝                                                       | 跨所有存储池（含正在退役/排空的池）解析逻辑当前对象后再校验 `If-Match` / `If-None-Match`                                    | [多池对象一致性](/zh/blog/design/multi-pool-object-consistency/)                                                                          |
-| **服务端分片校验和**                       | 已声明校验和算法的分片上传在分片请求省略校验和头时失败，复制分片也受影响                                     | 按上传初始化时声明的算法，在压缩或加密前计算明文分片校验和，并持久化到 `xl.meta`；未声明算法的上传不会因此默认启用 `CRC32C` | [分片校验和](/zh/blog/design/uploadpart-checksum/)                                                                                        |
-| **`CompleteMultipartUpload` 校验**         | 对重复 part 号、缺失校验和或 `FULL_OBJECT` 类型匹配检查不严                                                  | 严格要求 part 号单调递增（重复返回 `InvalidPartOrder`），严格校验分片校验和与 `FULL_OBJECT`/`COMPOSITE` 汇总值              | [校验和完整性修复](/zh/blog/design/complete-multipart-checksum-errors/)                                                                   |
-| **`CopyObject` / `UploadPartCopy` 校验和** | 服务端复制加密或压缩对象时可能直接拷贝底层密文 bitrot 哈希，且响应漏返 `ChecksumType`                        | 统一按明文逻辑字节重算或验证校验和，并在 `CopyObjectResult` / `CopyPartResult` 中返回准确的 `ChecksumType`                  | [校验和完整性修复](/zh/blog/design/copyobject-ssec-checksum-response/)                                                                    |
-| **SSE-C 同对象密钥轮换与零字节**           | 用新 SSE-C 密钥原地 `CopyObject` 只改元数据不重加密数据，导致对象损坏；零字节 SSE-C 对象与分片属性未解封校验 | 同对象换钥时强制重写底层密文；零字节 SSE-C 对象及 `GetObjectAttributes` 分片列表均执行完整密钥解封验证                      | [SSE-C 密钥轮换](/zh/blog/release/silo-20260903/#copyobject-ssec)、[零字节验证](/zh/blog/security/20260903-server-hardening/#sn-2026-006) |
-| **加密/压缩分片逻辑大小**                  | `GetObjectAttributes` 与 `?partNumber=N` 可能返回含加密/压缩开销的物理分片大小                               | 解密/解压路径与元数据属性统一返回真实的明文逻辑分片大小                                                                     | [分片逻辑大小](/zh/blog/release/silo-20260916/#encryption)                                                                                |
-| **加密元数据篡改状态码**                   | `ObjectTampered` 被映射为 HTTP `206 Partial Content`                                                         | 修正为 HTTP `500` (`XMinioObjectTampered`)，避免客户端把损坏对象当成正常部分响应缓存或续传                                  | [ObjectTampered 500](/zh/blog/release/silo-20260916/#encryption)                                                                          |
-| **DNS 联邦 `CopyObject`**                  | 跨集群联邦复制可能直接流式传输 `.minio.sys` 底层密文导致目标对象无法解密                                     | 改为通过标准 S3 客户端流式读取明文并在目标端重新封存                                                                        | [联邦 CopyObject](/zh/blog/design/federated-copy-object/)                                                                                 |
+| 特性 / 场景                                | 上游 MinIO (`2025-10-15`)                                                                                    | SILO (`20261026`)                                                                                                           | 相关设计记录                                                                                                                         |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **桶级 CORS 配置**                         | `GetBucketCors`/`PutBucketCors`/`DeleteBucketCors` 直接返回 `NotImplemented`                                 | 完整实现桶级 CORS XML 持久化（最多 100 条规则、64 KiB）、`OPTIONS` 预检匹配、跨站复制与桶元数据导入导出                     | [按桶配置 CORS](/zh/release/silo-20260903/#cors-trust)                                                                               |
+| **条件 `DELETE`**                          | 不支持 `If-Match` 条件删除                                                                                   | 单对象 `DELETE` 支持 `If-Match: "<etag>"` 与 `If-Match: *`，在共享对象锁内校验；批量 `DeleteObjects` 尚不支持逐项 ETag 条件 | [条件删除设计](/zh/blog/design/conditional-delete/)                                                                                  |
+| **多池条件 `PUT` 与分片完成**              | 只检查目标写入池，可能被旧池的过期 ETag 误放行或误拒绝                                                       | 跨所有存储池（含正在退役/排空的池）解析逻辑当前对象后再校验 `If-Match` / `If-None-Match`                                    | [多池对象一致性](/zh/blog/design/multi-pool-object-consistency/)                                                                     |
+| **服务端分片校验和**                       | 已声明校验和算法的分片上传在分片请求省略校验和头时失败，复制分片也受影响                                     | 按上传初始化时声明的算法，在压缩或加密前计算明文分片校验和，并持久化到 `xl.meta`；未声明算法的上传不会因此默认启用 `CRC32C` | [分片校验和](/zh/blog/design/uploadpart-checksum/)                                                                                   |
+| **`CompleteMultipartUpload` 校验**         | 对重复 part 号、缺失校验和或 `FULL_OBJECT` 类型匹配检查不严                                                  | 严格要求 part 号单调递增（重复返回 `InvalidPartOrder`），严格校验分片校验和与 `FULL_OBJECT`/`COMPOSITE` 汇总值              | [校验和完整性修复](/zh/blog/design/complete-multipart-checksum-errors/)                                                              |
+| **`CopyObject` / `UploadPartCopy` 校验和** | 服务端复制加密或压缩对象时可能直接拷贝底层密文 bitrot 哈希，且响应漏返 `ChecksumType`                        | 统一按明文逻辑字节重算或验证校验和，并在 `CopyObjectResult` / `CopyPartResult` 中返回准确的 `ChecksumType`                  | [校验和完整性修复](/zh/blog/design/copyobject-ssec-checksum-response/)                                                               |
+| **SSE-C 同对象密钥轮换与零字节**           | 用新 SSE-C 密钥原地 `CopyObject` 只改元数据不重加密数据，导致对象损坏；零字节 SSE-C 对象与分片属性未解封校验 | 同对象换钥时强制重写底层密文；零字节 SSE-C 对象及 `GetObjectAttributes` 分片列表均执行完整密钥解封验证                      | [SSE-C 密钥轮换](/zh/release/silo-20260903/#copyobject-ssec)、[零字节验证](/zh/blog/security/20260903-server-hardening/#sn-2026-006) |
+| **加密/压缩分片逻辑大小**                  | `GetObjectAttributes` 与 `?partNumber=N` 可能返回含加密/压缩开销的物理分片大小                               | 解密/解压路径与元数据属性统一返回真实的明文逻辑分片大小                                                                     | [分片逻辑大小](/zh/release/silo-20260916/#encryption)                                                                                |
+| **加密元数据篡改状态码**                   | `ObjectTampered` 被映射为 HTTP `206 Partial Content`                                                         | 修正为 HTTP `500` (`XMinioObjectTampered`)，避免客户端把损坏对象当成正常部分响应缓存或续传                                  | [ObjectTampered 500](/zh/release/silo-20260916/#encryption)                                                                          |
+| **DNS 联邦 `CopyObject`**                  | 跨集群联邦复制可能直接流式传输 `.minio.sys` 底层密文导致目标对象无法解密                                     | 改为通过标准 S3 客户端流式读取明文并在目标端重新封存                                                                        | [联邦 CopyObject](/zh/blog/design/federated-copy-object/)                                                                            |
 {.wide .expand}
 
 ---
@@ -192,7 +192,7 @@ SILO 在社区开发者 Georg Mangold（`@gmangold`）恢复的历史分支基�
 | **高延迟网络诊断（`#63`）** | 跨地域或高延迟链路下下载健康报告易触发 WebSocket `1006` / `1011` 截断 | 修复六类诊断流的 WebSocket 关闭握手与 `madmin v3` 帧解码器预读吞字节缺陷，双向叠加 250 ms 延迟仍稳定输出完整健康报告                                                                                                                         |
 {.wide .expand}
 
-Console 2.5.1 进一步修复切换组状态时丢失成员、OIDC 组权限、TLS 代理会话 Cookie、凭据导出及键盘焦点问题，完整变化见 [Console 2.5 系列发布说明](/zh/blog/release/console-2.5.1/)。
+Console 2.5.1 进一步修复切换组状态时丢失成员、OIDC 组权限、TLS 代理会话 Cookie、凭据导出及键盘焦点问题，完整变化见 [Console 2.5 系列发布说明](/zh/release/console-2.5.1/)。
 
 ### mcli 20261026：说真话的退出码与只读校验和核验 {#mcli-20261026-honest-exit-codes}
 
@@ -205,7 +205,7 @@ Console 2.5.1 进一步修复切换组状态时丢失成员、OIDC 组权限、T
   - 下载流中途断开时直接报错返回，绝不把截短文件当作成功下载。
 - **安全的 `mirror` 删除传播与服务重启预演**：修复 `mirror --remove` 在源端列举异常时的误删风险；为 `mcli admin service restart` 增加 `--dry-run` 预演模式；支持在别名配置中持久化可选的 `region` 字段。
 
-20261026 还加入客户端身份缓存隔离、复制重同步 JSON 终态输出和速率溢出修复、start/cancel 部分失败的非零退出码，以及缺少实时指标时的 batch `pending` 状态与有界回退。完整命令与脚本迁移说明见 [mcli 更新](/zh/blog/release/silo-20261026/#mcli)。
+20261026 还加入客户端身份缓存隔离、复制重同步 JSON 终态输出和速率溢出修复、start/cancel 部分失败的非零退出码，以及缺少实时指标时的 batch `pending` 状态与有界回退。完整命令与脚本迁移说明见 [mcli 更新](/zh/release/silo-20261026/#mcli)。
 
 ---
 

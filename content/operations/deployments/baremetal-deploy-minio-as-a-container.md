@@ -25,7 +25,7 @@ The procedure includes guidance for deploying Single-Node Multi-Drive (SNMD) and
 >
 > These examples cover Single-Node Single-Drive and Single-Node Multi-Drive development or evaluation deployments. They do not define a production Multi-Node Multi-Drive topology or an upgrade contract for Docker Compose, Docker Swarm, or another container orchestrator. For a production distributed deployment, use a tested [Kubernetes tenant workflow](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/) and validate persistence, networking, failure domains, and upgrades for your environment.
 >
-> The examples target [Server 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`). Validate the version with your workload and record the image digest for rollback.
+> The examples target [Server 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`). Validate the version with your workload and record the image digest for rollback.
 >
 > SILO disables in-place self-update; `MINIO_UPDATE=off` does not re-enable it. Upgrade containers by replacing the image with a verified SILO tag or digest, not with `mc admin update`.
 

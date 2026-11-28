@@ -14,7 +14,7 @@ url: "/blog/design/site-replication-lock-snapshots/"
 
 This record covers an upstream-inherited concurrency deadlock and map-race family in `SiteReplicationSys` (`cmd/site-replication.go`, `cmd/iam-revision.go`, `cmd/site-replication-metadata.go`), tracked under [#341](https://github.com/pgsty/silo/issues/341).
 
-**Status:** Shipped in **[SILO 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`; commits [`745fbf043`](https://github.com/pgsty/silo/commit/745fbf04376454a3052afb7204856b90cd394f9b), [`2f228284f`](https://github.com/pgsty/silo/commit/2f228284f31ded34ff34442b239a7e1589caa778), and [`ef6efd312`](https://github.com/pgsty/silo/commit/ef6efd3120737506f9dd706e2c8564647b2c5685)). `SILO Server 20261109` and earlier—as well as upstream MinIO releases since `2022-04-24`—are affected.
+**Status:** Shipped in **[SILO 20261112](/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`; commits [`745fbf043`](https://github.com/pgsty/silo/commit/745fbf04376454a3052afb7204856b90cd394f9b), [`2f228284f`](https://github.com/pgsty/silo/commit/2f228284f31ded34ff34442b239a7e1589caa778), and [`ef6efd312`](https://github.com/pgsty/silo/commit/ef6efd3120737506f9dd706e2c8564647b2c5685)). `SILO Server 20261109` and earlier—as well as upstream MinIO releases since `2022-04-24`—are affected.
 
 ## Short Answer {#tldr}
 

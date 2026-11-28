@@ -16,7 +16,7 @@ is merged on `main` at
 [`91006a587`](https://github.com/pgsty/mc/commit/91006a5879d34422725d7f6aab9640319be88c94).
 We accepted the per-alias region design, kept its small production implementation
 and supplemented the regression coverage. This records the original design decision. The capability is included in
-the published [mcli 20261109](/blog/release/mcli-20261109/); the configuration
+the published [mcli 20261109](/release/mcli-20261109/); the configuration
 boundaries below have been checked against that release source.
 
 The original patch and tests came from

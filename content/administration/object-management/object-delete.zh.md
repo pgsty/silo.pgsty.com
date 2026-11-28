@@ -99,7 +99,7 @@ MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-ma
 
 使用 `JSON` 时，生命周期规则可以在指定天数后删除已删除对象的所有版本。
 
-自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，生命周期过期执行以下保护机制：
+自 [SILO 20261109](/zh/release/silo-20261109/) 起，生命周期过期执行以下保护机制：
 
 - **整键删除精确限定于当前对象键：** `ExpiredObjectAllVersions` 和 `DelMarkerExpiration` 仅作用于已过期的精确对象键，而不会影响该前缀下的子键；若对象键仍包含已分层版本或受 Object Lock 保护的版本，则拒绝执行整键删除（[#297](https://github.com/pgsty/silo/issues/297)）。
 - **仅含 `DelMarkerExpiration` 的规则：** 唯一动作为 `DelMarkerExpiration` 的生命周期规则可正常执行（[#268](https://github.com/pgsty/silo/issues/268)）。
@@ -113,7 +113,7 @@ MinIO 会保护受 [锁定规则](/zh/administration/object-management/object-re
 
 指定对象版本的 `DELETE` 操作受保留规则约束。 对于受锁定保护的对象版本，MinIO 会在锁定过期或被移除之前防止其被覆盖或删除。
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，批量 `DeleteObjects` 请求在执行物理版本移除时会使用与保留期和 legal hold 更新相同的变更锁逐项串行复核，并合并所有存储池的保护状态（提交 [`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)；因此在启用 Object Lock 的存储桶中，大批量物理版本清除耗时更长，而创建删除标记及普通存储桶仍保持并发批量路径）。批量删除在移除目录对象的 `null` 版本前，同样会检查该目录对象的 Object Lock 保留期与 legal hold 状态（提交 [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)）。
+在 [SILO 20261109](/zh/release/silo-20261109/) 中，批量 `DeleteObjects` 请求在执行物理版本移除时会使用与保留期和 legal hold 更新相同的变更锁逐项串行复核，并合并所有存储池的保护状态（提交 [`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)；因此在启用 Object Lock 的存储桶中，大批量物理版本清除耗时更长，而创建删除标记及普通存储桶仍保持并发批量路径）。批量删除在移除目录对象的 `null` 版本前，同样会检查该目录对象的 Object Lock 保留期与 legal hold 状态（提交 [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)）。
 
 ## 已复制对象 {#replicated-objects}
 
@@ -121,7 +121,7 @@ MinIO 会保护受 [锁定规则](/zh/administration/object-management/object-re
 
 删除操作是否会被复制，取决于复制类型以及复制配置方式。
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，复制删除会保留目标端的 legal hold 与保留期（提交 [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)）：源端绕过 `GOVERNANCE` 保留期的物理清除不会赋予目标端副本绕过权限，目标端会拒绝清除并由源端重试。此外，生命周期规则创建的删除标记与版本清除**不会**通过存储桶复制或站点复制传播（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)），与 AWS S3 语义一致，每个副本存储桶独立应用各自的生命周期配置。
+在 [SILO 20261109](/zh/release/silo-20261109/) 中，复制删除会保留目标端的 legal hold 与保留期（提交 [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)）：源端绕过 `GOVERNANCE` 保留期的物理清除不会赋予目标端副本绕过权限，目标端会拒绝清除并由源端重试。此外，生命周期规则创建的删除标记与版本清除**不会**通过存储桶复制或站点复制传播（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)），与 AWS S3 语义一致，每个副本存储桶独立应用各自的生命周期配置。
 
 ### 站点复制 {#site-replication}
 

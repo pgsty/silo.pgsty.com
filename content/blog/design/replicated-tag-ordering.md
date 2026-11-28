@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/replicated-tag-ordering/"
 ---
 
-Shipped in [SILO Server 20260916](/blog/release/silo-20260916/) (`40220bd836cbd066ca424fa4dc5dbb90057fb55a`), [PR #193](https://github.com/pgsty/silo/pull/193) (commit [`03027727d`](https://github.com/pgsty/silo/commit/03027727d)) and [PR #196](https://github.com/pgsty/silo/pull/196) (commit [`680eac66e`](https://github.com/pgsty/silo/commit/680eac66e)) fix two defects in how object tags preserve ordering across bucket replication: SSE-KMS destination copies silently dropping tag revision timestamps (`R4`), and empty tag values lacking a revision timestamp so delayed replication events could resurrect deleted tags (`R5`).
+Shipped in [SILO Server 20260916](/release/silo-20260916/) (`40220bd836cbd066ca424fa4dc5dbb90057fb55a`), [PR #193](https://github.com/pgsty/silo/pull/193) (commit [`03027727d`](https://github.com/pgsty/silo/commit/03027727d)) and [PR #196](https://github.com/pgsty/silo/pull/196) (commit [`680eac66e`](https://github.com/pgsty/silo/commit/680eac66e)) fix two defects in how object tags preserve ordering across bucket replication: SSE-KMS destination copies silently dropping tag revision timestamps (`R4`), and empty tag values lacking a revision timestamp so delayed replication events could resurrect deleted tags (`R5`).
 
 ## The Shared Model: A Tag Value and Its Revision Form One State {#model}
 
@@ -57,7 +57,7 @@ Both defects broke that invariant by dropping the revision timestamp rather than
 
 - **Equal-timestamp ties resolve to stored-wins:** Both unversioned and explicit `null`-version `COPY` requests now keep the stored destination state when incoming and stored tag timestamps are identical.
 - **Ordinary `COPY` with `X-Amz-Tagging-Directive: REPLACE` and empty tags:** Now clears destination tags as required by S3, instead of falling back to copying source tags.
-- **Coordinated two-ended upgrade required:** Both source and target clusters in a replication pair must be upgraded to [SILO Server 20260916](/blog/release/silo-20260916/) (see also the [IAM and replication upgrade guide](/operations/replication/iam-upgrade/)). An unupgraded peer still ignores empty-value revision headers.
+- **Coordinated two-ended upgrade required:** Both source and target clusters in a replication pair must be upgraded to [SILO Server 20260916](/release/silo-20260916/) (see also the [IAM and replication upgrade guide](/operations/replication/iam-upgrade/)). An unupgraded peer still ignores empty-value revision headers.
 - **One additional metadata `COPY` per tagged object during resync/heal:** Because `HEAD` does not expose internal tag revision headers through `minio-go`, explicit resync/heal issues one metadata `COPY` for objects that carry a recorded tag revision. On destination buckets with default or global SSE-KMS encryption, that metadata `COPY` rewrites the object payload—account for this I/O when scheduling bulk resyncs.
 - **Scope boundaries:** Historical missing or overwritten deletion timestamps are not reconstructed automatically; repair affected objects by issuing a fresh `PutObjectTagging` or `DeleteObjectTagging` on the authoritative source. Tag-filtered replication rules continue to evaluate target eligibility against the post-mutation tag set, and per-hop timestamp comparison relies on synchronized wall clocks (NTP) across sites.
 

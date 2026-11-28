@@ -101,7 +101,7 @@ See the [scanner](/operations/concepts/scanner/#minio-concepts-scanner) page for
 
 With `JSON`, lifecycle rules can remove all versions of a deleted object after a specified number of days.
 
-Starting in [SILO 20261109](/blog/release/silo-20261109/), lifecycle expiration enforces the following safeguards:
+Starting in [SILO 20261109](/release/silo-20261109/), lifecycle expiration enforces the following safeguards:
 
 - **Exact-key delete-all scope:** `ExpiredObjectAllVersions` and `DelMarkerExpiration` act only on the expired object key rather than child keys below that prefix, and refuse deletion when the key still holds tiered or Object Lock protected versions ([#297](https://github.com/pgsty/silo/issues/297)).
 - **`DelMarkerExpiration`-only rules:** Rules whose sole action is `DelMarkerExpiration` execute as configured ([#268](https://github.com/pgsty/silo/issues/268)).
@@ -115,7 +115,7 @@ MinIO protects objects subject to a [locking rule](/administration/object-manage
 
 `DELETE` operations that specify an object version are subject to the retention rules. MinIO protects object versions subject to a lock from being overwritten or deleted until the lock expires or is removed.
 
-In [SILO 20261109](/blog/release/silo-20261109/), bulk `DeleteObjects` requests check physical version removals sequentially under the same mutation lock used for retention and legal-hold updates, merging protection across all server pools (commit [`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc); large version-purge batches in Object Lock buckets therefore take longer, while delete-marker creation and ordinary buckets retain the concurrent bulk path). Bulk deletion also checks Object Lock retention and legal hold on directory objects before removing a directory `null` version (commit [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)).
+In [SILO 20261109](/release/silo-20261109/), bulk `DeleteObjects` requests check physical version removals sequentially under the same mutation lock used for retention and legal-hold updates, merging protection across all server pools (commit [`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc); large version-purge batches in Object Lock buckets therefore take longer, while delete-marker creation and ordinary buckets retain the concurrent bulk path). Bulk deletion also checks Object Lock retention and legal hold on directory objects before removing a directory `null` version (commit [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)).
 
 ## Replicated Objects {#replicated-objects}
 
@@ -123,7 +123,7 @@ Replication duplicates objects from one location to another. MinIO supports repl
 
 Delete operations may or may not replicate, depending on the type of replication and how the replication is configured.
 
-In [SILO 20261109](/blog/release/silo-20261109/), replicated deletes preserve the target's legal hold and retention (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)): a source purge that bypassed `GOVERNANCE` retention does not bypass active protection on the target copy, so the target refuses the purge and the source retries. In addition, lifecycle-created delete markers and version purges are **not** replicated across bucket or site replication (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), matching AWS S3 semantics where each replica bucket applies its own lifecycle configuration independently.
+In [SILO 20261109](/release/silo-20261109/), replicated deletes preserve the target's legal hold and retention (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)): a source purge that bypassed `GOVERNANCE` retention does not bypass active protection on the target copy, so the target refuses the purge and the source retries. In addition, lifecycle-created delete markers and version purges are **not** replicated across bucket or site replication (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), matching AWS S3 semantics where each replica bucket applies its own lifecycle configuration independently.
 
 ### Site Replication {#site-replication}
 

@@ -125,7 +125,7 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 SILO Server 20261018 及更高版本会迁移 `null` 和 UUID 删除标记，包括源池中唯一剩下的删除标记。其他池可能仍保留同名对象的旧数据版本，因此不能仅因本池没有其他版本就丢弃标记。这替代了旧版上游跳过孤立删除标记的行为。
 
-退役过程会评估[生命周期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)，对跨全部存储池确认可安全过期的对象或版本执行过期处理，并跳过不必要的载荷迁移。[SILO 20261109](/zh/blog/release/silo-20261109/) 在池退役与再平衡期间仅当 `MINIO_SCANNER_SUBSYSTEMS` 启用 `scanner` 时才评估 ILM 规则，先评估生命周期动作（`evalActionFromLifecycle`）再评估分层转移（`evalScannerTransition`）（见 [ILM 迁移顺序](/zh/blog/design/ilm-migration-ordering/)），并包含以下池退役修复：
+退役过程会评估[生命周期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)，对跨全部存储池确认可安全过期的对象或版本执行过期处理，并跳过不必要的载荷迁移。[SILO 20261109](/zh/release/silo-20261109/) 在池退役与再平衡期间仅当 `MINIO_SCANNER_SUBSYSTEMS` 启用 `scanner` 时才评估 ILM 规则，先评估生命周期动作（`evalActionFromLifecycle`）再评估分层转移（`evalScannerTransition`）（见 [ILM 迁移顺序](/zh/blog/design/ilm-migration-ordering/)），并包含以下池退役修复：
 
 - 支持迁移跨存储池副本具有不同纠删码布局的对象（[#261](https://github.com/pgsty/silo/issues/261)）。
 - 迁移已被 ILM 判定过期的当前版本，避免跳过或将其遗留在退役池中（[#265](https://github.com/pgsty/silo/issues/265)）。
@@ -147,11 +147,11 @@ SILO Server 20261018 及更高版本会迁移 `null` 和 UUID 删除标记，包
 
 ### SILO 20261112 多轮排空扫描与进展核算 {#candidate-progress}
 
-Server 20261109 的物理列举先遇到同名父对象时，可能遗漏其下的子键（[#334](https://github.com/pgsty/silo/issues/334)、[PR #335](https://github.com/pgsty/silo/pull/335)）。[SILO 20261112](/zh/blog/release/silo-20261112/)（`RELEASE.2026-11-12T00-00-00Z`）在确认源版本被移除、更多子键显露后重新扫描存储桶，修复这一历史列举限制；逻辑层返回 NotFound 不再被当作源磁盘已清空的证据。
+Server 20261109 的物理列举先遇到同名父对象时，可能遗漏其下的子键（[#334](https://github.com/pgsty/silo/issues/334)、[PR #335](https://github.com/pgsty/silo/pull/335)）。[SILO 20261112](/zh/release/silo-20261112/)（`RELEASE.2026-11-12T00-00-00Z`）在确认源版本被移除、更多子键显露后重新扫描存储桶，修复这一历史列举限制；逻辑层返回 NotFound 不再被当作源磁盘已清空的证据。
 
 退役和再平衡会在同名的另一个版本被并发删除时，继续清理已经成功迁移的版本。只有确认源端移除，包括安全清理的 free-version 记录，才计为进展；不可读或相互冲突的元数据不计为不存在。源端清理与最终清空核验会检查每一块在线磁盘，允许纠删集读仲裁容错范围内的离线坏盘，但继续拒绝在线盘残留元数据、损坏元数据、目录错误以及超出容错阈值的磁盘离线。扫描没有物理进展时停止；源端仍有物理元数据时，最终检查会返回错误，阻止标记完成。取消也返回错误。失败后应先检查报告中的元数据或磁盘问题，再重新发起操作。
 
-最终物理清空检查仍然必需。如果 free-version 记录仍承担远端分层清理所有权，就不能为了排空池而直接丢弃；未解决的分层所有权仍会阻止完成。这些改动已随 [SILO 20261112](/zh/blog/release/silo-20261112/) 发布（未包含在 20261109 制品中），发布边界见 [Server 兼容性说明](/zh/compatibility/server/#candidate-after-20261109)。
+最终物理清空检查仍然必需。如果 free-version 记录仍承担远端分层清理所有权，就不能为了排空池而直接丢弃；未解决的分层所有权仍会阻止完成。这些改动已随 [SILO 20261112](/zh/release/silo-20261112/) 发布（未包含在 20261109 制品中），发布边界见 [Server 兼容性说明](/zh/compatibility/server/#candidate-after-20261109)。
 
 ### 最终列表检查 {#final-listing-check}
 
@@ -166,14 +166,14 @@ Server 20261109 的物理列举先遇到同名父对象时，可能遗漏其下�
 > [!NOTE]
 > **变更: RELEASE.2023-03-20T20-16-18Z**
 
-对于已启用并处于活动状态的 tiering 部署，退役会将对象引用迁移到新的 active pool，并且 [SILO 20261109](/zh/blog/release/silo-20261109/) 在其他存储池仍引用远端对象时保留该远端数据（[#306](https://github.com/pgsty/silo/issues/306)、[#308](https://github.com/pgsty/silo/issues/308)）。应用程序可继续对这些对象发出 `GET` 请求，由 SILO 透明地从远端 tier 检索数据。
+对于已启用并处于活动状态的 tiering 部署，退役会将对象引用迁移到新的 active pool，并且 [SILO 20261109](/zh/release/silo-20261109/) 在其他存储池仍引用远端对象时保留该远端数据（[#306](https://github.com/pgsty/silo/issues/306)、[#308](https://github.com/pgsty/silo/issues/308)）。应用程序可继续对这些对象发出 `GET` 请求，由 SILO 透明地从远端 tier 检索数据。
 
 在旧版本 MinIO 中，tiering 配置会阻止退役操作。
 
 > [!WARNING]
 > **退役完成前，保留所有远端 tier 的配置**
 >
-> tier free version 是某个仍待删除远端对象的内部记录。退役会在确认没有其他存储池引用后先删除远端对象、再移除该记录，因此在池退役完成前必须保留记录所指向的远端 tier 配置。若该 tier 已从配置中移除，退役会失败且记录仍留在退役池中。[SILO 20261109](/zh/blog/release/silo-20261109/) 会先继续迁移其余所有存储桶，并在错误信息中列出该 free version、对应的远端对象和缺失的 tier（[#307](https://github.com/pgsty/silo/issues/307)）。
+> tier free version 是某个仍待删除远端对象的内部记录。退役会在确认没有其他存储池引用后先删除远端对象、再移除该记录，因此在池退役完成前必须保留记录所指向的远端 tier 配置。若该 tier 已从配置中移除，退役会失败且记录仍留在退役池中。[SILO 20261109](/zh/release/silo-20261109/) 会先继续迁移其余所有存储桶，并在错误信息中列出该 free version、对应的远端对象和缺失的 tier（[#307](https://github.com/pgsty/silo/issues/307)）。
 >
 > 请使用 [`mcli ilm tier add`](/zh/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add) 以相同名称重新添加该 tier，然后重新运行 [`mcli admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) 继续处理剩余存储桶。参见[分层游离版本是内部清理记录](/zh/blog/design/tier-free-version-semantics/#operations)。
 

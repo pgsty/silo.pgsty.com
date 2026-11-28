@@ -11,7 +11,7 @@ upstream_modified: true
 
 ## 内嵌与独立 Console（SILO 20261109 / Console v2.7.0） {#embedded-compatibility}
 
-[SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）内嵌 [Console v2.7.0](/zh/blog/release/console-2.7.0/)（`4e91ae506e70`）；独立部署使用镜像 `docker.io/pgsty/silo-console:v2.7.0`。单独更新独立部署的 Console 二进制或容器镜像**不会**替换旧版 `silo` 服务端二进制内嵌的 Console。
+[SILO 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）内嵌 [Console v2.7.0](/zh/release/console-2.7.0/)（`4e91ae506e70`）；独立部署使用镜像 `docker.io/pgsty/silo-console:v2.7.0`。单独更新独立部署的 Console 二进制或容器镜像**不会**替换旧版 `silo` 服务端二进制内嵌的 Console。
 
 Console `v2.7.0` 包含以下运行与运维能力：
 
@@ -58,7 +58,7 @@ Server 的 S3 策略保持不变。设置 `none`/`off` 时，S3 也会忽略内�
 ## 对象分享 {#object-sharing}
 
 > [!NOTE]
-> **Console v2.4.1：** [#56](https://github.com/pgsty/silo-console/pull/56) 实现了以下请求边界，并随 [v2.4.1](/zh/blog/release/console-2.4.1/) 发布。[Server #209](https://github.com/pgsty/silo/pull/209) 接入了对应的内嵌行为。详见[组件说明](/zh/compatibility/versions/#console-sharing)。
+> **Console v2.4.1：** [#56](https://github.com/pgsty/silo-console/pull/56) 实现了以下请求边界，并随 [v2.4.1](/zh/release/console-2.4.1/) 发布。[Server #209](https://github.com/pgsty/silo/pull/209) 接入了对应的内嵌行为。详见[组件说明](/zh/compatibility/versions/#console-sharing)。
 
 该修复无需新增配置，请求限制始终执行，正常分享继续可用。`CONSOLE_SHARE_MINIO_URL` 仍只选择生成的链接格式。匿名代理仅允许下载对象内容的 GET 请求：
 

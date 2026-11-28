@@ -14,7 +14,7 @@ url: "/blog/design/multi-pool-lifecycle-expiry/"
 
 This record covers [issue #278](https://github.com/pgsty/silo/issues/278) and [PR #279](https://github.com/pgsty/silo/pull/279) by Denis Babchuk, evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). The merged maintainer integration preserves the contributor commits and adds the follow-ups described below. The restored-copy expiry fix ([#281](https://github.com/pgsty/silo/issues/281)) travels in the same integration PR and has its own record.
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 
@@ -303,7 +303,7 @@ On these paths, a wrong local decision is refused rather than executed. Migratio
 
 Multi-node lock domains across separate physical hosts and multi-day scanner and migration soak runs were not exercised in the local checks.
 
-**Integration and release verification.** The fix served as the base of the `SILO Server 20261109` integration branch, with #281 and the lock-domain, delete-all, heal dry-run, #259, #285, and Console fixes stacked on top without conflicts. Local integration runs passed the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite and CI race-detector selections, and an adversarial review of the combined branch checked lock domains, cleanup paths, and purge against restore with executed probes and found no defects. Release commit `d998292387cc` (`RELEASE.2026-11-09T00-00-00Z`) passed Go CI (including the untagged Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` gate), VulnCheck, Test Release Pipeline, and [release build verification](/blog/release/silo-20261109/).
+**Integration and release verification.** The fix served as the base of the `SILO Server 20261109` integration branch, with #281 and the lock-domain, delete-all, heal dry-run, #259, #285, and Console fixes stacked on top without conflicts. Local integration runs passed the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite and CI race-detector selections, and an adversarial review of the combined branch checked lock domains, cleanup paths, and purge against restore with executed probes and found no defects. Release commit `d998292387cc` (`RELEASE.2026-11-09T00-00-00Z`) passed Go CI (including the untagged Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` gate), VulnCheck, Test Release Pipeline, and [release build verification](/release/silo-20261109/).
 
 ## Review history {#review}
 

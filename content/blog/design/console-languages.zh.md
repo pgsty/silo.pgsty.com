@@ -14,7 +14,7 @@ url: "/zh/blog/design/console-languages/"
 
 Eduardo Andrade Machado 的 [Console PR #83](https://github.com/pgsty/silo-console/pull/83) 提供了巴西葡萄牙语翻译。siyahkut 在 [silo#277](https://github.com/pgsty/silo/issues/277) 中请求土耳其语。这两项贡献推动 Console 扩展为可配置的十语言界面。
 
-**状态：** 已随 [Console 2.7.0](/zh/blog/release/console-2.7.0/)（[`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)，`pgsty/silo-console:v2.7.0`）正式发布，并内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）。发布前复核验证了紧凑标签、RTL 输入控件，以及手机、平板和桌面宽度下的版面边界。
+**状态：** 已随 [Console 2.7.0](/zh/release/console-2.7.0/)（[`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)，`pgsty/silo-console:v2.7.0`）正式发布，并内嵌于 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）。发布前复核验证了紧凑标签、RTL 输入控件，以及手机、平板和桌面宽度下的版面边界。
 
 ## 决定 {#tldr}
 
@@ -218,6 +218,6 @@ tr: { label: "Türkçe", tag: "tr", dir: "ltr", tier: "maintained" },
 
 PR #83 已保留原始历史合并，初版十语言[实现](https://github.com/pgsty/silo-console/commit/51a735992)与[嵌入 GUI](https://github.com/pgsty/silo-console/commit/0059ee2d9)分别提交。随后提交包含[审校译文与紧凑布局检查](https://github.com/pgsty/silo-console/commit/34de5907eb8d290ddb3e7f43c6bec68f1eb76daa)、[逐语言资源与缓存策略](https://github.com/pgsty/silo-console/commit/b0371b69cc1eae78eb30342afa8613dfbd78971b)，以及[中间阶段重新生成的嵌入 GUI](https://github.com/pgsty/silo-console/commit/efe12ae972579972327b0d56e085fcfc8ba62923)。发布前收尾修复恢复了任务计数角标位置（[`bc17e124a`](https://github.com/pgsty/silo-console/commit/bc17e124a)）并在 RTL 下将协议字段操作按钮保持在文本末尾（[`a9da731c5`](https://github.com/pgsty/silo-console/commit/a9da731c5)），最终由 [Console 2.7.0 正式版资源构建 `4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505) 取代 `efe12ae97`。
 
-正式发布的 `v2.7.0` 源码通过全部前端单元测试、Go API 测试、类型检查、格式检查、未使用代码检查和生产包预算，已随独立版 [Console 2.7.0](/zh/blog/release/console-2.7.0/)（`pgsty/silo-console:v2.7.0`）交付，并内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)。词典修订既要进入 TypeScript 文件，也必须进入实际发布的 GUI。
+正式发布的 `v2.7.0` 源码通过全部前端单元测试、Go API 测试、类型检查、格式检查、未使用代码检查和生产包预算，已随独立版 [Console 2.7.0](/zh/release/console-2.7.0/)（`pgsty/silo-console:v2.7.0`）交付，并内嵌于 [SILO Server 20261109](/zh/release/silo-20261109/)。词典修订既要进入 TypeScript 文件，也必须进入实际发布的 GUI。
 
 验收覆盖缺词回退、占位符和复数、语言偏好持久化、首次加载后的离线切换、未保存表单、阿拉伯语布局、原始数据不变，以及只修改一种语言后的缓存复用。

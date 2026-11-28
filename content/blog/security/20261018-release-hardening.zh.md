@@ -10,7 +10,7 @@ weight: 1
 url: "/zh/blog/security/20261018-release-hardening/"
 ---
 
-[SILO Server 20261018](/zh/blog/release/silo-20261018/) 正式交付了 **`SN-2026-015`**、**`SN-2026-016`** 与 **`SN-2026-017`** 三项安全修复、细粒度 STS 令牌撤销机制，以及跨 `silo`、`mcli` 与 `silo-console` 的 Go 工具链与依赖库安全更新。Server `20260916` 与 `20260903` 均受影响（`20261015` 为已被替代的预发布草稿）。
+[SILO Server 20261018](/zh/release/silo-20261018/) 正式交付了 **`SN-2026-015`**、**`SN-2026-016`** 与 **`SN-2026-017`** 三项安全修复、细粒度 STS 令牌撤销机制，以及跨 `silo`、`mcli` 与 `silo-console` 的 Go 工具链与依赖库安全更新。Server `20260916` 与 `20260903` 均受影响（`20261015` 为已被替代的预发布草稿）。
 
 ## Object Lock：SN-2026-015 与 SN-2026-016 {#object-lock}
 
@@ -45,14 +45,14 @@ url: "/zh/blog/security/20261018-release-hardening/"
 
 ## STS 撤销的后续修复 {#sts-revocation}
 
-最终发布提交 [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce) 修复了 `RevokeTokens` 仅枚举本地内存缓存以及撤销状态未完整传播至同集群兄弟节点与远端站点的问题。服务端现为集群已持久掌握、匹配父身份/类型及操作时间截点的令牌保留删除墓碑，并通过节点通知与删除自愈机制同步传播。详情参见[细粒度 STS 撤销设计说明](/zh/blog/design/iam-revocations/#scoped-sts-20261018)与 [Server 20261018 发布说明](/zh/blog/release/silo-20261018/#delivery)。
+最终发布提交 [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce) 修复了 `RevokeTokens` 仅枚举本地内存缓存以及撤销状态未完整传播至同集群兄弟节点与远端站点的问题。服务端现为集群已持久掌握、匹配父身份/类型及操作时间截点的令牌保留删除墓碑，并通过节点通知与删除自愈机制同步传播。详情参见[细粒度 STS 撤销设计说明](/zh/blog/design/iam-revocations/#scoped-sts-20261018)与 [Server 20261018 发布说明](/zh/release/silo-20261018/#delivery)。
 
 ## 依赖安全与登录兼容性 {#dependencies}
 
 Server `20261018` 在 [`go.mod`](https://github.com/pgsty/silo/blob/0cd388c666f8211f552604ae73448a066e9c25ce/go.mod) 中采用 Go **1.27.2**、`golang.org/x/net` **v0.61.0**、`golang.org/x/crypto` **v0.58.0**、`golang.org/x/text` **v0.43.0**、`silo-pkg` **v3.14.3** 与 `go-jose` **v4.1.6**：
 
 - **`go-jose` v4.1.6（[GHSA-mgcc-cww5-fp2q](https://github.com/go-jose/go-jose/security/advisories/GHSA-mgcc-cww5-fp2q)）**：修复解析恶意构造的 RSA JWK 时消耗过多 CPU 的问题，并在 OIDC 路径上拒绝超过 **4096 位**的 RSA JWK 密钥。若外部身份提供者（IdP）使用了超过 4096 位的 RSA 签名密钥，请在升级前检查 OIDC 发现端点、JWKS 与登录流程并在 IdP 侧轮换密钥。
-- **独立 Console**：独立部署版 Console 的依赖更新见 [Console v2.4.2 发布说明](/zh/blog/release/console-2.4.2/)。
+- **独立 Console**：独立部署版 Console 的依赖更新见 [Console v2.4.2 发布说明](/zh/release/console-2.4.2/)。
 
 ## 验证与覆盖范围 {#evidence}
 

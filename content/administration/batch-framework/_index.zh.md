@@ -12,7 +12,7 @@ upstream_modified: true
 <a id="id1" data-td-print-local></a>
 
 > [!NOTE]
-> **版本范围：** [SILO 20261109](/zh/blog/release/silo-20261109/) 与 [mcli 20261109](/zh/blog/release/mcli-20261109/) 实现了下述授权、Object Lock 与恢复规则。Server `20261026` 不包含这些服务端规则，单独升级 `mcli` 也不会更新服务端作业执行逻辑。
+> **版本范围：** [SILO 20261109](/zh/release/silo-20261109/) 与 [mcli 20261109](/zh/release/mcli-20261109/) 实现了下述授权、Object Lock 与恢复规则。Server `20261026` 不包含这些服务端规则，单独升级 `mcli` 也不会更新服务端作业执行逻辑。
 
 ## 概述 {#overview}
 
@@ -35,7 +35,7 @@ MinIO 批处理框架支持以下作业类型：
 
 ## SILO 20261109：授权与重试 {#silo-lifecycle}
 
-[SILO 20261109](/zh/blog/release/silo-20261109/) 在创建作业时将本地批处理操作绑定到已认证提交者，并在执行全程强制校验提交者的数据权限（[#310](https://github.com/pgsty/silo/issues/310)、[#311](https://github.com/pgsty/silo/issues/311)）。作业定义中的凭据仅用于授权远端连接，不会授予本地服务器权限。SILO 在每次执行动作前都会重新评估当前 IAM 状态：
+[SILO 20261109](/zh/release/silo-20261109/) 在创建作业时将本地批处理操作绑定到已认证提交者，并在执行全程强制校验提交者的数据权限（[#310](https://github.com/pgsty/silo/issues/310)、[#311](https://github.com/pgsty/silo/issues/311)）。作业定义中的凭据仅用于授权远端连接，不会授予本地服务器权限。SILO 在每次执行动作前都会重新评估当前 IAM 状态：
 
 - 显式拒绝、凭据过期/禁用/撤销，或凭据密钥、会话令牌、父级身份发生变更时，作业会以 `failureReason` 结束。
 - 保留提交者凭据本身的身份元数据编辑（如描述或延后过期时间）与 LDAP 组刷新不会中断作业；每次检查都会重新解析当前状态、组与策略（[#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)）。

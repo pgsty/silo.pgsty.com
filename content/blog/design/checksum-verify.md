@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/checksum-verify/"
 ---
 
-This is the design and implementation record for MCLI's read-only checksum verification workflow and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5), the non-TTY output defect discovered during release review. The command merged into [`pgsty/mc`](https://github.com/pgsty/mc) through pull requests [#8](https://github.com/pgsty/mc/pull/8) and [#13](https://github.com/pgsty/mc/pull/13) and shipped in [mcli 20260903](/blog/release/mcli-20260903/) (bundled in [Server 20260903](/blog/release/silo-20260903/) container images).
+This is the design and implementation record for MCLI's read-only checksum verification workflow and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5), the non-TTY output defect discovered during release review. The command merged into [`pgsty/mc`](https://github.com/pgsty/mc) through pull requests [#8](https://github.com/pgsty/mc/pull/8) and [#13](https://github.com/pgsty/mc/pull/13) and shipped in [mcli 20260903](/release/mcli-20260903/) (bundled in [Server 20260903](/release/silo-20260903/) container images).
 
 ## Overview {#tldr}
 

@@ -37,7 +37,7 @@ MinIO 批处理框架允许您使用 YAML 格式的作业定义文件（“批�
 
 ### SILO 20261109：授权、Object Lock 与重试 {#silo-retry}
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，Push、Pull 和 Snowball 复制会在执行全程强制校验已认证提交者的本地数据权限，并保留 Object Lock 保护（[#310](https://github.com/pgsty/silo/issues/310)、[#311](https://github.com/pgsty/silo/issues/311)）。Pull 复制会校验复制过来的 Object Lock 头部，在需要时应用目标端默认保留策略，并跳过目标端受 Object Lock 保护的版本（计入 `versionsSkippedLocked`，终态为 `complete-with-skips`）；复制删除操作同样遵守目标端的 Object Lock 保留期与法定保留设置。
+在 [SILO 20261109](/zh/release/silo-20261109/) 中，Push、Pull 和 Snowball 复制会在执行全程强制校验已认证提交者的本地数据权限，并保留 Object Lock 保护（[#310](https://github.com/pgsty/silo/issues/310)、[#311](https://github.com/pgsty/silo/issues/311)）。Pull 复制会校验复制过来的 Object Lock 头部，在需要时应用目标端默认保留策略，并跳过目标端受 Object Lock 保护的版本（计入 `versionsSkippedLocked`，终态为 `complete-with-skips`）；复制删除操作同样遵守目标端的 Object Lock 保留期与法定保留设置。
 
 Push、Pull 和 Snowball 复制在必要的授权依赖或报告读取暂时不可用时（包括对象处理过程中发生的故障）进入暂停（[#324](https://github.com/pgsty/silo/issues/324)）。服务端会保存 `pausedReason` 并保留作业所有权以便自动重试；服务重启后，启动发现过程也会自动恢复未完成的复制作业（[#314](https://github.com/pgsty/silo/issues/314)、[#324](https://github.com/pgsty/silo/issues/324)）。明确的授权拒绝仍是带有 `failureReason` 的终态失败；重试不会绕过授权。
 
@@ -47,7 +47,7 @@ Push、Pull 和 Snowball 复制在必要的授权依赖或报告读取暂时不�
 
 ### 访问控制与要求 {#access-control-and-requirements}
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，已认证的提交者必须具备 `admin:StartBatchJob` 和作业所需的本地数据权限。定义中的凭据用于远端连接，不能代替提交者的本地权限。撤销、暂停与版本切换的行为见[授权与重试](/zh/administration/batch-framework/#silo-lifecycle)。
+在 [SILO 20261109](/zh/release/silo-20261109/) 中，已认证的提交者必须具备 `admin:StartBatchJob` 和作业所需的本地数据权限。定义中的凭据用于远端连接，不能代替提交者的本地权限。撤销、暂停与版本切换的行为见[授权与重试](/zh/administration/batch-framework/#silo-lifecycle)。
 
 批量复制与 [bucket replication](/zh/administration/bucket-replication/bucket-replication-requirements/#minio-bucket-replication-requirements) 具有类似的访问和权限要求。
 

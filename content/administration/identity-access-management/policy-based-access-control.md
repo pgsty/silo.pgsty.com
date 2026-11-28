@@ -845,7 +845,7 @@ MinIO Extension for controlling API operations related to [Server-Side Bucket Re
 
 Required for synchronizing [delete operations](/administration/object-management/object-delete/#minio-object-delete) as part of MinIO server-side replication.
 
-Since [SILO 20261109](/blog/release/silo-20261109/) (`7e9ee6bef`), replicated deletes honor Object Lock legal hold and retention on the target object version. A source version purge that bypassed `GOVERNANCE` retention does not bypass active retention on the target, so protected target copies refuse the replicated delete and the source retries until target protection expires or is cleared.
+Since [SILO 20261109](/release/silo-20261109/) (`7e9ee6bef`), replicated deletes honor Object Lock legal hold and retention on the target object version. A source version purge that bypassed `GOVERNANCE` retention does not bypass active retention on the target, so protected target copies refuse the replicated delete and the source retries until target protection expires or is cleared.
 
 Supports the following additional [condition keys](#minio-policy-conditions):
 
@@ -1385,7 +1385,7 @@ Allows access to the see the definition details of a running batch job.
 
 Allows a user to start a batch job run.
 
-Since [SILO 20261109](/blog/release/silo-20261109/) ([#310](https://github.com/pgsty/silo/issues/310)), batch `expire` and `keyrotate` jobs bind to the authenticated submitter and enforce the submitter's local S3 data permissions throughout execution, while leaving Object Lock protected versions intact. Revoked or disabled submitter credentials stop the job; transient IAM or external authorization outages pause execution with bounded retry. Batch authorization skips deleted policies still named in a policy mapping, refuses a job only when a matching `Deny` statement requires request-time context unavailable during background execution, and survives metadata edits and LDAP group refreshes that retain the submitter's credential ([#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)).
+Since [SILO 20261109](/release/silo-20261109/) ([#310](https://github.com/pgsty/silo/issues/310)), batch `expire` and `keyrotate` jobs bind to the authenticated submitter and enforce the submitter's local S3 data permissions throughout execution, while leaving Object Lock protected versions intact. Revoked or disabled submitter credentials stop the job; transient IAM or external authorization outages pause execution with bounded retry. Batch authorization skips deleted policies still named in a policy mapping, refuses a job only when a matching `Deny` statement requires request-time context unavailable during background execution, and survives metadata edits and LDAP group refreshes that retain the submitter's credential ([#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)).
 
 <a id="policy-action.admin:CancelBatchJob"></a>
 

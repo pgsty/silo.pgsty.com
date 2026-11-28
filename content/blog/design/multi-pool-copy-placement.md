@@ -14,7 +14,7 @@ url: "/blog/design/multi-pool-copy-placement/"
 
 This record covers an upstream-inherited multi-pool `CopyObject` failure family across `cmd/erasure-server-pool.go` and `cmd/object-handlers.go`, tracked under [#343](https://github.com/pgsty/silo/issues/343).
 
-**Status:** Shipped in **[SILO 20261112](/blog/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`; commits [`a8824b341`](https://github.com/pgsty/silo/commit/a8824b341fce071cdd48356caaed37d76580c39e), [`e36ea51d9`](https://github.com/pgsty/silo/commit/e36ea51d9c3a28df7d60f1d105226b1d0049342e), and [`cd3e46a2b`](https://github.com/pgsty/silo/commit/cd3e46a2b7dee00b64c323d35ebdd32aab0fe644)). `SILO Server 20261109` and earlier—as well as upstream MinIO releases since `2020-08-03`—are affected.
+**Status:** Shipped in **[SILO 20261112](/release/silo-20261112/)** (`RELEASE.2026-11-12T00-00-00Z`; commits [`a8824b341`](https://github.com/pgsty/silo/commit/a8824b341fce071cdd48356caaed37d76580c39e), [`e36ea51d9`](https://github.com/pgsty/silo/commit/e36ea51d9c3a28df7d60f1d105226b1d0049342e), and [`cd3e46a2b`](https://github.com/pgsty/silo/commit/cd3e46a2b7dee00b64c323d35ebdd32aab0fe644)). `SILO Server 20261109` and earlier—as well as upstream MinIO releases since `2020-08-03`—are affected.
 
 ## Short Answer {#tldr}
 

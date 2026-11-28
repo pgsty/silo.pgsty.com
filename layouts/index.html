@@ -21,11 +21,11 @@
       <div class="hero-bg" aria-hidden="true"></div>
       <div class="landing-container">
         {{- /* Latest server release badge, driven by data/releases.yaml; the
-             target is that release's note under blog/release/silo-<version>/. */ -}}
+             target is that release's note under release/silo-<version>/. */ -}}
         {{- $serverVer := replace hugo.Data.releases.server.date "-" "" -}}
         {{- $serverPublished := hugo.Data.releases.server.published -}}
         <p class="hero-news anim" style="--d:0">
-          <a class="hero-news-badge" href="{{ relLangURL (printf "blog/release/silo-%s/" $serverVer) }}" aria-label="{{ if $zh }}SILO {{ $serverVer }}{{ if $serverPublished }} 已发布{{ else }} 发布准备{{ end }}，阅读版本说明{{ else }}SILO {{ $serverVer }} {{ if $serverPublished }}released{{ else }}release preparation{{ end }}, read the release notes{{ end }}">
+          <a class="hero-news-badge" href="{{ relLangURL (printf "release/silo-%s/" $serverVer) }}" aria-label="{{ if $zh }}SILO {{ $serverVer }}{{ if $serverPublished }} 已发布{{ else }} 发布准备{{ end }}，阅读版本说明{{ else }}SILO {{ $serverVer }} {{ if $serverPublished }}released{{ else }}release preparation{{ end }}, read the release notes{{ end }}">
             <span class="hero-news-tag">NEWS</span>
             <span class="hero-news-text">{{ $serverVer }} {{ if $serverPublished }}{{ if $zh }}已发布！{{ else }}Released!{{ end }}{{ else }}{{ if $zh }}发布准备{{ else }}Release Preparation{{ end }}{{ end }}</span>
             <i class="fas fa-arrow-right" aria-hidden="true"></i>
@@ -118,8 +118,8 @@
             <span class="stat-value" data-count="{{ (len (.Site.GetPage "blog/security").RegularPages) }}">{{ lang.FormatNumber 0 (len (.Site.GetPage "blog/security").RegularPages) }}</span>
             <span class="stat-label">Security Notes</span>
           </a>
-          <a href="{{ relLangURL "blog/release/" }}" class="stat-item">
-            <span class="stat-value" data-count="{{ (len (.Site.GetPage "blog/release").RegularPages) }}">{{ lang.FormatNumber 0 (len (.Site.GetPage "blog/release").RegularPages) }}</span>
+          <a href="{{ relLangURL "release/" }}" class="stat-item">
+            <span class="stat-value" data-count="{{ (len (.Site.GetPage "release").RegularPages) }}">{{ lang.FormatNumber 0 (len (.Site.GetPage "release").RegularPages) }}</span>
             <span class="stat-label">Release Notes</span>
           </a>
         </div>
@@ -281,7 +281,7 @@
           <a href="{{ relLangURL "developers/minio-drivers/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">S3</span><span class="kernel-name">S3 API</span><span class="kernel-desc">Application interface</span></a>
           <a href="{{ relLangURL "reference/minio-server/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">$</span><span class="kernel-name">silo</span><span class="kernel-desc">Server executable</span></a>
           <a href="{{ relLangURL "reference/minio-server/settings/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">ENV</span><span class="kernel-name">MINIO_*</span><span class="kernel-desc">Environment Vars</span></a>
-          <a href="{{ relLangURL "blog/release/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">REL</span><span class="kernel-name">RELEASE.*</span><span class="kernel-desc">Version tags</span></a>
+          <a href="{{ relLangURL "release/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">REL</span><span class="kernel-name">RELEASE.*</span><span class="kernel-desc">Version tags</span></a>
           <a href="{{ relLangURL "reference/minio-mc/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">MC</span><span class="kernel-name">mcli / mc</span><span class="kernel-desc">Command-line client</span></a>
           <a href="{{ relLangURL "administration/identity-access-management/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">IAM</span><span class="kernel-name">IAM + TLS</span><span class="kernel-desc">Security controls</span></a>
         </nav>
@@ -427,7 +427,7 @@
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q5</span><span class="faq-q">{{ if $zh }}Coding Agent 在项目中扮演什么角色？{{ else }}What role do coding agents play?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}Agent 是功能开发与代码 Review 的主力。与之配套的承诺是：每一个变更都必须通过 CI 与人工审核，所有建设性变更都要经过人类的利弊权衡才会合入；Agent 的完整思考记录会归档留存，其利弊权衡也会作为设计文档归档，以备查阅。<a href="{{ relLangURL "blog/security/" }}">安全纪事</a>与<a href="{{ relLangURL "blog/release/" }}">发布说明</a>里可以看到这套工作方式的公开产出。{{ else }}Most of the code, and most of the first-pass review, is written by coding agents. A human reads every diff, decides the trade-offs, and merges; nothing lands without CI and that review. We keep the agents' working notes and trade-off write-ups, because when a fix turns out to be wrong, the reasoning behind it is the thing you want. The <a href="{{ relLangURL "blog/security/" }}">security advisories</a> and <a href="{{ relLangURL "blog/release/" }}">release notes</a> are what this arrangement produces in public. Judge it on those.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}Agent 是功能开发与代码 Review 的主力。与之配套的承诺是：每一个变更都必须通过 CI 与人工审核，所有建设性变更都要经过人类的利弊权衡才会合入；Agent 的完整思考记录会归档留存，其利弊权衡也会作为设计文档归档，以备查阅。<a href="{{ relLangURL "blog/security/" }}">安全纪事</a>与<a href="{{ relLangURL "release/" }}">发布说明</a>里可以看到这套工作方式的公开产出。{{ else }}Most of the code, and most of the first-pass review, is written by coding agents. A human reads every diff, decides the trade-offs, and merges; nothing lands without CI and that review. We keep the agents' working notes and trade-off write-ups, because when a fix turns out to be wrong, the reasoning behind it is the thing you want. The <a href="{{ relLangURL "blog/security/" }}">security advisories</a> and <a href="{{ relLangURL "release/" }}">release notes</a> are what this arrangement produces in public. Judge it on those.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">

@@ -168,7 +168,7 @@ MinIO 计算各 pool 被用于写入操作的概率如下：
 
 除空闲空间计算外，如果某次写入（含校验）会导致驱动器使用率超过 99%，或已知剩余 inode 数量低于 1000，MinIO 也不会写入该 pool。
 
-如有需要，你可以使用 [`mc admin rebalance`](/zh/reference/minio-mc-admin/mc-admin-rebalance/#command-mc.admin.rebalance) 手动启动重平衡过程。有关重平衡工作方式的更多信息，请参阅[跨部署管理对象](/zh/operations/concepts/#minio-rebalance)。[SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）包含多项重平衡修复：
+如有需要，你可以使用 [`mc admin rebalance`](/zh/reference/minio-mc-admin/mc-admin-rebalance/#command-mc.admin.rebalance) 手动启动重平衡过程。有关重平衡工作方式的更多信息，请参阅[跨部署管理对象](/zh/operations/concepts/#minio-rebalance)。[SILO 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）包含多项重平衡修复：
 
 - 支持迁移跨存储池副本具有不同纠删码布局的对象（[#261](https://github.com/pgsty/silo/issues/261)），并迁移已被 ILM 判定过期的当前版本（[#265](https://github.com/pgsty/silo/issues/265)）。
 - 对无法在所有存储池上安全完成生命周期过期的版本改为迁移而非丢弃（[#278](https://github.com/pgsty/silo/issues/278)）。
@@ -221,7 +221,7 @@ MinIO 建议预先规划足以存放 **至少** 2 年数据的存储容量，并
 
 ### 1) 在新服务器池的每个节点上安装 Silo 二进制 {#install-the-minio-binary-on-each-node-in-the-new-server-pool}
 
-安装与现有 pool **完全相同的公开 Silo 版本**（例如 [SILO 20261109](/zh/blog/release/silo-20261109/)，标签 `RELEASE.2026-11-09T00-00-00Z`，软件包版本 `20261109000000.0.0`）。从[下载与安装](/zh/download/#server)获取 x86-64 或 ARM64 的 RPM、DEB 或独立归档，并在安装前校验 SHA-256 摘要。当前 Silo 发布只提供这两种 Linux 架构，因此已删除继承文档中指向未发布 `ppc64le` 与 `s390x` 制品的说明。
+安装与现有 pool **完全相同的公开 Silo 版本**（例如 [SILO 20261109](/zh/release/silo-20261109/)，标签 `RELEASE.2026-11-09T00-00-00Z`，软件包版本 `20261109000000.0.0`）。从[下载与安装](/zh/download/#server)获取 x86-64 或 ARM64 的 RPM、DEB 或独立归档，并在安装前校验 SHA-256 摘要。当前 Silo 发布只提供这两种 Linux 架构，因此已删除继承文档中指向未发布 `ppc64le` 与 `s390x` 制品的说明。
 
 {{< tabs group="rpmrhel-debdebianubuntu-tab3" >}}
 {{< tab label="RPM（RHEL 系）" value="rpmrhel" >}}

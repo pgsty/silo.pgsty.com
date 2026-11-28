@@ -101,7 +101,7 @@ mc ilm rule add ALIAS/PATH \
 
 ## 过期行为说明 {#expiration-behavior}
 
-自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，生命周期过期执行以下行为（详见[对象生命周期管理](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)）：
+自 [SILO 20261109](/zh/release/silo-20261109/) 起，生命周期过期执行以下行为（详见[对象生命周期管理](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)）：
 
 - **多池法定人数复核：** 过期判定会在对象锁内跨所有存储池评估，并要求取得权威法定人数后才移除版本（[#278](https://github.com/pgsty/silo/issues/278)）。请升级全部服务节点以使所有存储池执行相同检查。
 - **精确键整键删除与仅含删除标记规则：** `ExpiredObjectAllVersions` 与 `DelMarkerExpiration` 仅作用于已过期的精确对象键，不会波及前缀下的子键，且拒绝包含已分层版本或受 Object Lock 保护版本的对象键（[#297](https://github.com/pgsty/silo/issues/297)）。唯一动作为 `DelMarkerExpiration` 的规则可正常执行（[#268](https://github.com/pgsty/silo/issues/268)）。

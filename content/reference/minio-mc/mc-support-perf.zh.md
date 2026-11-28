@@ -307,4 +307,4 @@ MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
 ## 行为说明 {#behavior}
 
-在 [mcli 20261109](/zh/blog/release/mcli-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，`mc support perf` 完整保留站点复制与网络测速的小数秒持续时间，不再截断亚秒级或带小数部分的测速时长。
+在 [mcli 20261109](/zh/release/mcli-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，`mc support perf` 完整保留站点复制与网络测速的小数秒持续时间，不再截断亚秒级或带小数部分的测速时长。

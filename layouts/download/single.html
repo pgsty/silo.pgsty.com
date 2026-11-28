@@ -20,7 +20,7 @@
 {{- $serverWindowsFormat := $server.windows_archive_format | default "tar.gz" -}}
 {{- $serverPublished := $server.published -}}
 {{- $serverVer := replace $server.date "-" "" -}}
-{{- $serverNotes := relLangURL (printf "blog/release/silo-%s/" $serverVer) -}}
+{{- $serverNotes := relLangURL (printf "release/silo-%s/" $serverVer) -}}
 {{- $serverReleaseURL := $serverNotes -}}
 {{- if $serverPublished -}}
   {{- $serverReleaseURL = printf "https://github.com/pgsty/silo/releases/tag/%s" $serverTag -}}
@@ -32,7 +32,7 @@
 {{- $clientBase := printf "https://github.com/pgsty/mc/releases/download/%s" $clientTag -}}
 {{- $consoleTag := hugo.Data.releases.console.tag -}}
 {{- $consoleBuild := hugo.Data.releases.console.build -}}
-{{- $consoleNotes := relLangURL (hugo.Data.releases.console.notes | default (printf "blog/release/console-%s/" $consoleBuild)) -}}
+{{- $consoleNotes := relLangURL (hugo.Data.releases.console.notes | default (printf "release/console-%s/" $consoleBuild)) -}}
 {{- $consoleWindowsFormat := hugo.Data.releases.console.windows_archive_format | default "zip" -}}
 {{- $consoleBase := printf "https://github.com/pgsty/silo-console/releases/download/%s" $consoleTag -}}
 {{- $kesTag := hugo.Data.releases.kes.tag -}}
@@ -80,7 +80,7 @@
         </div>
 
         {{ if not $targetServer.published }}
-        <div class="security-note" role="note"><i class="fas fa-clock" aria-hidden="true"></i><span>{{ if $zh }}Server {{ replace $targetServer.date "-" "" }} 正在准备发布，内嵌 Console {{ $consoleTag }}，采用 mcli {{ replace hugo.Data.releases.client.date "-" "" }} 与 silo-pkg {{ hugo.Data.releases.pkg.tag }}。参阅<a href="{{ relLangURL (printf "blog/release/silo-%s/" (replace $targetServer.date "-" "")) }}">新版说明与升级要求</a>。下方 Server 下载和安装命令使用已发布的 {{ $serverVer }}；KES 仍独立使用 {{ replace hugo.Data.releases.kes.date "-" "" }}。{{ else }}Server {{ replace $targetServer.date "-" "" }} is being prepared with embedded Console {{ $consoleTag }}, mcli {{ replace hugo.Data.releases.client.date "-" "" }} and silo-pkg {{ hugo.Data.releases.pkg.tag }}. Read the <a href="{{ relLangURL (printf "blog/release/silo-%s/" (replace $targetServer.date "-" "")) }}">release notes and upgrade requirements</a>. Server downloads and installation commands below use the published {{ $serverVer }} release; KES remains independently versioned at {{ replace hugo.Data.releases.kes.date "-" "" }}.{{ end }}</span></div>
+        <div class="security-note" role="note"><i class="fas fa-clock" aria-hidden="true"></i><span>{{ if $zh }}Server {{ replace $targetServer.date "-" "" }} 正在准备发布，内嵌 Console {{ $consoleTag }}，采用 mcli {{ replace hugo.Data.releases.client.date "-" "" }} 与 silo-pkg {{ hugo.Data.releases.pkg.tag }}。参阅<a href="{{ relLangURL (printf "release/silo-%s/" (replace $targetServer.date "-" "")) }}">新版说明与升级要求</a>。下方 Server 下载和安装命令使用已发布的 {{ $serverVer }}；KES 仍独立使用 {{ replace hugo.Data.releases.kes.date "-" "" }}。{{ else }}Server {{ replace $targetServer.date "-" "" }} is being prepared with embedded Console {{ $consoleTag }}, mcli {{ replace hugo.Data.releases.client.date "-" "" }} and silo-pkg {{ hugo.Data.releases.pkg.tag }}. Read the <a href="{{ relLangURL (printf "release/silo-%s/" (replace $targetServer.date "-" "")) }}">release notes and upgrade requirements</a>. Server downloads and installation commands below use the published {{ $serverVer }} release; KES remains independently versioned at {{ replace hugo.Data.releases.kes.date "-" "" }}.{{ end }}</span></div>
         {{ end }}
 
         <div class="product-choice-grid" aria-label="{{ if $zh }}选择下载产品{{ else }}Choose a product{{ end }}">

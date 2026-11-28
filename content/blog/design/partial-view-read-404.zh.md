@@ -14,7 +14,7 @@ url: "/zh/blog/design/partial-view-read-404/"
 
 本记录说明在 `SILO Server 20261109` 本地验收中发现的一个缺陷。修复前的 `SILO Server 20261109` 集成分支和 [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 上都能复现。对应 [#302](https://github.com/pgsty/silo/issues/302)。
 
-**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+**状态：** 已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短回答 {#tldr}
 

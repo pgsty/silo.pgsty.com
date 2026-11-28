@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/config-env-file/"
 ---
 
-本文定义 `MINIO_CONFIG_ENV_FILE` 的启动解析契约，并记录提交 `2aea7fe9c`（已随 [Server 20260903](/zh/blog/release/silo-20260903/) 发布）中的兼容性修复。该文件是 SILO 的专用输入格式；为方便运维而支持可选的 `export` 前缀，并不意味着它是一段 POSIX shell 脚本。
+本文定义 `MINIO_CONFIG_ENV_FILE` 的启动解析契约，并记录提交 `2aea7fe9c`（已随 [Server 20260903](/zh/release/silo-20260903/) 发布）中的兼容性修复。该文件是 SILO 的专用输入格式；为方便运维而支持可选的 `export` 前缀，并不意味着它是一段 POSIX shell 脚本。
 
 ## 概览 {#tldr}
 
@@ -133,7 +133,7 @@ EMPTY =
 - 畸形输入会以带行号且脱敏的诊断信息阻止启动；
 - 合法的标点命名目标不再仅仅因为 POSIX `sh` 无法直接通过 `NAME=value` 语法赋值而被拒绝。
 
-对原始 [#65](https://github.com/pgsty/silo/issues/65) 的调查还揭示了一个隐蔽的热重启陷阱：旧版解析器按 `=` 切分时未去除键名尾随空白，会将 `KEY = new` 保存为带尾随空格的键名 `KEY `。在使用 `systemd` 冷启动时，由于 `systemd` 会自行解析 `EnvironmentFile=` 并去除 `=` 两侧空格，该缺陷往往被掩盖；但当管理员通过管理 API 触发原地热重启（`mcli admin service restart`）时，`re-exec` 出的新进程会从父进程继承 `KEY=old`，而环境文件中新解析出的 `KEY ` 无法覆盖 `KEY`，导致服务虽重启成功却继续使用过期的 root 凭据、KMS 配置或 IdP 设置。[Server 20260903](/zh/blog/release/silo-20260903/) 修复键名空白裁剪后，`KEY = new` 在冷启动与热重启下均会正常覆盖 `KEY`；若环境文件中曾包含带空格的 `=` 赋值，升级前请核对其配置值是否符合预期。
+对原始 [#65](https://github.com/pgsty/silo/issues/65) 的调查还揭示了一个隐蔽的热重启陷阱：旧版解析器按 `=` 切分时未去除键名尾随空白，会将 `KEY = new` 保存为带尾随空格的键名 `KEY `。在使用 `systemd` 冷启动时，由于 `systemd` 会自行解析 `EnvironmentFile=` 并去除 `=` 两侧空格，该缺陷往往被掩盖；但当管理员通过管理 API 触发原地热重启（`mcli admin service restart`）时，`re-exec` 出的新进程会从父进程继承 `KEY=old`，而环境文件中新解析出的 `KEY ` 无法覆盖 `KEY`，导致服务虽重启成功却继续使用过期的 root 凭据、KMS 配置或 IdP 设置。[Server 20260903](/zh/release/silo-20260903/) 修复键名空白裁剪后，`KEY = new` 在冷启动与热重启下均会正常覆盖 `KEY`；若环境文件中曾包含带空格的 `=` 赋值，升级前请核对其配置值是否符合预期。
 
 ## 结论 {#conclusion}
 

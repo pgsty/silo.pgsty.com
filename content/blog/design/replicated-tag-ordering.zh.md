@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/replicated-tag-ordering/"
 ---
 
-随 [SILO Server 20260916](/zh/blog/release/silo-20260916/)（`40220bd836cbd066ca424fa4dc5dbb90057fb55a`）发布的 [PR #193](https://github.com/pgsty/silo/pull/193)（修复提交 [`03027727d`](https://github.com/pgsty/silo/commit/03027727d)）与 [PR #196](https://github.com/pgsty/silo/pull/196)（修复提交 [`680eac66e`](https://github.com/pgsty/silo/commit/680eac66e)），修复了对象标签在跨桶复制中保持顺序的两项缺陷：SSE-KMS 目的端复制静默丢弃标签修订时间戳（`R4`），以及空标签值（删除操作）缺失修订时间戳导致延迟到达的复制事件将已删除标签“复活”（`R5`）。
+随 [SILO Server 20260916](/zh/release/silo-20260916/)（`40220bd836cbd066ca424fa4dc5dbb90057fb55a`）发布的 [PR #193](https://github.com/pgsty/silo/pull/193)（修复提交 [`03027727d`](https://github.com/pgsty/silo/commit/03027727d)）与 [PR #196](https://github.com/pgsty/silo/pull/196)（修复提交 [`680eac66e`](https://github.com/pgsty/silo/commit/680eac66e)），修复了对象标签在跨桶复制中保持顺序的两项缺陷：SSE-KMS 目的端复制静默丢弃标签修订时间戳（`R4`），以及空标签值（删除操作）缺失修订时间戳导致延迟到达的复制事件将已删除标签“复活”（`R5`）。
 
 ## 共同模型：标签值与其修订时间戳共同构成单一状态 {#model}
 

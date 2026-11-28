@@ -26,7 +26,7 @@ Silo 容器的功能和性能可能会受到基础操作系统的限制。
 >
 > 下面的示例仅覆盖用于开发或评估的单机单盘和单机多盘部署；它们不构成 Docker Compose、Docker Swarm 或其他容器编排器上的生产级多机多盘拓扑或升级契约。生产环境的分布式部署应使用经过验证的 [Kubernetes Tenant 流程](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)，并针对实际环境验证持久化、网络、故障域与升级。
 >
-> 示例以 [Server 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）为目标。生产部署还需验证实际负载，并记录镜像摘要以便回滚。
+> 示例以 [Server 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）为目标。生产部署还需验证实际负载，并记录镜像摘要以便回滚。
 >
 > SILO 禁止原地自更新，`MINIO_UPDATE=off` 不会重新启用它。容器升级应替换为经过验证的 SILO 标签或摘要，不应调用 `mc admin update`。
 

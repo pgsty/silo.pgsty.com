@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/cors-replication-trust/"
 ---
 
-This note documents the CORS hot-path and replication-request trust repair merged in [PR #101](https://github.com/pgsty/silo/pull/101) (`938603458` through `04b097fd9`), tracked as [SN-2026-008](/about/security-advisories/#sn-2026-008), and shipped in [Server 20260903](/blog/release/silo-20260903/).
+This note documents the CORS hot-path and replication-request trust repair merged in [PR #101](https://github.com/pgsty/silo/pull/101) (`938603458` through `04b097fd9`), tracked as [SN-2026-008](/about/security-advisories/#sn-2026-008), and shipped in [Server 20260903](/release/silo-20260903/).
 
 ## Overview {#tldr}
 
@@ -210,4 +210,4 @@ Automated and black-box two-site TLS replication tests verify:
 
 ## Conclusion {#conclusion}
 
-Merged in [`0079723d3`](https://github.com/pgsty/silo/commit/0079723d35d29a0134d81a7d8d502b1040cec64f) ([PR #159](https://github.com/pgsty/silo/pull/159)) and shipped in [Server 20260916](/blog/release/silo-20260916/), the resident-only CORS lookup and post-authentication replication trust boundary close both the unauthenticated bucket-metadata probe path and untrusted replication-header injection.
+Merged in [`0079723d3`](https://github.com/pgsty/silo/commit/0079723d35d29a0134d81a7d8d502b1040cec64f) ([PR #159](https://github.com/pgsty/silo/pull/159)) and shipped in [Server 20260916](/release/silo-20260916/), the resident-only CORS lookup and post-authentication replication trust boundary close both the unauthenticated bucket-metadata probe path and untrusted replication-header injection.

@@ -11,7 +11,7 @@ upstream_modified: true
 
 MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_model/) 发布集群和节点指标。你可以使用任意抓取工具从 SILO 拉取指标数据，以执行分析和配置告警。
 
-**[SILO 20261109](/zh/blog/release/silo-20261109/) / [Console 2.7.0](/zh/blog/release/console-2.7.0/)：** 新部署以及 Console 2.7.0 的 Metrics 页面建议抓取 [Metrics V3](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)（通过 [mcli 20261109](/zh/blog/release/mcli-20261109/) 执行 `mcli admin prometheus generate ALIAS --api-version v3` 生成配置；参见 [Console 2.7.0 Metrics V3 映射参考](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/metrics-v3.md)）。在 SILO 20261109 中，复制工作协程指标在复制工作池不存在时不会触发 panic，并继续保留历史均值和峰值计数（[`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)）；实时批处理作业指标保留暂停原因以及跳过或拒绝计数（[#325](https://github.com/pgsty/silo/issues/325)）。
+**[SILO 20261109](/zh/release/silo-20261109/) / [Console 2.7.0](/zh/release/console-2.7.0/)：** 新部署以及 Console 2.7.0 的 Metrics 页面建议抓取 [Metrics V3](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)（通过 [mcli 20261109](/zh/release/mcli-20261109/) 执行 `mcli admin prometheus generate ALIAS --api-version v3` 生成配置；参见 [Console 2.7.0 Metrics V3 映射参考](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/metrics-v3.md)）。在 SILO 20261109 中，复制工作协程指标在复制工作池不存在时不会触发 panic，并继续保留历史均值和峰值计数（[`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)）；实时批处理作业指标保留暂停原因以及跳过或拒绝计数（[#325](https://github.com/pgsty/silo/issues/325)）。
 
 <a id="version-2" data-td-print-local></a>
 

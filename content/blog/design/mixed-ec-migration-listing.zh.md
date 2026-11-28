@@ -14,13 +14,13 @@ url: "/zh/blog/design/mixed-ec-migration-listing/"
 
 本文记录 [issue #261](https://github.com/pgsty/silo/issues/261) 与 [PR #262](https://github.com/pgsty/silo/pull/262) 的审查结论（#276 后续更新基线 [0fc5a0b5](https://github.com/pgsty/silo/commit/0fc5a0b5278980b0960abf26566ce3272f85227b)）。实际修复通过维护者 PR [#267](https://github.com/pgsty/silo/pull/267)（[a7310d59f](https://github.com/pgsty/silo/commit/a7310d59fe307ae7fc4b57dc190b5e0c3de1a56a)）合入，#262 是被取代的重复 PR。
 
-**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+**状态：** 已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 先说结论 {#tldr}
 
 问题成立。一次成功的降级覆写可能让一个无版本对象同时存在两种 EC 布局：在线磁盘上有更新的副本，离线磁盘上保留旧副本。GET 与 ListObjectsV2 能选出更新的可读多数；decommission 与 rebalance 使用 all-versions 遍历，此时元数据合并可能以旧布局为参考，只统计旧布局。旧布局低于 quorum 后，对象就从迁移列表中消失。迁移报告成功，旧池被移除后对象丢失。
 
-PR #262 的修复方向正确。它只放宽已有 mixed-EC recount 的一个过窄条件，仍把 recount 限制在“每个非空流都只有一个普通 null version”的安全范围，并增加 quorum、流顺序、迁移和排除场景测试。该修复通过 #267（[a7310d59f](https://github.com/pgsty/silo/commit/a7310d59fe307ae7fc4b57dc190b5e0c3de1a56a)）合入，补充了完整的池移除端到端回归测试，并随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 发布。
+PR #262 的修复方向正确。它只放宽已有 mixed-EC recount 的一个过窄条件，仍把 recount 限制在“每个非空流都只有一个普通 null version”的安全范围，并增加 quorum、流顺序、迁移和排除场景测试。该修复通过 #267（[a7310d59f](https://github.com/pgsty/silo/commit/a7310d59fe307ae7fc4b57dc190b5e0c3de1a56a)）合入，补充了完整的池移除端到端回归测试，并随 [SILO Server 20261109](/zh/release/silo-20261109/) 发布。
 
 ## 什么条件会触发 {#trigger}
 

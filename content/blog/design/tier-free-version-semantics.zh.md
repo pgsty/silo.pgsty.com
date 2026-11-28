@@ -14,7 +14,7 @@ url: "/zh/blog/design/tier-free-version-semantics/"
 
 本文记录 [issue #263](https://github.com/pgsty/silo/issues/263) 与 [PR #264](https://github.com/pgsty/silo/pull/264) 的审查结论（#276 后续更新基线 [0fc5a0b5](https://github.com/pgsty/silo/commit/0fc5a0b5278980b0960abf26566ce3272f85227b)），#264 的合入提交记录为 [0cfca29c](https://github.com/pgsty/silo/commit/0cfca29cb2f16e43cb8266d9259f0dc5298c53b3)。这个 PR 的三个提交是一组相互配合的修复，不是三个互不相关的 workaround。
 
-**状态：** 已连同下文的 free version 清理归属与 decommission 取消后续修复一并随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+**状态：** 已连同下文的 free version 清理归属与 decommission 取消后续修复一并随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 先说结论 {#tldr}
 
@@ -27,7 +27,7 @@ url: "/zh/blog/design/tier-free-version-semantics/"
 - ListObjectsV2 隐藏这个 key；
 - decommission 与 rebalance 把 free record 当成真实删除标记搬走，旧池删除后对象变得不可读。
 
-PR #264 同时修复生命周期视图、latest marker 判断、普通列表和池清理，并保留 healing 所需的全量视图。该 PR 已作为继续审查 #266 的必要基础合入，并随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 发布。
+PR #264 同时修复生命周期视图、latest marker 判断、普通列表和池清理，并保留 healing 所需的全量视图。该 PR 已作为继续审查 #266 的必要基础合入，并随 [SILO Server 20261109](/zh/release/silo-20261109/) 发布。
 
 ## free version 到底是什么 {#meaning}
 

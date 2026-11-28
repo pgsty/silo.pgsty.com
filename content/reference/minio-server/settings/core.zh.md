@@ -122,7 +122,7 @@ silo server $MINIO_OPTS ...
 
 指定 YAML 服务端配置文件路径（`version: v1` 或 `version: v2`），功能等价于传入 [`silo server --config`](/zh/reference/minio-server/#minio.server.-config)。
 
-[SILO 20261109](/zh/blog/release/silo-20261109/) 集成 [`silo-pkg v3.16.0`](/zh/blog/release/pkg-3.16.0/)（`go.yaml.in/yaml/v3 v3.0.6`），在 YAML 编码时会对字面量键 `<<` 添加引号，避免在保存并重新加载配置时将 `<<` 误解析为 YAML 合并指令。
+[SILO 20261109](/zh/release/silo-20261109/) 集成 [`silo-pkg v3.16.0`](/zh/release/pkg-3.16.0/)（`go.yaml.in/yaml/v3 v3.0.6`），在 YAML 编码时会对字面量键 `<<` 添加引号，避免在保存并重新加载配置时将 `<<` 误解析为 YAML 合并指令。
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
@@ -506,7 +506,7 @@ LDAP STS 登录限流有自己独立的允许列表 `MINIO_IDENTITY_LDAP_STS_TRU
 
 ## 多段上传列举：退役模式开关 {#envvar.MINIO_API_MULTIPART_LISTING}
 
-**[SILO 20261109](/zh/blog/release/silo-20261109/)（自 20261018 起）：** 忽略 `MINIO_API_MULTIPART_LISTING`，启动时说明公开列表恢复旧缓存／精确 key 行为，持久列举延期。不增加替代设置。旧共享配置键 `api multipart_listing` 继续被容忍，不因它拒绝启动或丢弃其他 API 设置，也不自动清理用户配置。此前启用 strict 的用户会失去可选持久列表和严格取消能力，需要评估升级影响。
+**[SILO 20261109](/zh/release/silo-20261109/)（自 20261018 起）：** 忽略 `MINIO_API_MULTIPART_LISTING`，启动时说明公开列表恢复旧缓存／精确 key 行为，持久列举延期。不增加替代设置。旧共享配置键 `api multipart_listing` 继续被容忍，不因它拒绝启动或丢弃其他 API 设置，也不自动清理用户配置。此前启用 strict 的用户会失去可选持久列表和严格取消能力，需要评估升级影响。
 
 只读签名接口 `GET /minio/admin/v3/multipart-preflight` 仍要求 `admin:StorageInfo`，返回 `mode=legacy`。`complete` 和 `ready` 描述磁盘诊断覆盖与历史记录，不是启动或列表开关。仅诊断保留 100,000 目录项、30 秒和并发预算；公开列表不依赖这些预算。无 prefix 的旧缓存仍有重启漏项和分页缺陷；非空 prefix 仍按完整对象名查找。已知 ID 的操作及后台清理保留。见[最新决策与取舍](/zh/blog/design/list-multipart-uploads/#decision-20261018)。
 

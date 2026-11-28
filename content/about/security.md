@@ -8,9 +8,9 @@ type: docs
 icon: fa-solid fa-shield-halved
 ---
 
-PGSTY SILO maintains active security tracking and patching for the S3-compatible object storage stack after upstream `minio/minio` entered archive mode. Production deployments should run **[Server 20261112](/blog/release/silo-20261112/)**, embedded and standalone **[Console v2.7.2](/blog/release/console-2.7.2/)**, **[mcli 20261112](/blog/release/mcli-20261112/)**, and **[silo-pkg v3.16.1](/blog/release/pkg-3.16.1/)**, all built with Go 1.27.4, alongside optional external **[KES 20261026](/blog/release/silo-20261026/#kes)** (Go 1.27.3).
+PGSTY SILO maintains active security tracking and patching for the S3-compatible object storage stack after upstream `minio/minio` entered archive mode. Production deployments should run **[Server 20261112](/release/silo-20261112/)**, embedded and standalone **[Console v2.7.2](/release/console-2.7.2/)**, **[mcli 20261112](/release/mcli-20261112/)**, and **[silo-pkg v3.16.1](/release/pkg-3.16.1/)**, all built with Go 1.27.4, alongside optional external **[KES 20261026](/release/silo-20261026/#kes)** (Go 1.27.3).
 
-Server 20261112 embeds Console v2.7.2 and delivers `SN-2026-020` through `SN-2026-025`: single-pool `DeleteObjects` containment, service-account inline-policy tri-state preservation, active-active tagging/read-proxy authorization and response-header redaction, `STREAMING-UNSIGNED-PAYLOAD-TRAILER` replay window and header validation, `s3:ExistingObjectTag/<key>` and version-action enforcement across attributes/copy/select/ZIP archive reads, strict IAM and bucket policy JSON decoding, and `null`-version and replica Object Lock hardening. It retains all earlier security repairs, including `SN-2026-018` through `SN-2026-019` from Server 20261109, `SN-2026-015` through `SN-2026-017` from Server 20261018, and `SN-2026-011` through `SN-2026-014` from Server 20260916. Review the [20261112 upgrade requirements](/blog/release/silo-20261112/#upgrade), [Advisory Ledger](/about/security-advisories/), and [Component Matrix](/compatibility/versions/) before upgrading.
+Server 20261112 embeds Console v2.7.2 and delivers `SN-2026-020` through `SN-2026-025`: single-pool `DeleteObjects` containment, service-account inline-policy tri-state preservation, active-active tagging/read-proxy authorization and response-header redaction, `STREAMING-UNSIGNED-PAYLOAD-TRAILER` replay window and header validation, `s3:ExistingObjectTag/<key>` and version-action enforcement across attributes/copy/select/ZIP archive reads, strict IAM and bucket policy JSON decoding, and `null`-version and replica Object Lock hardening. It retains all earlier security repairs, including `SN-2026-018` through `SN-2026-019` from Server 20261109, `SN-2026-015` through `SN-2026-017` from Server 20261018, and `SN-2026-011` through `SN-2026-014` from Server 20260916. Review the [20261112 upgrade requirements](/release/silo-20261112/#upgrade), [Advisory Ledger](/about/security-advisories/), and [Component Matrix](/compatibility/versions/) before upgrading.
 
 Deploying standalone Console or `mcli` does not replace components embedded in an older Server binary; Server-side authorization, lifecycle, and Object Lock fixes require upgrading SILO Server.
 
@@ -31,7 +31,7 @@ Because SILO shares lineage with `minio/minio`, most vulnerabilities in inherite
 
 - **[Advisory Ledger](/about/security-advisories/)**: The canonical index of all `CVE-*` and `SN-2026-*` identifiers, fix commits, affected versions, and dependency security updates.
 - **[Security Advisories](/blog/security/)**: Technical advisories detailing root causes, exploit conditions, code fixes, and upgrade requirements.
-- **[Release Notes](/blog/release/)**: Versioned release announcements for Server, Console, `mcli`, `silo-pkg`, and `kes`.
+- **[Release Notes](/release/)**: Versioned release announcements for Server, Console, `mcli`, `silo-pkg`, and `kes`.
 
 ## Deployment Hardening {#hardening}
 

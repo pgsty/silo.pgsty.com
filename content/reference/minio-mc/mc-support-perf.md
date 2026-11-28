@@ -286,4 +286,4 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ## Behavior {#behavior}
 
-In [mcli 20261109](/blog/release/mcli-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), `mc support perf` retains fractional site-replication and network speed-test durations instead of truncating sub-second or fractional durations.
+In [mcli 20261109](/release/mcli-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), `mc support perf` retains fractional site-replication and network speed-test durations instead of truncating sub-second or fractional durations.

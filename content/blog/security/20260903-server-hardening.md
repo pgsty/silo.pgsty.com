@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/20260903-server-hardening/"
 ---
 
-This bulletin covers five security findings fixed in [SILO Server 20260903](/blog/release/silo-20260903/) ([`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z)), spanning customer-provided encryption keys (SSE-C), client-supplied replication headers, administrative status transitions, and explicit object-version deletion. `SN-2026-006` through `SN-2026-010` are SILO security-note identifiers grouping the pre-release audit findings inherited from the upstream `minio/minio` codebase.
+This bulletin covers five security findings fixed in [SILO Server 20260903](/release/silo-20260903/) ([`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z)), spanning customer-provided encryption keys (SSE-C), client-supplied replication headers, administrative status transitions, and explicit object-version deletion. `SN-2026-006` through `SN-2026-010` are SILO security-note identifiers grouping the pre-release audit findings inherited from the upstream `minio/minio` codebase.
 
 ## Summary {#summary}
 
@@ -128,4 +128,4 @@ All five fixes are covered by unit, handler, authorization, streaming-trailer, S
 
 ## Residual risks outside this bulletin {#residual-risks}
 
-- Conditional deletion (`If-Match` on `DeleteObject` and per-object ETag on `DeleteObjects`, [#10](https://github.com/pgsty/silo/issues/10)) and bucket-metadata deletion convergence across site-replication peers ([#77](https://github.com/pgsty/silo/issues/77)) are tracked separately; see the [Server 20260903 release notes](/blog/release/silo-20260903/#known-issues) and [Server 20260916 release notes](/blog/release/silo-20260916/).
+- Conditional deletion (`If-Match` on `DeleteObject` and per-object ETag on `DeleteObjects`, [#10](https://github.com/pgsty/silo/issues/10)) and bucket-metadata deletion convergence across site-replication peers ([#77](https://github.com/pgsty/silo/issues/77)) are tracked separately; see the [Server 20260903 release notes](/release/silo-20260903/#known-issues) and [Server 20260916 release notes](/release/silo-20260916/).

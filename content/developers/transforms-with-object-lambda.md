@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Version scope:** commands and illustrative output target [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`). See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261109/#upgrade).
+**Version scope:** commands and illustrative output target [SILO 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`). See [downloads](/download/) and the [release upgrade requirements](/release/silo-20261109/#upgrade).
 
 <a id="transforms-with-object-lambda"></a>
 <a id="developers-object-lambda"></a>

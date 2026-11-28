@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**SILO 20261109 契约：** 本页继承 S3 API 目录，当前目标为 [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`），包括持锁批量版本清除、两阶段恢复、跨池生命周期仲裁检查以及按当前对象求值的分片条件。[普通 LIST](/zh/blog/design/listing-recovery-lock-cost/)、[Object Lock](/zh/blog/release/silo-20261109/#authorization) 和[分片列表](/zh/blog/design/list-multipart-uploads/#implementation)仍有文档列出的限定与错误行为。校验和消息可能改变，错误码契约见[校验和说明](/zh/blog/design/complete-multipart-checksum-errors/#october-errors)。
+**SILO 20261109 契约：** 本页继承 S3 API 目录，当前目标为 [SILO 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`），包括持锁批量版本清除、两阶段恢复、跨池生命周期仲裁检查以及按当前对象求值的分片条件。[普通 LIST](/zh/blog/design/listing-recovery-lock-cost/)、[Object Lock](/zh/release/silo-20261109/#authorization) 和[分片列表](/zh/blog/design/list-multipart-uploads/#implementation)仍有文档列出的限定与错误行为。校验和消息可能改变，错误码契约见[校验和说明](/zh/blog/design/complete-multipart-checksum-errors/#october-errors)。
 
 <a id="s3-api"></a>
 
@@ -91,7 +91,7 @@ PutObjectAcl
 
 - 已发布的 Server 20260903：`ListMultipartUploads` 将非空 `prefix` 当成精确对象名；空 prefix 使用节点本地易失缓存，不具备完整分页、marker 和 delimiter 语义。
 - Server 20260916 以可选 strict 模式增加持久扫描，默认仍保留 legacy 精确键／缓存行为。运行该版本时仍适用其[历史升级契约](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。
-- **[SILO 20261109](/zh/blog/release/silo-20261109/)（自 Server 20261018 起）：** 撤回默认持久扫描，公开列表恢复无 prefix 的节点缓存和非空 prefix 的精确对象查找（[#79](https://github.com/pgsty/silo/issues/79)）；重启漏项、真正前缀筛选及缓存分页缺陷仍然存在。模式开关被忽略并告警，旧共享配置键被容忍；已有 strict 用户会失去可选持久列表和严格取消。诊断扫描保留资源限制但不控制业务入口。身份字段、安全校验、默认尽力取消和后台清理修复保留。见[决策、容量与限制](/zh/blog/design/list-multipart-uploads/#decision-20261018)。
+- **[SILO 20261109](/zh/release/silo-20261109/)（自 Server 20261018 起）：** 撤回默认持久扫描，公开列表恢复无 prefix 的节点缓存和非空 prefix 的精确对象查找（[#79](https://github.com/pgsty/silo/issues/79)）；重启漏项、真正前缀筛选及缓存分页缺陷仍然存在。模式开关被忽略并告警，旧共享配置键被容忍；已有 strict 用户会失去可选持久列表和严格取消。诊断扫描保留资源限制但不控制业务入口。身份字段、安全校验、默认尽力取消和后台清理修复保留。见[决策、容量与限制](/zh/blog/design/list-multipart-uploads/#decision-20261018)。
 - `PutBucketLifecycle` 不支持 `AbortIncompleteMultipartUpload` 生命周期动作。
 
 <a id="id6" data-td-print-local></a>

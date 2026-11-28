@@ -115,7 +115,7 @@ Do **not** perform “rolling” (e.g. one node at a time) restarts.
 
 SILO Server 20261018 and later migrate both null and UUID delete markers, including a marker that is the only remaining version in the source pool. Another pool may still contain older data for that key, so a marker cannot be discarded merely because no other version remains in its own pool. This replaces the older upstream behavior that skipped isolated markers.
 
-Decommissioning evaluates [lifecycle rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration), queues eligible expired objects or versions for expiration when safe across all pools, and skips unnecessary payload copies. [SILO 20261109](/blog/release/silo-20261109/) evaluates ILM rules during pool decommission and rebalance only when `scanner` is enabled in `MINIO_SCANNER_SUBSYSTEMS`, evaluates lifecycle actions (`evalActionFromLifecycle`) before tier transition (`evalScannerTransition`) (see [ILM Migration Ordering](/blog/design/ilm-migration-ordering/)), and includes the following decommissioning fixes:
+Decommissioning evaluates [lifecycle rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration), queues eligible expired objects or versions for expiration when safe across all pools, and skips unnecessary payload copies. [SILO 20261109](/release/silo-20261109/) evaluates ILM rules during pool decommission and rebalance only when `scanner` is enabled in `MINIO_SCANNER_SUBSYSTEMS`, evaluates lifecycle actions (`evalActionFromLifecycle`) before tier transition (`evalScannerTransition`) (see [ILM Migration Ordering](/blog/design/ilm-migration-ordering/)), and includes the following decommissioning fixes:
 
 - Moves objects whose copies across pools have different erasure layouts ([#261](https://github.com/pgsty/silo/issues/261)).
 - Moves ILM-expired current versions instead of skipping or stranding them in the draining pool ([#265](https://github.com/pgsty/silo/issues/265)).
@@ -133,11 +133,11 @@ Remove the pool from configuration and retire it only after its status is `Compl
 
 ### SILO 20261112 Multi-Pass Drain and Progress Accounting {#candidate-progress}
 
-Server 20261109 can leave a child key behind when a physical listing first encounters its parent as an object ([#334](https://github.com/pgsty/silo/issues/334), [PR #335](https://github.com/pgsty/silo/pull/335)). [SILO 20261112](/blog/release/silo-20261112/) (`RELEASE.2026-11-12T00-00-00Z`) rescans the bucket after verified source removals expose more keys. This resolves the historical listing limitation without treating a logical NotFound response as proof that the source disks are empty.
+Server 20261109 can leave a child key behind when a physical listing first encounters its parent as an object ([#334](https://github.com/pgsty/silo/issues/334), [PR #335](https://github.com/pgsty/silo/pull/335)). [SILO 20261112](/release/silo-20261112/) (`RELEASE.2026-11-12T00-00-00Z`) rescans the bucket after verified source removals expose more keys. This resolves the historical listing limitation without treating a logical NotFound response as proof that the source disks are empty.
 
 Decommission and rebalance clean up successfully migrated versions even when a sibling version is concurrently deleted. Confirmed source removal, including safe free-version cleanup, counts as progress; unreadable or conflicting metadata does not. Source-removal and final empty verification check every online drive and tolerate offline drives within the erasure set's read quorum, while still rejecting online metadata remnants, corrupt metadata, directory errors, and drive outages beyond parity. A scan with no physical progress stops instead of spinning; remaining physical metadata prevents completion with an error, and cancellation is returned as an error. Inspect the reported metadata or drive problem before restarting a failed attempt.
 
-The final physical-empty check remains required. A free-version record that still owns remote-tier cleanup cannot be discarded merely to finish draining the pool; unresolved tier ownership still prevents completion. These changes are shipped in [SILO 20261112](/blog/release/silo-20261112/) (not in the 20261109 artifacts). See [Server compatibility notes](/compatibility/server/#candidate-after-20261109) for the release boundary.
+The final physical-empty check remains required. A free-version record that still owns remote-tier cleanup cannot be discarded merely to finish draining the pool; unresolved tier ownership still prevents completion. These changes are shipped in [SILO 20261112](/release/silo-20261112/) (not in the 20261109 artifacts). See [Server compatibility notes](/compatibility/server/#candidate-after-20261109) for the release boundary.
 
 ### Final Listing Check {#final-listing-check}
 
@@ -150,14 +150,14 @@ If decommissioning fails, preserve the logs, inspect pool health and available c
 > [!NOTE]
 > **Changed: RELEASE.2023-03-20T20-16-18Z**
 
-For deployments with tiering enabled and active, decommissioning moves the object references to a new active pool, and [SILO 20261109](/blog/release/silo-20261109/) retains remote-tier objects whenever another pool still references them ([#306](https://github.com/pgsty/silo/issues/306), [#308](https://github.com/pgsty/silo/issues/308)). Applications can continue issuing `GET` requests against those objects while SILO retrieves them from the remote tier.
+For deployments with tiering enabled and active, decommissioning moves the object references to a new active pool, and [SILO 20261109](/release/silo-20261109/) retains remote-tier objects whenever another pool still references them ([#306](https://github.com/pgsty/silo/issues/306), [#308](https://github.com/pgsty/silo/issues/308)). Applications can continue issuing `GET` requests against those objects while SILO retrieves them from the remote tier.
 
 In older MinIO versions, tiering configurations prevent decommissioning.
 
 > [!WARNING]
 > **Keep every remote tier configured until decommissioning completes**
 >
-> A tier free version is an internal record of a remote object that still requires deletion. Decommissioning removes the remote object (when no other pool references it) before removing the record, so the configured tier named in that record must remain available until pool decommissioning finishes. If that tier was removed from configuration, decommissioning fails and the record stays in the pool. [SILO 20261109](/blog/release/silo-20261109/) continues decommissioning all other buckets first and reports the free version, remote object, and missing tier in the error ([#307](https://github.com/pgsty/silo/issues/307)).
+> A tier free version is an internal record of a remote object that still requires deletion. Decommissioning removes the remote object (when no other pool references it) before removing the record, so the configured tier named in that record must remain available until pool decommissioning finishes. If that tier was removed from configuration, decommissioning fails and the record stays in the pool. [SILO 20261109](/release/silo-20261109/) continues decommissioning all other buckets first and reports the free version, remote object, and missing tier in the error ([#307](https://github.com/pgsty/silo/issues/307)).
 >
 > Re-add the tier under the same name with [`mcli ilm tier add`](/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add), then re-run [`mcli admin decommission start`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) to resume the remaining buckets. See [Tier Free Versions Are Internal Cleanup Records](/blog/design/tier-free-version-semantics/#operations).
 

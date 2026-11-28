@@ -99,7 +99,7 @@ Measured with `go test -run=^$ -bench=BenchmarkMultipartPublicListingCapacity -b
 | Document                                                                                                                                                 | Scope                                                                                              |
 | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
 | [S3 API Compatibility — Differences from S3 APIs for Multipart Uploads](/reference/s3-api-compatibility/#differences-from-s3-apis-for-multipart-uploads) | Canonical user-facing compatibility reference for `ListMultipartUploads` in Server `20261018`      |
-| [SILO 20260916 Release Notes](/blog/release/silo-20260916/)                                                                                              | Published legacy default, opt-in strict behavior, UploadID validation, and cancellation boundaries |
+| [SILO 20260916 Release Notes](/release/silo-20260916/)                                                                                                   | Published legacy default, opt-in strict behavior, UploadID validation, and cancellation boundaries |
 {.wide .expand}
 
 ---

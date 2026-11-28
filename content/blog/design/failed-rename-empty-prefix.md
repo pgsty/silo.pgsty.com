@@ -14,7 +14,7 @@ url: "/blog/design/failed-rename-empty-prefix/"
 
 This record covers [issue #285](https://github.com/pgsty/silo/issues/285) and [PR #286](https://github.com/pgsty/silo/pull/286) by Denis Babchuk, evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) and the PR head [ed05d982a](https://github.com/pgsty/silo/commit/ed05d982a1d26502e3ed2c7c5605bcf422f5d228).
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 

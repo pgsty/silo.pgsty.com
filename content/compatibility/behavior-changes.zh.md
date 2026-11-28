@@ -11,7 +11,7 @@ icon: fa-solid fa-scale-balanced
 **标准 S3 应用通常无需修改代码即可从 MinIO 切换到 SILO，现代 `xl` / `xl-single` 数据卷也可原地挂载读取，无需重写对象。** 但从上游 MinIO 迁移到 SILO 属于**全集群协调停机切换**（不支持新旧节点混跑滚动升级），且安全加固与一致性修复对交付身份、IAM 策略求值、请求签名、Object Lock、多池写入及后台作业引入了明确的边界。
 
 > [!IMPORTANT] 当前核查基线：SILO 20261112
-> 本页完整覆盖从上游分叉基线 [`minio/minio@27742d469462`](https://github.com/minio/minio/commit/27742d469462e1561c776f88ca7a1f26816d69e2)（`2025-12-03`，位于上游最后发行版 `RELEASE.2025-10-15T17-29-55Z` 之后）至 **[SILO Server 20261112](/zh/blog/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，源码 [`44e848fedf8c`](https://github.com/pgsty/silo/commit/44e848fedf8cec3d8c0da4b1aa8422390a2b7a8b)，内嵌 **[Console v2.7.2](/zh/blog/release/console-2.7.2/)** [`0e7953ff59c4`](https://github.com/pgsty/silo-console/commit/0e7953ff59c4a1eb77c7d203b265e6783ff18d01)、配套 **[mcli 20261112](/zh/blog/release/mcli-20261112/)** [`a37a9f054fba`](https://github.com/pgsty/mc/commit/a37a9f054fba828a0bbbceb4e9ff247ccf09c28d)、`silo-pkg v3.16.1`、Helm chart `7.0.5`、Go `1.27.4`）的全部用户可感知变化。高层分类见[三层兼容性总览](/zh/compatibility/)，操作步骤见[迁移指南](/zh/compatibility/migration/)。
+> 本页完整覆盖从上游分叉基线 [`minio/minio@27742d469462`](https://github.com/minio/minio/commit/27742d469462e1561c776f88ca7a1f26816d69e2)（`2025-12-03`，位于上游最后发行版 `RELEASE.2025-10-15T17-29-55Z` 之后）至 **[SILO Server 20261112](/zh/release/silo-20261112/)**（`RELEASE.2026-11-12T00-00-00Z`，源码 [`44e848fedf8c`](https://github.com/pgsty/silo/commit/44e848fedf8cec3d8c0da4b1aa8422390a2b7a8b)，内嵌 **[Console v2.7.2](/zh/release/console-2.7.2/)** [`0e7953ff59c4`](https://github.com/pgsty/silo-console/commit/0e7953ff59c4a1eb77c7d203b265e6783ff18d01)、配套 **[mcli 20261112](/zh/release/mcli-20261112/)** [`a37a9f054fba`](https://github.com/pgsty/mc/commit/a37a9f054fba828a0bbbceb4e9ff247ccf09c28d)、`silo-pkg v3.16.1`、Helm chart `7.0.5`、Go `1.27.4`）的全部用户可感知变化。高层分类见[三层兼容性总览](/zh/compatibility/)，操作步骤见[迁移指南](/zh/compatibility/migration/)。
 
 {{< cards >}}
 {{< card title="旧集群接管判定矩阵" link="#takeover" icon="fa-solid fa-hard-drive" badge="先看这里" >}}
@@ -93,7 +93,7 @@ icon: fa-solid fa-scale-balanced
 {{< /tab >}}
 {{< tab label="从 SILO 20261109 升级到 20261112" value="silo-20261109" >}}
 
-`20261109` 已包含单池锁域对齐、`SILO-BATCH` v2 清单与两阶段归档恢复，升级到 `20261112` 主要关注以下增量变化（详见 [20261112 发行说明](/zh/blog/release/silo-20261112/#upgrade)）：
+`20261109` 已包含单池锁域对齐、`SILO-BATCH` v2 清单与两阶段归档恢复，升级到 `20261112` 主要关注以下增量变化（详见 [20261112 发行说明](/zh/release/silo-20261112/#upgrade)）：
 
 - **服务账号策略保留与重置（SN-2026-025）**：更新服务账号或访问密钥时，省略／`null` 策略会保留原有内联限制（含历史空内联拒绝策略），显式传 `{}` 或 `{"Statement":[]}` 才移除内联策略并恢复继承母账号。多站点升级期间避免在 `20261109` 站点编辑服务账号。
 - **严格策略 JSON 与 SSE-KMS 上下文校验**：Server、Console `v2.7.2` 与 `mcli 20261112` 拒绝含未知字段、尾部垃圾内容或空 `Principal: {}` 的策略 JSON；`X-Amz-Server-Side-Encryption-Context` 非法输入统一返回 `400 InvalidArgument`（不再返回 `500`），且 `keyrotate` 持久保留 KMS 上下文并将旧 `XLV1` 流式重写为 `XLV2`。
@@ -290,6 +290,6 @@ icon: fa-solid fa-scale-balanced
 ## 15. 核查范围与延伸参考 {#references}
 
 - **分叉对照起点**：服务端 [`minio/minio@27742d469462`](https://github.com/minio/minio/commit/27742d469462e1561c776f88ca7a1f26816d69e2)（`2025-12-03`），客户端 [`minio/mc@77f82e18b540`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)，控制台 [`silo-console@feff71e48e39`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)。
-- **当前发布基线（`2026-11-12`）**：[SILO Server 20261112](/zh/blog/release/silo-20261112/)（[`44e848fedf8c`](https://github.com/pgsty/silo/commit/44e848fedf8cec3d8c0da4b1aa8422390a2b7a8b)）、[Console v2.7.2](/zh/blog/release/console-2.7.2/)（[`0e7953ff59c4`](https://github.com/pgsty/silo-console/commit/0e7953ff59c4a1eb77c7d203b265e6783ff18d01)）、[mcli 20261112](/zh/blog/release/mcli-20261112/)（[`a37a9f054fba`](https://github.com/pgsty/mc/commit/a37a9f054fba828a0bbbceb4e9ff247ccf09c28d)）、`silo-pkg v3.16.1`（[`433f7eefa714`](https://github.com/pgsty/silo-pkg/commit/433f7eefa714a30b72ca70c4dffcd5faca25804f)）。
+- **当前发布基线（`2026-11-12`）**：[SILO Server 20261112](/zh/release/silo-20261112/)（[`44e848fedf8c`](https://github.com/pgsty/silo/commit/44e848fedf8cec3d8c0da4b1aa8422390a2b7a8b)）、[Console v2.7.2](/zh/release/console-2.7.2/)（[`0e7953ff59c4`](https://github.com/pgsty/silo-console/commit/0e7953ff59c4a1eb77c7d203b265e6783ff18d01)）、[mcli 20261112](/zh/release/mcli-20261112/)（[`a37a9f054fba`](https://github.com/pgsty/mc/commit/a37a9f054fba828a0bbbceb4e9ff247ccf09c28d)）、`silo-pkg v3.16.1`（[`433f7eefa714`](https://github.com/pgsty/silo-pkg/commit/433f7eefa714a30b72ca70c4dffcd5faca25804f)）。
 - **配套深入文档**：[三层兼容性总览](/zh/compatibility/) · [组件版本矩阵](/zh/compatibility/versions/) · [迁移操作指南](/zh/compatibility/migration/) · [原生软件包迁移](/zh/compatibility/binary/) · [服务端源码审计台账](/zh/compatibility/server/) · [mcli 兼容性](/zh/compatibility/mcli/) · [Console 兼容性](/zh/compatibility/console/) · [安全公告汇总](/zh/about/security-advisories/)。
 

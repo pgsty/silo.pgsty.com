@@ -23,14 +23,14 @@ sidebar_expanded: false
 {{< /card >}}
 {{< /cards >}}
 
-**当前发布基线为 [SILO 20261112](/zh/blog/release/silo-20261112/)。** 请先阅读 [20261112 升级要求](/zh/blog/release/silo-20261112/#upgrade)与 [20261109 升级清单](/zh/blog/release/silo-20261109/#upgrade)，核对服务账号策略保留与重置、严格策略 JSON 校验、批量删版本顺序执行、锁域升级、batch 记录边界、混合版本恢复与 S3 就绪检查。本页汇总分叉以来的源码与配套组件变化，标明各项修复首次发布的版本。当前组件组合与旧版缺失的修复见[组件版本矩阵](/zh/compatibility/versions/)。
+**当前发布基线为 [SILO 20261112](/zh/release/silo-20261112/)。** 请先阅读 [20261112 升级要求](/zh/release/silo-20261112/#upgrade)与 [20261109 升级清单](/zh/release/silo-20261109/#upgrade)，核对服务账号策略保留与重置、严格策略 JSON 校验、批量删版本顺序执行、锁域升级、batch 记录边界、混合版本恢复与 S3 就绪检查。本页汇总分叉以来的源码与配套组件变化，标明各项修复首次发布的版本。当前组件组合与旧版缺失的修复见[组件版本矩阵](/zh/compatibility/versions/)。
 
 > [!TIP] 需要完整的行为差异对照或存量集群接管判定？
 > 请查阅 **[SILO 与 MinIO 用户可感知行为变化](/zh/compatibility/behavior-changes/)**：包含存量数据卷接管与混跑判定矩阵、按起点版本筛选的速查页签，以及覆盖分叉以来至 `20261112` 的 12 大领域完整行为变化清单。
 
 ## 20261112 正式版变化 {#maintenance-20261112}
 
-[Server 20261112](/zh/compatibility/server/#maintenance-20261112) 在服务账号元数据编辑时默认保留内联策略（显式传 `{}` 恢复继承），对各类策略写入与导入执行严格 JSON 解码，按权限过滤本地与双活代理 `GET`/`HEAD` 的标签及对象锁响应头，按真实外层标签在内存中鉴权 ZIP 归档成员，保护暂停版本控制桶中已锁定的 `null` 版本，将全部桶中显式携带 `VersionId` 的 `DeleteObjects` 条目改为单对象顺序执行，并修复压缩加密对象 `Range` 读取、跨池历史版本自复制、历史 `xl.meta` / `UsesDataDir` 修订号分裂以及池退役嵌套子键重扫与仲裁内离线盘判空。同步发布 Helm chart `7.0.5`、Go `1.27.4`、[silo-pkg 3.16.1](/zh/blog/release/pkg-3.16.1/)、内嵌 [Console 2.7.2](/zh/compatibility/console/#release-272) 与 [mcli 20261112](/zh/compatibility/mcli/#release-20261112)。
+[Server 20261112](/zh/compatibility/server/#maintenance-20261112) 在服务账号元数据编辑时默认保留内联策略（显式传 `{}` 恢复继承），对各类策略写入与导入执行严格 JSON 解码，按权限过滤本地与双活代理 `GET`/`HEAD` 的标签及对象锁响应头，按真实外层标签在内存中鉴权 ZIP 归档成员，保护暂停版本控制桶中已锁定的 `null` 版本，将全部桶中显式携带 `VersionId` 的 `DeleteObjects` 条目改为单对象顺序执行，并修复压缩加密对象 `Range` 读取、跨池历史版本自复制、历史 `xl.meta` / `UsesDataDir` 修订号分裂以及池退役嵌套子键重扫与仲裁内离线盘判空。同步发布 Helm chart `7.0.5`、Go `1.27.4`、[silo-pkg 3.16.1](/zh/release/pkg-3.16.1/)、内嵌 [Console 2.7.2](/zh/compatibility/console/#release-272) 与 [mcli 20261112](/zh/compatibility/mcli/#release-20261112)。
 
 ## 20261109 正式版变化 {#maintenance-20261109}
 
@@ -42,7 +42,7 @@ sidebar_expanded: false
 
 ## 20261018 正式发布 {#october-2026}
 
-[Server 20261026](/zh/blog/release/silo-20261026/)保留 [20261018](/zh/blog/release/silo-20261018/) 已交付的修复。升级检查包括 Object Lock、IAM 管理凭据授权、普通 LIST 恢复、strict 分片列表退役及 OIDC/JWK 密钥限制，见[服务端兼容性](/zh/compatibility/server/#october-2026)。下方列出的 strict 前提仅适用于 Server 20260916 的可选模式。
+[Server 20261026](/zh/release/silo-20261026/)保留 [20261018](/zh/release/silo-20261018/) 已交付的修复。升级检查包括 Object Lock、IAM 管理凭据授权、普通 LIST 恢复、strict 分片列表退役及 OIDC/JWK 密钥限制，见[服务端兼容性](/zh/compatibility/server/#october-2026)。下方列出的 strict 前提仅适用于 Server 20260916 的可选模式。
 
 
 ## 🟢 兼容或改进：12 类 {#compatible}
@@ -53,12 +53,12 @@ sidebar_expanded: false
 | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | <span id="g01"></span>**G01 · 完整 Web 管理控制台**<br>恢复桶、对象、用户、策略和系统的完整 Web 管理。                                                | 通过浏览器管理部署。                   | 管理界面增强；普通 S3 应用无需改动。               | [Console 功能](/zh/compatibility/console/#scope)                                                                      |
 | <span id="g02"></span>**G02 · 十种界面语言与文本预览**<br>提供十种界面语言（Console 2.7.0／Server 20261109 支持阿拉伯语 RTL）和有界、安全的文本预览。 | 切换界面语言或预览文本对象。           | 影响 Console 使用体验，不改变对象内容。            | [界面语言](/zh/compatibility/console/#i18n)、[文本预览](/zh/blog/design/console-text-preview/)                        |
-| <span id="g03"></span>**G03 · 桶级 CORS**<br>原有 CORS 接口开始实际保存和执行逐桶跨域规则。                                                           | 浏览器跨域访问，并配置了桶级 CORS。    | 该桶规则覆盖全局 CORS；对象访问仍需授权。          | [CORS 行为](/zh/blog/release/silo-20260903/#cors-trust)                                                               |
+| <span id="g03"></span>**G03 · 桶级 CORS**<br>原有 CORS 接口开始实际保存和执行逐桶跨域规则。                                                           | 浏览器跨域访问，并配置了桶级 CORS。    | 该桶规则覆盖全局 CORS；对象访问仍需授权。          | [CORS 行为](/zh/release/silo-20260903/#cors-trust)                                                                    |
 | <span id="g04"></span>**G04 · 原生健康检查**<br>新增 `silo healthcheck` 命令，便于容器和运维探测。                                                    | 主动采用新探针命令。                   | 原有 HTTP 健康端点继续可用。                       | [命令与范围](/zh/compatibility/feature/healthcheck/#command)                                                          |
 | <span id="g05"></span>**G05 · 客户端校验和审计**<br>新增 `mcli checksum verify`，读取对象并核验校验和。                                               | 主动运行完整性审计。                   | 只读检查和报告，不修改或修复对象。                 | [审计命令](/zh/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify)                                     |
-| <span id="g06"></span>**G06 · 上传与复制校验和修复**<br>合法上传、分片完成和复制更准确地计算、保存及返回校验和。                                      | 使用相关上传或复制路径。               | 改善 SDK 互操作；非法请求的变化见 [O04](#o04)。    | [分片上传](/zh/blog/design/uploadpart-checksum/#decision)、[S3 修复](/zh/blog/release/silo-20260903/#s3-correctness)  |
+| <span id="g06"></span>**G06 · 上传与复制校验和修复**<br>合法上传、分片完成和复制更准确地计算、保存及返回校验和。                                      | 使用相关上传或复制路径。               | 改善 SDK 互操作；非法请求的变化见 [O04](#o04)。    | [分片上传](/zh/blog/design/uploadpart-checksum/#decision)、[S3 修复](/zh/release/silo-20260903/#s3-correctness)       |
 | <span id="g07"></span>**G07 · 加密与压缩处理修复**<br>修正 SSE-C、KMS、压缩与复制组合中的数据及逻辑大小处理。                                         | 使用这些加密、压缩或复制组合。         | 修正新请求，不修改存量对象。                       | [SSE-C 与历史对象](/zh/blog/design/ssec-replica-integrity/)、[联邦复制](/zh/blog/design/federated-copy-object/)       |
-| <span id="g08"></span>**G08 · 桶配置并发更新修复**<br>桶配置共用元数据锁，防止并发更新互相覆盖。                                                      | 同时修改策略、生命周期、加密等桶配置。 | 管理操作更可靠，现有调用方式不变。                 | [共享配置锁](/zh/blog/release/silo-20260903/#bucket-metadata)                                                         |
+| <span id="g08"></span>**G08 · 桶配置并发更新修复**<br>桶配置共用元数据锁，防止并发更新互相覆盖。                                                      | 同时修改策略、生命周期、加密等桶配置。 | 管理操作更可靠，现有调用方式不变。                 | [共享配置锁](/zh/release/silo-20260903/#bucket-metadata)                                                              |
 | <span id="g09"></span>**G09 · 标签与对象锁复制修复**<br>复制更准确地保留并排序标签、保留期与锁状态。                                                  | 使用标签、Object Lock 的复制或修复。   | 减少状态丢失与旧事件覆盖；混合版本见 [O07](#o07)。 | [标签排序](/zh/blog/design/replicated-tag-ordering/)、[对象锁排序](/zh/blog/design/object-lock-replication-ordering/) |
 | <span id="g10"></span>**G10 · 池迁移与数据修复改进**<br>再平衡、退役及修复更准确地处理标签、版本和删除标记。                                          | 迁移存储池、执行 heal 或恢复复制。     | 改善元数据保留与重试；历史异常仍需检查。           | [多池一致性](/zh/blog/design/multi-pool-object-consistency/)、[复制恢复](/zh/blog/design/replication-reliability/)    |
 | <span id="g11"></span>**G11 · 通知与流式推送修复**<br>修正 NATS/AMQP 配置识别，以及通知、Select 等流式响应刷新。                                      | 使用相应通知目标或流式接口。           | 配置与事件输出更准确；旧数据库配置见 [O03](#o03)。 | [通知配置](/zh/compatibility/server/#notify-audit)、[流式响应](/zh/compatibility/server/#s3-behavior)                 |

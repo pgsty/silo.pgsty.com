@@ -14,7 +14,7 @@ url: "/blog/design/audit-webhook-peer-reload/"
 
 This record covers [issue #259](https://github.com/pgsty/silo/issues/259), reported by Henrik Feldt, evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). The fix completes earlier, uncommitted maintainer work. It adds the Kafka call site, a handoff of records queued in a target that never started, and Kafka test coverage.
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 

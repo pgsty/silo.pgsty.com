@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/notify-url/"
 ---
 
-Shipped in [SILO Server 20260903](/blog/release/silo-20260903/) via commit [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358), this design resolves [SILO issue #53](https://github.com/pgsty/silo/issues/53) by establishing the compatibility boundary, legacy-migration behavior, and startup error handling for PostgreSQL and MySQL bucket-notification targets.
+Shipped in [SILO Server 20260903](/release/silo-20260903/) via commit [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358), this design resolves [SILO issue #53](https://github.com/pgsty/silo/issues/53) by establishing the compatibility boundary, legacy-migration behavior, and startup error handling for PostgreSQL and MySQL bucket-notification targets.
 
 ## Decision {#decision}
 
@@ -218,7 +218,7 @@ Commit [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) implements 
 
 ### Release Compatibility Statement {#release}
 
-SILO database notification targets require `connection_string` for PostgreSQL and `dsn_string` for MySQL. The pre-2020 discrete `host`/`port`/`username`/`password`/`database` form is not migrated; convert, disable, or remove such targets before upgrading to [SILO Server 20260903](/blog/release/silo-20260903/) or later.
+SILO database notification targets require `connection_string` for PostgreSQL and `dsn_string` for MySQL. The pre-2020 discrete `host`/`port`/`username`/`password`/`database` form is not migrated; convert, disable, or remove such targets before upgrading to [SILO Server 20260903](/release/silo-20260903/) or later.
 
 ### Design Review Calibration {#review-record}
 

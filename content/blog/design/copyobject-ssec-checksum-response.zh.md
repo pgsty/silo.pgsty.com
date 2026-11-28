@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/copyobject-ssec-checksum-response/"
 ---
 
-本文记录提交 `e73436c99`（已随 [Server 20260903](/zh/blog/release/silo-20260903/) 发布）中的 `CopyObject` SSE-C 校验和响应修复。该修复仅作用于目标对象成功提交后的 `CopyObject` XML 与 HTTP 响应生成阶段；已存储的对象字节、校验和元数据、加密格式、源对象解密、联邦复制与站点复制均保持不变。
+本文记录提交 `e73436c99`（已随 [Server 20260903](/zh/release/silo-20260903/) 发布）中的 `CopyObject` SSE-C 校验和响应修复。该修复仅作用于目标对象成功提交后的 `CopyObject` XML 与 HTTP 响应生成阶段；已存储的对象字节、校验和元数据、加密格式、源对象解密、联邦复制与站点复制均保持不变。
 
 ## 概览 {#tldr}
 

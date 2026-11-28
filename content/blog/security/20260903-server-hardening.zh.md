@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/20260903-server-hardening/"
 ---
 
-本公告汇总随 [SILO Server 20260903](/zh/blog/release/silo-20260903/)（[`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z)）发布的五项服务端安全修复，涵盖客户端提供密钥加密（SSE-C）、客户端可控复制请求头、管理端账户/组状态变更鉴权以及显式对象版本删除。`SN-2026-006` 至 `SN-2026-010` 为 SILO 安全说明编号，对应从上游 `minio/minio` 代码基线继承并在发布前审计中修复的权限与密码学边界缺陷。
+本公告汇总随 [SILO Server 20260903](/zh/release/silo-20260903/)（[`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z)）发布的五项服务端安全修复，涵盖客户端提供密钥加密（SSE-C）、客户端可控复制请求头、管理端账户/组状态变更鉴权以及显式对象版本删除。`SN-2026-006` 至 `SN-2026-010` 为 SILO 安全说明编号，对应从上游 `minio/minio` 代码基线继承并在发布前审计中修复的权限与密码学边界缺陷。
 
 ## 摘要 {#summary}
 
@@ -130,4 +130,4 @@ Server `20260903` 要求删除显式版本必须具备 `s3:DeleteObjectVersion` 
 
 ## 相邻问题跟踪 {#residual-risks}
 
-- 条件删除（`DeleteObject` 的 `If-Match` 与 `DeleteObjects` 的逐对象 ETag，[#10](https://github.com/pgsty/silo/issues/10)）以及站点复制间桶级元数据删除收敛（[#77](https://github.com/pgsty/silo/issues/77)）另行跟踪，详见 [Server 20260903 发布说明](/zh/blog/release/silo-20260903/#known-issues)与随后的 [Server 20260916 发布说明](/zh/blog/release/silo-20260916/)。
+- 条件删除（`DeleteObject` 的 `If-Match` 与 `DeleteObjects` 的逐对象 ETag，[#10](https://github.com/pgsty/silo/issues/10)）以及站点复制间桶级元数据删除收敛（[#77](https://github.com/pgsty/silo/issues/77)）另行跟踪，详见 [Server 20260903 发布说明](/zh/release/silo-20260903/#known-issues)与随后的 [Server 20260916 发布说明](/zh/release/silo-20260916/)。

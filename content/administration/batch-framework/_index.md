@@ -11,7 +11,7 @@ upstream_modified: true
 <a id="minio-batch-framework"></a>
 
 > [!NOTE]
-> **Version scope:** [SILO 20261109](/blog/release/silo-20261109/) and [mcli 20261109](/blog/release/mcli-20261109/) implement the authorization, Object Lock, and recovery rules below. Server `20261026` does not implement these server-side rules, and updating `mcli` alone does not update server-side job execution.
+> **Version scope:** [SILO 20261109](/release/silo-20261109/) and [mcli 20261109](/release/mcli-20261109/) implement the authorization, Object Lock, and recovery rules below. Server `20261026` does not implement these server-side rules, and updating `mcli` alone does not update server-side job execution.
 
 ## Overview {#overview}
 
@@ -34,7 +34,7 @@ The MinIO Batch Framework supports the following job types:
 
 ## SILO 20261109: authorization and retries {#silo-lifecycle}
 
-[SILO 20261109](/blog/release/silo-20261109/) binds local batch operations to the authenticated submitter at job creation and enforces the submitter's data permissions throughout execution ([#310](https://github.com/pgsty/silo/issues/310), [#311](https://github.com/pgsty/silo/issues/311)). Credentials in a job definition authorize remote connections only and do not grant local server authority. SILO re-evaluates IAM state before each action:
+[SILO 20261109](/release/silo-20261109/) binds local batch operations to the authenticated submitter at job creation and enforces the submitter's data permissions throughout execution ([#310](https://github.com/pgsty/silo/issues/310), [#311](https://github.com/pgsty/silo/issues/311)). Credentials in a job definition authorize remote connections only and do not grant local server authority. SILO re-evaluates IAM state before each action:
 
 - An explicit denial, an expired, disabled, or revoked credential, or a changed credential secret, session token, or parent identity ends the job with `failureReason`.
 - Identity metadata edits (such as descriptions or extended expiration dates) and LDAP group refreshes that keep the submitter's credential intact do not stop the job; each check resolves current status, groups, and policies ([#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)).

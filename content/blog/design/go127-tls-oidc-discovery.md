@@ -15,7 +15,7 @@ draft: false
 url: "/blog/design/go127-tls-oidc-discovery/"
 ---
 
-After SILO's toolchain moved to Go 1.27, the Server TLS repair [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31) ("fix(tls): honor Go key exchange defaults across transports", shipped in [Server 20260916](/blog/release/silo-20260916/)) removed explicit curve overrides across eight Server TLS configuration points. This article records the Go 1.27 TLS changes, the phase-based diagnostic method for OIDC discovery failures developed during the investigation of [issue #154](https://github.com/pgsty/silo/issues/154), and the health-endpoint behavior when an identity provider is unreachable at startup.
+After SILO's toolchain moved to Go 1.27, the Server TLS repair [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31) ("fix(tls): honor Go key exchange defaults across transports", shipped in [Server 20260916](/release/silo-20260916/)) removed explicit curve overrides across eight Server TLS configuration points. This article records the Go 1.27 TLS changes, the phase-based diagnostic method for OIDC discovery failures developed during the investigation of [issue #154](https://github.com/pgsty/silo/issues/154), and the health-endpoint behavior when an identity provider is unreachable at startup.
 
 For the post-release retest analysis — why `GODEBUG=tlsmlkem=0` disables hybrid key exchange but does not suppress the 12-byte `ML-DSA` signature algorithm offer, and the configuration options for TLS-inspecting middleboxes — see [Pinned TLS Parameters and Handshake Compatibility](/blog/design/tls-parameter-pinning/).
 

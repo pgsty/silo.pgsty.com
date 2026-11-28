@@ -11,7 +11,7 @@ upstream_modified: true
 body_class: landing-page
 ---
 
-本站面向 **[SILO 20261112](/zh/blog/release/silo-20261112/)**（内嵌与独立版 **[Console 2.7.2](/zh/blog/release/console-2.7.2/)**、**[mcli 20261112](/zh/blog/release/mcli-20261112/)**、**[silo-pkg 3.16.1](/zh/blog/release/pkg-3.16.1/)**，Go 1.27.4）以及可选外部密钥服务 **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**。升级前请核对[组件版本矩阵](/zh/compatibility/versions/)与 [20261112 升级检查](/zh/compatibility/server/#maintenance-20261112)（单独升级独立版 `mcli` 或 Console 不会替换旧版 Server 内嵌的组件）。
+本站面向 **[SILO 20261112](/zh/release/silo-20261112/)**（内嵌与独立版 **[Console 2.7.2](/zh/release/console-2.7.2/)**、**[mcli 20261112](/zh/release/mcli-20261112/)**、**[silo-pkg 3.16.1](/zh/release/pkg-3.16.1/)**，Go 1.27.4）以及可选外部密钥服务 **[KES 20261026](/zh/release/silo-20261026/#kes)**。升级前请核对[组件版本矩阵](/zh/compatibility/versions/)与 [20261112 升级检查](/zh/compatibility/server/#maintenance-20261112)（单独升级独立版 `mcli` 或 Console 不会替换旧版 Server 内嵌的组件）。
 
 > [!WARNING]
 > **SILO 是由 Pigsty 社区维护的 MinIO 分支。** 本项目并非 MinIO, Inc. 的关联项目，也未获得其认可、赞助或背书。“MinIO” 是 MinIO, Inc. 的商标，此处仅用于标识上游项目。源码与许可信息详见[归属与署名](/zh/about/attribution/)。
@@ -22,7 +22,7 @@ SILO 在保留 S3 API、配置与磁盘存储契约的同时，为现有 MinIO �
 
 {{< tabs group="quickstart" >}}
 {{< tab label="Docker" value="docker" >}}
-以下命令固定使用已公开发布的 [Server 20261112](/zh/blog/release/silo-20261112/#delivery)。示例凭据仅用于本地评估。
+以下命令固定使用已公开发布的 [Server 20261112](/zh/release/silo-20261112/#delivery)。示例凭据仅用于本地评估。
 
 {{% steps %}}
 

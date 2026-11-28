@@ -14,7 +14,7 @@ url: "/blog/design/ilm-delete-all-exact-key/"
 
 This record covers a defect found during review of the [#278](https://github.com/pgsty/silo/issues/278) fix ([Multi-Pool Lifecycle Expiry](/blog/design/multi-pool-lifecycle-expiry/)). It was evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) and against the maintainer integration branch for #278 and #281, as it stood before integration.
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 

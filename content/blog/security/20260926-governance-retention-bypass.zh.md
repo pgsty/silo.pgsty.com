@@ -9,7 +9,7 @@ weight: 1
 url: "/zh/blog/security/20260926-governance-retention-bypass/"
 ---
 
-**`SN-2026-015`** 与 **`SN-2026-016`** 涵盖了在 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 中通过 PR [`#234`](https://github.com/pgsty/silo/pull/234)（`14042b5aa`）与 PR [`#235`](https://github.com/pgsty/silo/pull/235)（`0d3ba5d4c`）修复的两组 S3 Object Lock 合规保留与不可变性漏洞（配套[修复设计方案](/zh/blog/design/governance-retention-bypass-repair/)）。虽然单对象删除路径此前已按 [CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63) 校验 `s3:BypassGovernanceRetention`，但保留期修改路径（`PutObjectRetention`）与四条原地版本覆写路径仍存在绕过缺陷；[SILO Server 20261109](/zh/blog/release/silo-20261109/#authorization)（`7e9ee6bef`、`aa2d79daf`、`6ef3a52fc`）随后进一步补齐了复制 `DELETE`、目录 `null` 版本批量删除与并发 S3 `DeleteObjects` 物理版本清除的删除路径保护。
+**`SN-2026-015`** 与 **`SN-2026-016`** 涵盖了在 [SILO Server 20261018](/zh/release/silo-20261018/) 中通过 PR [`#234`](https://github.com/pgsty/silo/pull/234)（`14042b5aa`）与 PR [`#235`](https://github.com/pgsty/silo/pull/235)（`0d3ba5d4c`）修复的两组 S3 Object Lock 合规保留与不可变性漏洞（配套[修复设计方案](/zh/blog/design/governance-retention-bypass-repair/)）。虽然单对象删除路径此前已按 [CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63) 校验 `s3:BypassGovernanceRetention`，但保留期修改路径（`PutObjectRetention`）与四条原地版本覆写路径仍存在绕过缺陷；[SILO Server 20261109](/zh/release/silo-20261109/#authorization)（`7e9ee6bef`、`aa2d79daf`、`6ef3a52fc`）随后进一步补齐了复制 `DELETE`、目录 `null` 版本批量删除与并发 S3 `DeleteObjects` 物理版本清除的删除路径保护。
 
 ## 漏洞范围：`SN-2026-015` 与 `SN-2026-016` {#advisory-scope-sn-2026-015}
 
@@ -177,4 +177,4 @@ PR [`#234`](https://github.com/pgsty/silo/pull/234) 与 PR [`#235`](https://gith
 
 ### 交付状态 {#delivery}
 
-**`SN-2026-015`**（`0d3ba5d4c`，PR `#235`）与 **`SN-2026-016`**（`14042b5aa`，PR `#234`）均已随 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 正式发布。所有依赖 S3 Object Lock WORM 治理模式或合规模式保护数据的生产环境应尽快升级至 `20261018`。
+**`SN-2026-015`**（`0d3ba5d4c`，PR `#235`）与 **`SN-2026-016`**（`14042b5aa`，PR `#234`）均已随 [SILO Server 20261018](/zh/release/silo-20261018/) 正式发布。所有依赖 S3 Object Lock WORM 治理模式或合规模式保护数据的生产环境应尽快升级至 `20261018`。

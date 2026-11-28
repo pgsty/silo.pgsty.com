@@ -6,18 +6,18 @@ weight: 25
 icon: fa-solid fa-user-shield
 ---
 
-**当前升级目标为 [SILO 20261109](/zh/blog/release/silo-20261109/)。** 下述 20260916、20261018 与 20261026 的撤销历史及授权要求继续适用。在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，IAM 拒绝不完整的策略加载（[#316](https://github.com/pgsty/silo/issues/316)），在惰性加载期间保持缓存认证可用（[#317](https://github.com/pgsty/silo/issues/317)），并直接基于持久化记录执行 IAM 编辑、LDAP 组刷新与服务账户创建，使陈旧对等节点无法恢复旧凭据或复活已删除身份（[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)）。此版本还加入了 batch 提交者授权；升级前请按[批处理清单](/zh/administration/batch-framework/#upgrade-20261109)排空或取消未完成作业。按[组件矩阵](/zh/compatibility/versions/)协调所有参与节点。
+**当前升级目标为 [SILO 20261109](/zh/release/silo-20261109/)。** 下述 20260916、20261018 与 20261026 的撤销历史及授权要求继续适用。在 [SILO 20261109](/zh/release/silo-20261109/) 中，IAM 拒绝不完整的策略加载（[#316](https://github.com/pgsty/silo/issues/316)），在惰性加载期间保持缓存认证可用（[#317](https://github.com/pgsty/silo/issues/317)），并直接基于持久化记录执行 IAM 编辑、LDAP 组刷新与服务账户创建，使陈旧对等节点无法恢复旧凭据或复活已删除身份（[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)）。此版本还加入了 batch 提交者授权；升级前请按[批处理清单](/zh/administration/batch-framework/#upgrade-20261109)排空或取消未完成作业。按[组件矩阵](/zh/compatibility/versions/)协调所有参与节点。
 
 **STS 撤销验证：**20261018 同时补齐[持久枚举与撤销传播](/zh/blog/design/iam-revocations/#scoped-sts-20261018)。用实际父身份／令牌类型撤销后，逐个节点与站点确认旧令牌被拒绝、新令牌仍可用，并覆盖离线节点重连。请求集群未曾收到的孤立站点令牌不在撤销快照中；不要据一次成功响应推断分区中的全局瞬时失效。
 
 
-**20261018 补充：** 本流程中的 20260916 撤销历史要求继续适用；本次另增加 [IAM 管理凭据授权修复](/zh/blog/design/iam-admin-authorization/)。维护窗口前验证自助 Deny、会话限制、root 目标和批量查询别名，历史密钥不会自动重写。版本与发布状态见 [20261018 发布说明](/zh/blog/release/silo-20261018/)。
+**20261018 补充：** 本流程中的 20260916 撤销历史要求继续适用；本次另增加 [IAM 管理凭据授权修复](/zh/blog/design/iam-admin-authorization/)。维护窗口前验证自助 Deny、会话限制、root 目标和批量查询别名，历史密钥不会自动重写。版本与发布状态见 [20261018 发布说明](/zh/release/silo-20261018/)。
 
 [Server #191](https://github.com/pgsty/silo/pull/191) 与
 [#192](https://github.com/pgsty/silo/pull/192) 持久化删除修订及父身份撤销边界，防止延迟的站点事件恢复已撤销身份和旧授权。
 所有参与服务器必须协调升级，包括没有配置站点复制、但共享 IAM 后端的节点。不支持共享后端的新旧节点混用，也不支持滚动降级。
 
-**发布状态：** 基础撤销历史修复随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布（Server 20260903 不包含），内置策略覆盖删除修复随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 发布，而基于持久化记录的 IAM 编辑与不完整策略加载保护随 [SILO 20261109](/zh/blog/release/silo-20261109/) 发布。
+**发布状态：** 基础撤销历史修复随 [Server 20260916](/zh/release/silo-20260916/) 发布（Server 20260903 不包含），内置策略覆盖删除修复随 [Server 20261026](/zh/release/silo-20261026/#server-20261026) 发布，而基于持久化记录的 IAM 编辑与不完整策略加载保护随 [SILO 20261109](/zh/release/silo-20261109/) 发布。
 本页说明这些版本的协调升级与恢复流程。隔离升级与恢复的观察结果、剩余恢复检查由
 [#200](https://github.com/pgsty/silo/issues/200) 跟踪，参阅[验证范围](#validation)；文档发布不代表生产升级验收通过。
 
@@ -51,7 +51,7 @@ mcli ready site-a
 
 升级前按[密码策略迁移指南](/zh/compatibility/password-permissions/)检查所有原有 `Deny admin:CreateUser`：
 若其意图包含禁止修改自身密码，在保留原 scope 与条件的同一 Deny 中加入 `admin:ChangeMyPassword`，并贯穿回滚窗口。
-[SILO 20261109](/zh/blog/release/silo-20261109/)（与自 Server 20260916 以来的各版本一致）的分段上传列表默认仍为 `legacy`；普通升级不要求切换为严格模式。只有主动启用严格模式时才执行
+[SILO 20261109](/zh/release/silo-20261109/)（与自 Server 20260916 以来的各版本一致）的分段上传列表默认仍为 `legacy`；普通升级不要求切换为严格模式。只有主动启用严格模式时才执行
 [分段上传预检与排空流程](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。
 
 ## 保存完整恢复点 {#backup}
@@ -107,7 +107,7 @@ etcdutl snapshot status iam-upgrade-evidence/etcd.db --write-out=json
 6. 对仍持有旧记录的站点显式调和升级前已知的删除。使用已确认的状态重建陈旧离线节点，再接回集群。
    节点重启、复制追平后，重复凭据检查。
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，IAM 拒绝不完整的策略加载（[#316](https://github.com/pgsty/silo/issues/316)），在惰性加载期间保持缓存认证可用（[#317](https://github.com/pgsty/silo/issues/317)），并直接对持久化记录执行编辑、LDAP 组刷新与服务账户创建，使陈旧对等节点无法恢复旧凭据或复活已删除身份（[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)）。自 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 起，删除对内置策略的显式覆盖内容会立即恢复原生内置定义，同时保留删除版本以拒绝旧覆盖回放（Server 20261018 不包含此修复）。升级后应逐个节点验证内置策略 Reset、凭据编辑、LDAP 组刷新与已删除身份拒绝，并在重启及复制追平后复查，同时确认在用策略拒绝删除与自定义策略删除行为符合预期。离线期间对旧式组成员关系的普通删除，仍不在父身份持久化删除保证的覆盖范围内。
+在 [SILO 20261109](/zh/release/silo-20261109/) 中，IAM 拒绝不完整的策略加载（[#316](https://github.com/pgsty/silo/issues/316)），在惰性加载期间保持缓存认证可用（[#317](https://github.com/pgsty/silo/issues/317)），并直接对持久化记录执行编辑、LDAP 组刷新与服务账户创建，使陈旧对等节点无法恢复旧凭据或复活已删除身份（[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)）。自 [Server 20261026](/zh/release/silo-20261026/#server-20261026) 起，删除对内置策略的显式覆盖内容会立即恢复原生内置定义，同时保留删除版本以拒绝旧覆盖回放（Server 20261018 不包含此修复）。升级后应逐个节点验证内置策略 Reset、凭据编辑、LDAP 组刷新与已删除身份拒绝，并在重启及复制追平后复查，同时确认在用策略拒绝删除与自定义策略删除行为符合预期。离线期间对旧式组成员关系的普通删除，仍不在父身份持久化删除保证的覆盖范围内。
 
 只有版本身份、后端恢复、IAM 加载、复制和两类凭据检查都通过后，才恢复访问。
 如果陈旧凭据仍能成功，保持相关站点隔离并调查；反复重启直到健康检查变绿不能解决授权问题。

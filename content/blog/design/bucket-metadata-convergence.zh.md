@@ -13,11 +13,11 @@ url: "/zh/blog/design/bucket-metadata-convergence/"
 translation_notice: false
 ---
 
-[#77](https://github.com/pgsty/silo/issues/77) 是已在 [Server 20260916](/zh/blog/release/silo-20260916/)（[PR #180](https://github.com/pgsty/silo/pull/180)，提交 [`48ec10312`](https://github.com/pgsty/silo/commit/48ec10312f98b494f75989615a5d24eae3207e44)）中修复的站点复制正确性缺陷。修复前，接收站点将对端事件的来源时间改写为本地到达时间（`UTCNow`），导致后续真正较新的删除请求因早于本地到达时间而被当作旧事件拒绝；同时部分配置在删除后不再导出时间戳，断连期间遗漏的删除也无法通过自愈（heal）恢复。仅补一个 `DELETE` 分支无法同时解决这两类问题，确定性收敛必须同时具备来源时间保留、持久化删除墓碑（tombstone）、规范化内容比较键以及整桶元数据锁。
+[#77](https://github.com/pgsty/silo/issues/77) 是已在 [Server 20260916](/zh/release/silo-20260916/)（[PR #180](https://github.com/pgsty/silo/pull/180)，提交 [`48ec10312`](https://github.com/pgsty/silo/commit/48ec10312f98b494f75989615a5d24eae3207e44)）中修复的站点复制正确性缺陷。修复前，接收站点将对端事件的来源时间改写为本地到达时间（`UTCNow`），导致后续真正较新的删除请求因早于本地到达时间而被当作旧事件拒绝；同时部分配置在删除后不再导出时间戳，断连期间遗漏的删除也无法通过自愈（heal）恢复。仅补一个 `DELETE` 分支无法同时解决这两类问题，确定性收敛必须同时具备来源时间保留、持久化删除墓碑（tombstone）、规范化内容比较键以及整桶元数据锁。
 
 ## 既有工作与本轮范围 {#scope}
 
-此前的[发布说明](/zh/blog/release/silo-20260903/)、[20260903 安全加固记录](/zh/blog/security/20260903-server-hardening/)与 [Server 兼容性说明](/zh/compatibility/server/#limits)已概述 [#77](https://github.com/pgsty/silo/issues/77) 的删除收敛限制。本文完整记录其状态模型、方案取舍与验证证据（原始实验记录归档于 [`docs/investigations/issue-77.md`](https://github.com/pgsty/silo/blob/114dc10529f242e1e22bafd0a08b1a096d69d4bc/docs/investigations/issue-77.md)）。
+此前的[发布说明](/zh/release/silo-20260903/)、[20260903 安全加固记录](/zh/blog/security/20260903-server-hardening/)与 [Server 兼容性说明](/zh/compatibility/server/#limits)已概述 [#77](https://github.com/pgsty/silo/issues/77) 的删除收敛限制。本文完整记录其状态模型、方案取舍与验证证据（原始实验记录归档于 [`docs/investigations/issue-77.md`](https://github.com/pgsty/silo/blob/114dc10529f242e1e22bafd0a08b1a096d69d4bc/docs/investigations/issue-77.md)）。
 
 | 已有工作                                                                                       | 已解决的问题                                    | #77 补齐的剩余缺口                                             |
 | :--------------------------------------------------------------------------------------------- | :---------------------------------------------- | :------------------------------------------------------------- |
@@ -136,7 +136,7 @@ heal 不再先取 map 第一项作为胜者再过滤默认时间，而是先筛�
 
 ### 协调升级与降级步骤 {#coordinated-upgrade-and-rollback}
 
-1. 将所有参与站点的全部节点升级至 [Server 20260916](/zh/blog/release/silo-20260916/) 或更高版本，确认同站点配置一致并排空在途请求。
+1. 将所有参与站点的全部节点升级至 [Server 20260916](/zh/release/silo-20260916/) 或更高版本，确认同站点配置一致并排空在途请求。
 2. 在全部节点统一设置 `MINIO_SITE_REPLICATION_METADATA_TOMBSTONES=on` 并重启。
 3. 如需回滚到旧版本，先在全部节点设置 `MINIO_SITE_REPLICATION_METADATA_TOMBSTONES=off` 并重启，再滚动降级软件二进制。
 

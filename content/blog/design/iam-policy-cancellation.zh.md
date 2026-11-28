@@ -11,7 +11,7 @@ draft: false
 url: "/zh/blog/design/iam-policy-cancellation/"
 ---
 
-提交 [`1b5477f3d`](https://github.com/pgsty/silo/commit/1b5477f3df87924712ad8dc580c8f8eac63eda2d)（[`pgsty/silo#251`](https://github.com/pgsty/silo/issues/251)，已随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 发布）解决了 KMS/KES 响应缓慢时的两类级联故障：
+提交 [`1b5477f3d`](https://github.com/pgsty/silo/commit/1b5477f3df87924712ad8dc580c8f8eac63eda2d)（[`pgsty/silo#251`](https://github.com/pgsty/silo/issues/251)，已随 [Server 20261026](/zh/release/silo-20261026/#server-20261026) 发布）解决了 KMS/KES 响应缓慢时的两类级联故障：
 
 1. **鉴权缓存锁争用**：`ListPolicies` 与 `ListPolicyDocs` 在保留 IAM 写操作串行锁（`writeMu`）的前提下，将慢速的后端策略读取与解密移出内存鉴权缓存锁（`store.lock()`），避免管理员列举策略时阻塞普通用户的 S3 读写请求。
 2. **全链路取消传播与超时预算隔离**：将调用方的请求 `context.Context` 贯通至 IAM 配置解密、SSE-S3 列表密钥解封以及底层的 `KES.Decrypt` 调用；同时将底层存储 RPC 超时严格限制在存储读取阶段，确保耗时超过 30 秒的合法慢查询不会被误杀。
@@ -69,7 +69,7 @@ IAM 子系统中的两把锁承担着不同的职责：
 
 后台定期刷新同样遵循这一合并与撤销规则。回归测试直接驱动具体的 `IAMObjectStore` 刷新路径，与策略更新、策略删除以及[持久化 IAM 撤销](/zh/blog/design/iam-revocations/)并发执行验证。
 
-**[SILO Server 20261109](/zh/blog/release/silo-20261109/) 按需加载与 Fail-Closed 扩展（[`07ce95dfd`](https://github.com/pgsty/silo/commit/07ce95dfd)、[`00270e9f6`](https://github.com/pgsty/silo/commit/00270e9f6)、[`c78ef6a6f`](https://github.com/pgsty/silo/commit/c78ef6a6f)、[`bb31c2618`](https://github.com/pgsty/silo/commit/bb31c2618)）：** 授权链路在策略加载不完整时全程按 Fail-Closed 拒绝放行；单个用户、组和策略的按需加载（Lazy Load）同样在存储读取期间释放鉴权缓存锁以保持已缓存 S3 鉴权可用，按 key 通过 `singleflight` 合并并发未命中，并在读取存储前记录 `loadedAt`，防止在途慢速读取覆盖更新的缓存版本或删除墓碑（配套持久化记录修改加固 [`70914759e`](https://github.com/pgsty/silo/commit/70914759e)、[`7eed95bc8`](https://github.com/pgsty/silo/commit/7eed95bc8)、[`a0de92fcb`](https://github.com/pgsty/silo/commit/a0de92fcb) 见[持久化 IAM 撤销](/zh/blog/design/iam-revocations/)）。
+**[SILO Server 20261109](/zh/release/silo-20261109/) 按需加载与 Fail-Closed 扩展（[`07ce95dfd`](https://github.com/pgsty/silo/commit/07ce95dfd)、[`00270e9f6`](https://github.com/pgsty/silo/commit/00270e9f6)、[`c78ef6a6f`](https://github.com/pgsty/silo/commit/c78ef6a6f)、[`bb31c2618`](https://github.com/pgsty/silo/commit/bb31c2618)）：** 授权链路在策略加载不完整时全程按 Fail-Closed 拒绝放行；单个用户、组和策略的按需加载（Lazy Load）同样在存储读取期间释放鉴权缓存锁以保持已缓存 S3 鉴权可用，按 key 通过 `singleflight` 合并并发未命中，并在读取存储前记录 `loadedAt`，防止在途慢速读取覆盖更新的缓存版本或删除墓碑（配套持久化记录修改加固 [`70914759e`](https://github.com/pgsty/silo/commit/70914759e)、[`7eed95bc8`](https://github.com/pgsty/silo/commit/7eed95bc8)、[`a0de92fcb`](https://github.com/pgsty/silo/commit/a0de92fcb) 见[持久化 IAM 撤销](/zh/blog/design/iam-revocations/)）。
 
 ## B：将取消信号贯通至 KMS 与 KES {#cancellation}
 

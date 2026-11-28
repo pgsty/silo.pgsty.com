@@ -11,8 +11,8 @@ upstream_modified: true
 > - **Console root login with LDAP ([#272](https://github.com/pgsty/silo/issues/272)):** The `root` user can sign in to the embedded Console when Active Directory / LDAP is enabled.
 > - **Long-DN LDAP login on erasure sets ([#271](https://github.com/pgsty/silo/issues/271)):** LDAP users whose normalized DN exceeds the 255-byte single-component limit can sign in on multi-drive erasure-set deployments.
 > - **Persisted IAM mutations and complete policy loads ([#316](https://github.com/pgsty/silo/issues/316), [#317](https://github.com/pgsty/silo/issues/317), [#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)):** IAM user, group, policy, LDAP group refresh, and service-account edits apply directly to stored records, and IAM refuses incomplete policy loads while keeping cached authentication active during lazy reloads so stale nodes cannot restore old credentials or deleted identities.
-> - **Arabic RTL field controls ([Console v2.7.0](/blog/release/console-2.7.0/)):** Password reveal buttons and field unit selectors stay beside input text instead of overlapping it in Arabic right-to-left layout.
-> - **Earlier Console 2.5.1 / Server 20261026 updates:** Toggling group status preserves existing members, OIDC string-array group claims are parsed, session cookies retain `Secure` under HTTPS or a trusted TLS proxy, newly created access keys export clean UTF-8 JSON credentials, and built-in policy **Reset** requires [SILO 20261026](/blog/release/silo-20261026/#server-20261026) or later ([Console 2.5.1](/blog/release/console-2.5.1/)).
+> - **Arabic RTL field controls ([Console v2.7.0](/release/console-2.7.0/)):** Password reveal buttons and field unit selectors stay beside input text instead of overlapping it in Arabic right-to-left layout.
+> - **Earlier Console 2.5.1 / Server 20261026 updates:** Toggling group status preserves existing members, OIDC string-array group claims are parsed, session cookies retain `Secure` under HTTPS or a trusted TLS proxy, newly created access keys export clean UTF-8 JSON credentials, and built-in policy **Reset** requires [SILO 20261026](/release/silo-20261026/#server-20261026) or later ([Console 2.5.1](/release/console-2.5.1/)).
 
 <a id="security-and-access"></a>
 <a id="minio-console-security-access"></a>
@@ -50,7 +50,7 @@ For deployments using an external identity manager such as Active Directory or a
 
 ## Policies {#policies}
 
-Console v2.5.1 provides **Reset** for built-in policies and **Delete** for custom policies. **Reset** removes a stored built-in policy override and restores SILO's native definition. The [Server 20261026](/blog/release/silo-20261026/#server-20261026) makes the restored definition immediately readable and reloads committed state on peer/etcd notifications so delayed notifications cannot overwrite a later edit (in-use checks still apply).
+Console v2.5.1 provides **Reset** for built-in policies and **Delete** for custom policies. **Reset** removes a stored built-in policy override and restores SILO's native definition. The [Server 20261026](/release/silo-20261026/#server-20261026) makes the restored definition immediately readable and reloads committed state on peer/etcd notifications so delayed notifications cannot overwrite a later edit (in-use checks still apply).
 
 The **Policies** section displays all [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) on the MinIO deployment. The Policies section allows you to create, modify, or delete policies.
 
@@ -139,4 +139,4 @@ MinIO supports using an [Active Directory or LDAP (AD/LDAP)](/administration/ide
 
 Use the screens in this section to view, add, or edit an LDAP configuration for the deployment. MinIO only supports one active LDAP configuration.
 
-MinIO queries the Active Directory / LDAP server to verify the client-specified credentials. MinIO also performs a group lookup on the AD/LDAP server if configured to do so. Since [SILO 20261109](/blog/release/silo-20261109/), the `root` user can sign in to the embedded Console when LDAP is enabled ([#272](https://github.com/pgsty/silo/issues/272)), and group-authorized LDAP users with long normalized DNs (> 255-byte component) can log in on multi-drive erasure-set deployments ([#271](https://github.com/pgsty/silo/issues/271)).
+MinIO queries the Active Directory / LDAP server to verify the client-specified credentials. MinIO also performs a group lookup on the AD/LDAP server if configured to do so. Since [SILO 20261109](/release/silo-20261109/), the `root` user can sign in to the embedded Console when LDAP is enabled ([#272](https://github.com/pgsty/silo/issues/272)), and group-authorized LDAP users with long normalized DNs (> 255-byte component) can log in on multi-drive erasure-set deployments ([#271](https://github.com/pgsty/silo/issues/271)).

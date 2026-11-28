@@ -10,7 +10,7 @@ upstream_modified: true
 > [!IMPORTANT]
 > **SILO 20261109 站点复制更新与升级要求**
 >
-> - **IAM 与 Server 协调升级：** [SILO 20261109](/zh/blog/release/silo-20261109/) 拒绝不完整的 IAM 策略加载，在惰性加载期间保持缓存认证可用，并直接基于持久化记录执行 IAM 编辑、LDAP 组刷新与服务账户创建，使陈旧对等节点无法恢复旧凭据或复活已删除身份（[#316](https://github.com/pgsty/silo/issues/316)、[#317](https://github.com/pgsty/silo/issues/317)、[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)）。升级前请阅读 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)、[历史复制状态检查](/zh/operations/replication/replica-metadata-audit/)及[组件版本表](/zh/compatibility/versions/)。
+> - **IAM 与 Server 协调升级：** [SILO 20261109](/zh/release/silo-20261109/) 拒绝不完整的 IAM 策略加载，在惰性加载期间保持缓存认证可用，并直接基于持久化记录执行 IAM 编辑、LDAP 组刷新与服务账户创建，使陈旧对等节点无法恢复旧凭据或复活已删除身份（[#316](https://github.com/pgsty/silo/issues/316)、[#317](https://github.com/pgsty/silo/issues/317)、[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)）。升级前请阅读 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)、[历史复制状态检查](/zh/operations/replication/replica-metadata-audit/)及[组件版本表](/zh/compatibility/versions/)。
 > - **Object Lock、生命周期删除与指标：** 复制删除保留目标端 legal hold 与保留期（提交 [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)），生命周期规则创建的删除标记与版本清除不跨站点复制（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)），且复制工作线程指标在复制线程池缺失时不再触发 panic 并保留历史均值与峰值计数（提交 [`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf3)）。
 > - **已知限制：** 多站点删除标记清除顺序（[#217](https://github.com/pgsty/silo/issues/217)）与重放创建存储桶（[#241](https://github.com/pgsty/silo/pull/241)）仍为已知未解决限制。
 
@@ -53,12 +53,12 @@ upstream_modified: true
 
 站点复制会在所有复制站点上，为所有新建和现有存储桶启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，复制删除保留目标站点的 Object Lock legal hold 与保留期（提交 [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)）：源站点绕过 `GOVERNANCE` 保留期发起的物理清除不会赋予仍处于有效保护下的对等副本绕过权限，目标站点会拒绝清除并由源站点重试。
+在 [SILO 20261109](/zh/release/silo-20261109/) 中，复制删除保留目标站点的 Object Lock legal hold 与保留期（提交 [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)）：源站点绕过 `GOVERNANCE` 保留期发起的物理清除不会赋予仍处于有效保护下的对等副本绕过权限，目标站点会拒绝清除并由源站点重试。
 
 > [!NOTE]
 > **生命周期过期删除不跨站点复制（`SILO 20261109`）**
 >
-> 自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，即使配置中曾设置旧版 ILM 过期复制标志（[`--replicate-ilm-expiry`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add.-replicate-ilm-expiry) 或 [`--enable-ilm-expiry-replication`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-enable-ilm-expiry-replication)），生命周期规则创建的删除标记与版本清除也**不会**跨站点复制（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)），行为与 AWS S3 一致。请在每个对等站点独立配置生命周期过期规则。
+> 自 [SILO 20261109](/zh/release/silo-20261109/) 起，即使配置中曾设置旧版 ILM 过期复制标志（[`--replicate-ilm-expiry`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add.-replicate-ilm-expiry) 或 [`--enable-ilm-expiry-replication`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-enable-ilm-expiry-replication)），生命周期规则创建的删除标记与版本清除也**不会**跨站点复制（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)），行为与 AWS S3 一致。请在每个对等站点独立配置生命周期过期规则。
 
 ### 哪些内容不会在站点之间复制 {#what-does-not-replicate-across-sites}
 

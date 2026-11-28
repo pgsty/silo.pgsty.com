@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/request-header-timeouts/"
 ---
 
-本文记录 Server HTTP 读取截止时间的修复设计，该修复通过 [PR #196](https://github.com/pgsty/silo/pull/196) 合入主干（提交 [`055030ea5`](https://github.com/pgsty/silo/commit/055030ea5)），随 [Server 20260916](/zh/blog/release/silo-20260916/)（`40220bd836cbd066ca424fa4dc5dbb90057fb55a`）发布。
+本文记录 Server HTTP 读取截止时间的修复设计，该修复通过 [PR #196](https://github.com/pgsty/silo/pull/196) 合入主干（提交 [`055030ea5`](https://github.com/pgsty/silo/commit/055030ea5)），随 [Server 20260916](/zh/release/silo-20260916/)（`40220bd836cbd066ca424fa4dc5dbb90057fb55a`）发布。
 
 排查源于慢速 HTTP DoS 扫描器报告（[#183](https://github.com/pgsty/silo/issues/183)），并通过两组实验验证：一是直接 TCP 对照实验（请求头限制设为 100 ms、实际分批发送耗时 400 ms，标准 Go 服务拒绝该请求而旧版服务返回 204）；二是单盘进程探针验证（通过命令行参数与环境变量两种入口配置后，服务端均拒绝 400 ms 慢速请求头，正常请求不受影响）。
 

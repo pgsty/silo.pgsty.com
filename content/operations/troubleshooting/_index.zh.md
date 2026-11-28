@@ -38,7 +38,7 @@ SILO 由 PGSTY 独立维护，MinIO SUBNET 订阅及原上游 Slack 均不是 SI
 
 ## 升级与版本支持 {#upgrades-and-version-support}
 
-使用[已发布制品](/zh/download/)，并阅读跨越版本的[发布说明](/zh/blog/release/)和[安全公告](/zh/about/security-advisories/)。源码改动或计划发布日期不能证明公开制品已经可用。
+使用[已发布制品](/zh/download/)，并阅读跨越版本的[发布说明](/zh/release/)和[安全公告](/zh/about/security-advisories/)。源码改动或计划发布日期不能证明公开制品已经可用。
 
 <a id="id6" data-td-print-local></a>
 

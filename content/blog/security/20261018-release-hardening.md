@@ -10,7 +10,7 @@ weight: 1
 url: "/blog/security/20261018-release-hardening/"
 ---
 
-[SILO Server 20261018](/blog/release/silo-20261018/) delivers the fixes for **`SN-2026-015`**, **`SN-2026-016`**, and **`SN-2026-017`**, scoped STS token revocation, and Go toolchain and dependency updates across `silo`, `mcli`, and `silo-console`. Server `20260916` and `20260903` are affected (and `20261015` was a superseded pre-release draft).
+[SILO Server 20261018](/release/silo-20261018/) delivers the fixes for **`SN-2026-015`**, **`SN-2026-016`**, and **`SN-2026-017`**, scoped STS token revocation, and Go toolchain and dependency updates across `silo`, `mcli`, and `silo-console`. Server `20260916` and `20260903` are affected (and `20261015` was a superseded pre-release draft).
 
 ## Object Lock: SN-2026-015 and SN-2026-016 {#object-lock}
 
@@ -45,14 +45,14 @@ The actor passed to IAM policy evaluation is always the authenticated access key
 
 ## Follow-up: scoped STS revocation {#sts-revocation}
 
-Release commit [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce) fixes cache-only `RevokeTokens` enumeration and incomplete propagation across peer nodes and sites. It persists deletion tombstones for tokens durably known to the cluster—scoped by parent identity, token type, and operation cutoff timestamp—and propagates them through peer notification and deletion healing. See [Scoped STS Revocation](/blog/design/iam-revocations/#scoped-sts-20261018) and the [Server 20261018 release notes](/blog/release/silo-20261018/#delivery).
+Release commit [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce) fixes cache-only `RevokeTokens` enumeration and incomplete propagation across peer nodes and sites. It persists deletion tombstones for tokens durably known to the cluster—scoped by parent identity, token type, and operation cutoff timestamp—and propagates them through peer notification and deletion healing. See [Scoped STS Revocation](/blog/design/iam-revocations/#scoped-sts-20261018) and the [Server 20261018 release notes](/release/silo-20261018/#delivery).
 
 ## Dependency security and login compatibility {#dependencies}
 
 Server `20261018` builds with Go **1.27.2**, `golang.org/x/net` **v0.61.0**, `golang.org/x/crypto` **v0.58.0**, `golang.org/x/text` **v0.43.0**, `silo-pkg` **v3.14.3**, and `go-jose` **v4.1.6** in [`go.mod`](https://github.com/pgsty/silo/blob/0cd388c666f8211f552604ae73448a066e9c25ce/go.mod):
 
 - **`go-jose` v4.1.6 ([GHSA-mgcc-cww5-fp2q](https://github.com/go-jose/go-jose/security/advisories/GHSA-mgcc-cww5-fp2q))**: Bounds CPU consumption when parsing crafted RSA JWKs on the OIDC path and rejects RSA JWKs larger than **4096 bits**. Verify OIDC discovery, JWKS endpoints, and login flows before upgrading if your identity provider uses oversized RSA keys.
-- **Standalone Console**: See [Console v2.4.2](/blog/release/console-2.4.2/) for standalone Console dependency updates.
+- **Standalone Console**: See [Console v2.4.2](/release/console-2.4.2/) for standalone Console dependency updates.
 
 ## Verification and scope {#evidence}
 

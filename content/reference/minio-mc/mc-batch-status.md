@@ -20,13 +20,13 @@ upstream_modified: true
 
 `mcli batch status TARGET JOBID` follows a batch job until it completes or fails. When live metrics are not yet available, it reports `pending` (`status: "pending"` in JSON) rather than treating a queued job or missing metric sample as complete. If no job metrics arrive for 30 seconds or the stream ends early, the client queries persisted job status (with a 10-second timeout per request) and returns an error if no terminal state is available; re-run the command to resume observation.
 
-Successfully retrieving either a `complete` or `failed` terminal state exits `0`—automation scripts should inspect the returned `status` field to determine whether the job succeeded. Unavailable status, missing jobs, and request errors exit non-zero. IOPs calculations also no longer overflow at large object counts; see the [release changes](/blog/release/silo-20261026/#mcli).
+Successfully retrieving either a `complete` or `failed` terminal state exits `0`—automation scripts should inspect the returned `status` field to determine whether the job succeeded. Unavailable status, missing jobs, and request errors exit non-zero. IOPs calculations also no longer overflow at large object counts; see the [release changes](/release/silo-20261026/#mcli).
 
 <a id="silo-status-details"></a>
 
 ## mcli 20261109 and SILO 20261109: pauses and skipped work {#silo-job-outcomes}
 
-[mcli 20261109](/blog/release/mcli-20261109/) and [SILO 20261109](/blog/release/silo-20261109/) add `paused` and `complete-with-skips`. `paused` is nonterminal: the server is waiting to retry, and the client keeps observing while live metrics remain available. `complete-with-skips` means the run finished but left protected versions or refused keys in place. It does not mean every selected object was removed. Like `complete` and `failed`, retrieving it exits `0`; scripts must inspect the status and counters.
+[mcli 20261109](/release/mcli-20261109/) and [SILO 20261109](/release/silo-20261109/) add `paused` and `complete-with-skips`. `paused` is nonterminal: the server is waiting to retry, and the client keeps observing while live metrics remain available. `complete-with-skips` means the run finished but left protected versions or refused keys in place. It does not mean every selected object was removed. Like `complete` and `failed`, retrieving it exits `0`; scripts must inspect the status and counters.
 
 The text display includes `VersionsSkippedLocked`, `KeysRefused`, `FailureReason`, and `PausedReason` when present. JSON preserves the existing `metric` object and adds those fields under `details` as `versionsSkippedLocked`, `keysRefused`, `failureReason`, and `pausedReason`. The counters have different units: skipped versions and refused whole keys. They must not be added to get a count of deleted objects.
 

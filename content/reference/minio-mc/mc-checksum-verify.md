@@ -10,7 +10,7 @@ upstream_link: ""
 
 The [`mc checksum verify`](#command-mc.checksum.verify) command compares the additional checksum stored by an S3 endpoint with a checksum independently calculated from the logical object bytes returned by that endpoint.
 
-This is a **read-only audit command** introduced by [mcli 20260903](/blog/release/mcli-20260903/). It uses only S3 LIST, HEAD, and GET operations. It never repairs metadata, rewrites an object, or identifies which historical writer produced a mismatch.
+This is a **read-only audit command** introduced by [mcli 20260903](/release/mcli-20260903/). It uses only S3 LIST, HEAD, and GET operations. It never repairs metadata, rewrites an object, or identifies which historical writer produced a mismatch.
 
 The command supports `FULL_OBJECT` CRC32, CRC32C, CRC64NVME, SHA1, and SHA256 checksums. It reports `COMPOSITE` checksums as unsupported and a missing `x-amz-checksum-type` as `UNKNOWN_CHECKSUM_TYPE`.
 

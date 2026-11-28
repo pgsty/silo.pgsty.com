@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261026](/blog/release/silo-20261026/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261026/#upgrade).
+**Version scope:** commands and illustrative output target [Server 20261026](/release/silo-20261026/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/release/silo-20261026/#upgrade).
 
 <a id="generate-let-s-encrypt-certificate-using-certbot-for-minio"></a>
 

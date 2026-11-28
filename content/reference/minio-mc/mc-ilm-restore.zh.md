@@ -169,13 +169,13 @@ mc ilm restore --recursive myminio/mybucket/data/
 
 ### 已恢复对象自动过期 {#restored-objects-expire-automatically}
 
-SILO 会在指定天数后自动使已恢复的本地副本过期（默认：1 天）。在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，已恢复副本到期时仅清理本地临时缓存，同时保留对象版本及其远程层数据（[#281](https://github.com/pgsty/silo/issues/281)）。
+SILO 会在指定天数后自动使已恢复的本地副本过期（默认：1 天）。在 [SILO 20261109](/zh/release/silo-20261109/) 中，已恢复副本到期时仅清理本地临时缓存，同时保留对象版本及其远程层数据（[#281](https://github.com/pgsty/silo/issues/281)）。
 
 <a id="restored-objects-become-head"></a>
 
 ### 两阶段原地版本恢复 {#two-phase-restore}
 
-自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，原生恢复（`POST ?restore`，提交 [`86dc6ee2e`](https://github.com/pgsty/silo/commit/86dc6ee2e)）分两个阶段运行，设计细节见[两阶段原生恢复](/zh/blog/design/native-restore-two-phase/)：
+自 [SILO 20261109](/zh/release/silo-20261109/) 起，原生恢复（`POST ?restore`，提交 [`86dc6ee2e`](https://github.com/pgsty/silo/commit/86dc6ee2e)）分两个阶段运行，设计细节见[两阶段原生恢复](/zh/blog/design/native-restore-two-phase/)：
 
 - **原地恢复指定版本：** SILO 原地恢复请求指定的精确版本，不会改变版本顺序，也不会创建新的 `HEAD` 版本；多池部署下的恢复不再挂起或长期停留在进行中状态（[#289](https://github.com/pgsty/silo/issues/289)）。
 - **两阶段加锁：** 第一阶段在对象写锁之外下载并暂存远程层数据，使同一对象键上的并发 `GET`、`HEAD` 和 `PUT` 请求无需等待下载结束；第二阶段短暂获取对象锁，核验恢复尝试所有权与版本元数据后再发布恢复副本（[#284](https://github.com/pgsty/silo/issues/284)）。

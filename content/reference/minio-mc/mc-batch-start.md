@@ -108,4 +108,4 @@ SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO a
 
 You must have the [`admin:StartBatchJob`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-StartBatchJob) permission on the deployment to start jobs.
 
-[SILO 20261109](/blog/release/silo-20261109/) also enforces the authenticated submitter's local data permissions when the job lists or modifies objects. Credentials in the job definition authorize remote operations separately. See [authorization and retries](/administration/batch-framework/#silo-lifecycle).
+[SILO 20261109](/release/silo-20261109/) also enforces the authenticated submitter's local data permissions when the job lists or modifies objects. Credentials in the job definition authorize remote operations separately. See [authorization and retries](/administration/batch-framework/#silo-lifecycle).

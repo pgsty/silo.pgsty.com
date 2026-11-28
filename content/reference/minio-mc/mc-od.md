@@ -155,7 +155,7 @@ The above command divides the source file into five equal parts, then uploads th
 
 ### Multipart Downloads and Parameter Validation (`mcli 20261109`) {#multipart-validation}
 
-In [`mcli 20261109`](/blog/release/mcli-20261109/):
+In [`mcli 20261109`](/release/mcli-20261109/):
 
 - Multipart `mc od` downloads read the requested part sequence in order instead of repeating the last part, and close opened part readers on completion or failure.
 - `mc od` validates operands, zero part sizes, negative sizes, and arithmetic overflow before modifying the target, and handles empty copies without invalid rate output.

@@ -91,7 +91,7 @@ Show information about offline and faulty healing drives.
 
 ## Behavior {#behavior}
 
-In [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) and [mcli 20261109](/blog/release/mcli-20261109/):
+In [SILO 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) and [mcli 20261109](/release/mcli-20261109/):
 
 - `mc admin heal --dry-run` (`-n`) remains strictly read-only and does not delete dangling or corrupted data on disk ([PR #280](https://github.com/pgsty/silo/pull/280)).
 - The server classifies `xl.meta` checksum failures for healing so damaged metadata shards are repaired ([#309](https://github.com/pgsty/silo/issues/309)).

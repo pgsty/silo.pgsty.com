@@ -45,26 +45,26 @@ languages:
           weight: 10
           url: /docs/
           pre: <i class='fa-solid fa-book'></i>
-        - identifier: blog
-          name: Blog
-          weight: 20
-          url: /blog/
-          pre: <i class='fa-solid fa-blog'></i>
-        - identifier: case
-          name: Case
-          weight: 22
-          url: /case/
-          pre: <i class='fa-solid fa-circle-nodes'></i>
         - identifier: download
           name: Download
-          weight: 25
+          weight: 20
           url: /download/
           pre: <i class='fa-solid fa-download'></i>
-        - identifier: pigsty
-          name: Pigsty
+        - identifier: case
+          name: Case
+          weight: 25
+          url: /case/
+          pre: <i class='fa-solid fa-circle-nodes'></i>
+        - identifier: blog
+          name: Blog
           weight: 30
-          url: https://pigsty.io
-          pre: <i class='fa-solid fa-database'></i>
+          url: /blog/
+          pre: <i class='fa-solid fa-blog'></i>
+        - identifier: release
+          name: Release
+          weight: 35
+          url: /release/
+          pre: <i class='fa-solid fa-tags'></i>
         - identifier: github
           name: GitHub
           weight: 40
@@ -90,26 +90,26 @@ languages:
           weight: 10
           url: /zh/docs/
           pre: <i class='fa-solid fa-book'></i>
-        - identifier: blog
-          name: 博客
-          weight: 20
-          url: /zh/blog/
-          pre: <i class='fa-solid fa-blog'></i>
-        - identifier: case
-          name: 案例
-          weight: 22
-          url: /zh/case/
-          pre: <i class='fa-solid fa-circle-nodes'></i>
         - identifier: download
           name: 下载
-          weight: 25
+          weight: 20
           url: /zh/download/
           pre: <i class='fa-solid fa-download'></i>
-        - identifier: pigsty
-          name: Pigsty
+        - identifier: case
+          name: 案例
+          weight: 25
+          url: /zh/case/
+          pre: <i class='fa-solid fa-circle-nodes'></i>
+        - identifier: blog
+          name: 博客
           weight: 30
-          url: https://pigsty.cc
-          pre: <i class='fa-solid fa-database'></i>
+          url: /zh/blog/
+          pre: <i class='fa-solid fa-blog'></i>
+        - identifier: release
+          name: 发布
+          weight: 35
+          url: /zh/release/
+          pre: <i class='fa-solid fa-tags'></i>
         - identifier: github
           name: GitHub
           weight: 40
@@ -251,7 +251,7 @@ params:
   ui:
     compare: true
     blog_index_size: 20
-    quick_links: [docs, blog]
+    quick_links: [docs, blog, release]
     page_context_menu:
       enable: true
       links: []

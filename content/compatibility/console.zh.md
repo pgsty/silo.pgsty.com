@@ -9,23 +9,23 @@ icon: fa-solid fa-window-maximize
 ---
 
 > [!NOTE]
-> **最新正式版：** [Console v2.7.2](/zh/blog/release/console-2.7.2/)（2026-11-12，UTC+8）在 [v2.7.1](/zh/blog/release/console-2.7.1/) 基础上同步版本元数据（`0e7953ff59c4`），同时提供独立版并内嵌于 **[SILO Server 20261112](/zh/blog/release/silo-20261112/)**（Server 20261109 内嵌 v2.7.0；Server 20261026 内嵌 v2.5.1），在元数据编辑时保留服务账号策略继承关系、拦截各类空内联策略变体、在编辑弹窗内直接提示保存错误、启用严格策略 JSON 校验，并升级至 Go 1.27.4、[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/) 与 [mcli 20261112](/zh/blog/release/mcli-20261112/)。升级独立 Console 不会替换旧版 Server 内嵌控制台；显式重置内联策略恢复继承（`{}`）需配合 Server 20261112 及后续版本，内置策略 Reset 与实时存储桶列表需配合 Server 20261026 及后续版本生效。配套版本见[组件矩阵](/zh/compatibility/versions/)。
+> **最新正式版：** [Console v2.7.2](/zh/release/console-2.7.2/)（2026-11-12，UTC+8）在 [v2.7.1](/zh/release/console-2.7.1/) 基础上同步版本元数据（`0e7953ff59c4`），同时提供独立版并内嵌于 **[SILO Server 20261112](/zh/release/silo-20261112/)**（Server 20261109 内嵌 v2.7.0；Server 20261026 内嵌 v2.5.1），在元数据编辑时保留服务账号策略继承关系、拦截各类空内联策略变体、在编辑弹窗内直接提示保存错误、启用严格策略 JSON 校验，并升级至 Go 1.27.4、[silo-pkg v3.16.1](/zh/release/pkg-3.16.1/) 与 [mcli 20261112](/zh/release/mcli-20261112/)。升级独立 Console 不会替换旧版 Server 内嵌控制台；显式重置内联策略恢复继承（`{}`）需配合 Server 20261112 及后续版本，内置策略 Reset 与实时存储桶列表需配合 Server 20261026 及后续版本生效。配套版本见[组件矩阵](/zh/compatibility/versions/)。
 
-SILO Console 是 Silo 构建的 MinIO Console；**[SILO Server 20261112](/zh/blog/release/silo-20261112/) 内嵌 Console v2.7.2**（Server 20261109 内嵌 v2.7.0；Server 20261026 内嵌 v2.5.1），同时也提供独立发布的制品。本页记录 SILO Console 与上游 MinIO Console 在哪些地方可以互换使用，在哪些地方存在差异。先看[三档兼容性总览](/zh/compatibility/)，再按下文核对界面与自动化接口。
+SILO Console 是 Silo 构建的 MinIO Console；**[SILO Server 20261112](/zh/release/silo-20261112/) 内嵌 Console v2.7.2**（Server 20261109 内嵌 v2.7.0；Server 20261026 内嵌 v2.5.1），同时也提供独立发布的制品。本页记录 SILO Console 与上游 MinIO Console 在哪些地方可以互换使用，在哪些地方存在差异。先看[三档兼容性总览](/zh/compatibility/)，再按下文核对界面与自动化接口。
 
-[`pgsty/silo-console`](https://github.com/pgsty/silo-console) 延续上游 `minio/console` 的历史，起点是其最终提交 [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），品牌重塑自 `50797deb`（2026-08-04）开始。上游仓库已不再公开 —— `github.com/minio/console` 现在返回 404，而 `minio/mc` 只是归档 —— 因此源码谱系只在这个分支中留存。Go 模块路径仍可解析，因为模块代理继续提供它此前缓存的版本。历次版本记录：[v2.0.0](/zh/blog/release/console-2.0.0/)、[v2.1.0](/zh/blog/release/console-2.1.0/)、[v2.1.1]、[v2.2.0](/zh/blog/release/console-2.2.0/)、[v2.2.1]、[v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0)、[v2.4.0](/zh/blog/release/console-2.4.0/)、[v2.4.1](/zh/blog/release/console-2.4.1/)、[v2.4.2](/zh/blog/release/console-2.4.2/)、[v2.5.1](/zh/blog/release/console-2.5.1/)、[v2.6.0](/zh/blog/release/console-2.6.0/)、[v2.7.0](/zh/blog/release/console-2.7.0/)、[v2.7.1](/zh/blog/release/console-2.7.1/) 与 [v2.7.2](/zh/blog/release/console-2.7.2/)。
+[`pgsty/silo-console`](https://github.com/pgsty/silo-console) 延续上游 `minio/console` 的历史，起点是其最终提交 [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），品牌重塑自 `50797deb`（2026-08-04）开始。上游仓库已不再公开 —— `github.com/minio/console` 现在返回 404，而 `minio/mc` 只是归档 —— 因此源码谱系只在这个分支中留存。Go 模块路径仍可解析，因为模块代理继续提供它此前缓存的版本。历次版本记录：[v2.0.0](/zh/release/console-2.0.0/)、[v2.1.0](/zh/release/console-2.1.0/)、[v2.1.1]、[v2.2.0](/zh/release/console-2.2.0/)、[v2.2.1]、[v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0)、[v2.4.0](/zh/release/console-2.4.0/)、[v2.4.1](/zh/release/console-2.4.1/)、[v2.4.2](/zh/release/console-2.4.2/)、[v2.5.1](/zh/release/console-2.5.1/)、[v2.6.0](/zh/release/console-2.6.0/)、[v2.7.0](/zh/release/console-2.7.0/)、[v2.7.1](/zh/release/console-2.7.1/) 与 [v2.7.2](/zh/release/console-2.7.2/)。
 
 <a id="candidate-policy-edit" data-td-print-local></a><a id="release-271" data-td-print-local></a>
 
 ## 2.7.2 / 2.7.1 服务账号策略继承保护、严格 JSON 校验与 HTTPS 重定向修复 {#release-272}
 
-[Console 2.7.2](/zh/blog/release/console-2.7.2/)（`0e7953ff59c4`，已内嵌于 [SILO Server 20261112](/zh/blog/release/silo-20261112/)）与 [Console 2.7.1](/zh/blog/release/console-2.7.1/)（`3825ebc44451`）区分继承与 inline policy（`1be8a74bf`），因此修改访问密钥的名称、描述、有效期或状态会保留继承关系，不会把父账号策略保存成一份 inline policy 副本。要移除已有的 inline 限制，关闭 **Restrict beyond user policy** 开关；Console 会发送显式空策略以恢复继承。开启 **Restrict beyond user policy** 时，创建或替换策略不能提交空编辑器、`{}`、`{"Statement":[]}` 或 `{"Statement":null}`（`a1a84cab4`、`1fdb279fd`、`3825ebc44`）；后端接受的大小写、Unicode 折叠与重复键空文档变体同样被拦截，且保存错误直接在编辑弹窗内展示。历史空内联策略未发生变化时，仍可仅编辑元数据并保留既有权限；Console 后端接口同步执行严格策略 JSON 校验（拒绝未知字段、尾部多余载荷、空 `Principal: {}` / `NotPrincipal` 与空命名策略）。启用 TLS 重定向（`CONSOLE_SECURE_TLS_REDIRECT=on`）时，HTTP 至 HTTPS 浏览器重定向保留请求主机名（或显式配置的 `CONSOLE_SECURE_TLS_HOST`），不再将监听 `--host 0.0.0.0` / `[::]` 的实例错误重定向至 `https://0.0.0.0:<tls-port>`（配套升级 `unrolled/secure v1.18.0`）。
+[Console 2.7.2](/zh/release/console-2.7.2/)（`0e7953ff59c4`，已内嵌于 [SILO Server 20261112](/zh/release/silo-20261112/)）与 [Console 2.7.1](/zh/release/console-2.7.1/)（`3825ebc44451`）区分继承与 inline policy（`1be8a74bf`），因此修改访问密钥的名称、描述、有效期或状态会保留继承关系，不会把父账号策略保存成一份 inline policy 副本。要移除已有的 inline 限制，关闭 **Restrict beyond user policy** 开关；Console 会发送显式空策略以恢复继承。开启 **Restrict beyond user policy** 时，创建或替换策略不能提交空编辑器、`{}`、`{"Statement":[]}` 或 `{"Statement":null}`（`a1a84cab4`、`1fdb279fd`、`3825ebc44`）；后端接受的大小写、Unicode 折叠与重复键空文档变体同样被拦截，且保存错误直接在编辑弹窗内展示。历史空内联策略未发生变化时，仍可仅编辑元数据并保留既有权限；Console 后端接口同步执行严格策略 JSON 校验（拒绝未知字段、尾部多余载荷、空 `Principal: {}` / `NotPrincipal` 与空命名策略）。启用 TLS 重定向（`CONSOLE_SECURE_TLS_REDIRECT=on`）时，HTTP 至 HTTPS 浏览器重定向保留请求主机名（或显式配置的 `CONSOLE_SECURE_TLS_HOST`），不再将监听 `--host 0.0.0.0` / `[::]` 的实例错误重定向至 `https://0.0.0.0:<tls-port>`（配套升级 `unrolled/secure v1.18.0`）。
 
-显式重置内联策略恢复继承需要配套 [SILO Server 20261112](/zh/compatibility/server/#maintenance-20261112)：省略/null 表示保留，显式空文档表示重置，非空文档缺少 Version 时补默认值。该修复不包含在 Console v2.7.0 或 Server 20261109 中；独立 Console 2.7.1 / 2.7.2 连接旧版 Server 时即可立即保护纯元数据编辑，[SILO Server 20261112](/zh/blog/release/silo-20261112/) 则直接内嵌 Console 2.7.2。
+显式重置内联策略恢复继承需要配套 [SILO Server 20261112](/zh/compatibility/server/#maintenance-20261112)：省略/null 表示保留，显式空文档表示重置，非空文档缺少 Version 时补默认值。该修复不包含在 Console v2.7.0 或 Server 20261109 中；独立 Console 2.7.1 / 2.7.2 连接旧版 Server 时即可立即保护纯元数据编辑，[SILO Server 20261112](/zh/release/silo-20261112/) 则直接内嵌 Console 2.7.2。
 
 ## 2.7.0 十种界面语言、容器 CA 信任与用量后台任务修复 {#release-270}
 
-[Console 2.7.0](/zh/blog/release/console-2.7.0/)（已内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)）交付以下改动：
+[Console 2.7.0](/zh/release/console-2.7.0/)（已内嵌于 [SILO Server 20261109](/zh/release/silo-20261109/)）交付以下改动：
 
 - **十种界面语言与阿拉伯语 RTL：** 共享语言菜单与命令面板扩展至十种内置语言，支持阿拉伯语从右向左（RTL）布局及输入框控件对齐（`a9da731c5`、`bc17e124a`）。
 - **容器 CA 证书包与 `/tmp`：** scratch 容器镜像内置 `/etc/ssl/certs/ca-certificates.crt` 与权限为 `1777` 的 `/tmp` 目录，开箱支持公共 HTTPS 端点访问及大型分片请求缓冲。
@@ -35,11 +35,11 @@ SILO Console 是 Silo 构建的 MinIO Console；**[SILO Server 20261112](/zh/blo
 
 ## 2.6.0 用量扫描与存储桶管理 {#release-260}
 
-[Console 2.6.0](/zh/blog/release/console-2.6.0/) 新增可取消的目录与存储桶用量扫描（分别显示当前字节与保留版本字节）、可选的 PostgreSQL 持久化用量后台任务、保留期/配额/复制带宽输入的精确整数范围校验、创建启用对象锁存储桶时的版本排除拦截、路由切换期间隐藏并禁用旧对象详情与版本控件（[#81](https://github.com/pgsty/silo-console/pull/81)），以及内嵌 Console 服务的三分钟 keep-alive 默认值。
+[Console 2.6.0](/zh/release/console-2.6.0/) 新增可取消的目录与存储桶用量扫描（分别显示当前字节与保留版本字节）、可选的 PostgreSQL 持久化用量后台任务、保留期/配额/复制带宽输入的精确整数范围校验、创建启用对象锁存储桶时的版本排除拦截、路由切换期间隐藏并禁用旧对象详情与版本控件（[#81](https://github.com/pgsty/silo-console/pull/81)），以及内嵌 Console 服务的三分钟 keep-alive 默认值。
 
 ## 2.5.1 管理修复 {#release-251}
 
-仅切换用户组启用/禁用状态时保留原有成员，显式传入成员数组时仍替换成员列表；支持解析 OIDC 字符串数组格式的组声明以保留对应权限，并仅在配置了 HTTPS 或可信代理时启用安全会话标记。凭据导出保持合法的 UTF-8 JSON 格式，流式 ZIP 在写出首字节前失败时透传底层 S3 错误状态；同时修复了键盘焦点、无障碍名称与标签页滚动问题。详见[完整 2.5 发布说明](/zh/blog/release/console-2.5.1/)。
+仅切换用户组启用/禁用状态时保留原有成员，显式传入成员数组时仍替换成员列表；支持解析 OIDC 字符串数组格式的组声明以保留对应权限，并仅在配置了 HTTPS 或可信代理时启用安全会话标记。凭据导出保持合法的 UTF-8 JSON 格式，流式 ZIP 在写出首字节前失败时透传底层 S3 错误状态；同时修复了键盘焦点、无障碍名称与标签页滚动问题。详见[完整 2.5 发布说明](/zh/release/console-2.5.1/)。
 
 ## 原则 {#principles}
 
@@ -86,7 +86,7 @@ Rewind 与“显示已删除对象”没有游标，最多返回 1,000 个版本
 
 对应 [B04](/zh/compatibility/#b04)、[O05](/zh/compatibility/#o05)。会话响应增加 `accountAccessKey`，对象列表显式返回零字节对象的 `size: 0`；会话能力字段还会随有效权限变化。自制解析器应容忍新增字段，Console 自动化应处理分页、会话失效和 WebSocket 错误。
 
-用户启用/禁用新增独立的 `PUT /api/v1/user/{name}/status`，旧 `PUT /api/v1/user/{name}` 保留但已弃用；批量下载沿用原入口，同时接受受限表单以支持原生流式 ZIP。改密权限另见[密码权限迁移](/zh/compatibility/password-permissions/)，分享下载边界见 [v2.4.1 说明](/zh/blog/release/console-2.4.1/)；定制调用以[当前 API 定义](https://github.com/pgsty/silo-console/blob/v2.7.0/swagger.yml)为准。
+用户启用/禁用新增独立的 `PUT /api/v1/user/{name}/status`，旧 `PUT /api/v1/user/{name}` 保留但已弃用；批量下载沿用原入口，同时接受受限表单以支持原生流式 ZIP。改密权限另见[密码权限迁移](/zh/compatibility/password-permissions/)，分享下载边界见 [v2.4.1 说明](/zh/release/console-2.4.1/)；定制调用以[当前 API 定义](https://github.com/pgsty/silo-console/blob/v2.7.0/swagger.yml)为准。
 
 Console v2.4.2 保留桶版本控制操作中被包装的 S3 错误；当 Object Lock 禁止暂停版本控制时，显式返回 `InvalidBucketState`，让调用方看见 Server 已有的限制。
 
@@ -111,7 +111,7 @@ colorjson 带入的历史 minio/pkg 传递依赖与维护中的 silo-pkg 策略�
 
 ## 迁移 {#migration}
 
-官方镜像为 [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)。**`v2.7.2` 与 `latest` 已发布 Linux amd64/arm64 多架构镜像**（`sha256:41ea21e782475e230fc19f59da6c96373387da2974c3cffea0bd4eebf604cb47`；`v2.7.1` 为 `sha256:2afef06f8505eadb24d657acd0f68c78bce8b148b1d9b74981454560fa3b055f`；`v2.7.0` 为 `sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`），核验细节见 [v2.7.2 发布验收](/zh/blog/release/console-2.7.2/#verification)。同时提供 [GitHub 二进制与软件包](https://github.com/pgsty/silo-console/releases/tag/v2.7.2)。
+官方镜像为 [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)。**`v2.7.2` 与 `latest` 已发布 Linux amd64/arm64 多架构镜像**（`sha256:41ea21e782475e230fc19f59da6c96373387da2974c3cffea0bd4eebf604cb47`；`v2.7.1` 为 `sha256:2afef06f8505eadb24d657acd0f68c78bce8b148b1d9b74981454560fa3b055f`；`v2.7.0` 为 `sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`），核验细节见 [v2.7.2 发布验收](/zh/release/console-2.7.2/#verification)。同时提供 [GitHub 二进制与软件包](https://github.com/pgsty/silo-console/releases/tag/v2.7.2)。
 
 镜像以 UID 1000 运行且没有主目录，默认证书目录因此是 `/.console/certs`：私有 CA 证书挂载到 `/.console/certs/CAs/`，或用 `--certs-dir` 指定其他路径。自 `v2.7.0` 起，scratch 容器镜像已内置系统 CA 证书库 `/etc/ssl/certs/ca-certificates.crt` 与权限为 `1777` 的 `/tmp` 目录，可直接访问公共 HTTPS 端点（`v2.6.0` 及更早镜像缺少上述两项，访问公共证书 HTTPS 端点时需将宿主机证书包只读挂载到 `/etc/ssl/certs/ca-certificates.crt`）。
 
@@ -125,7 +125,7 @@ colorjson 带入的历史 minio/pkg 传递依赖与维护中的 silo-pkg 策略�
 从早于 v2.4.1 的版本升级时，还需检查[密码权限迁移](/zh/compatibility/password-permissions/)。
 Linux 软件包使用 `/etc/silo-console/certs` 作为证书目录；重启前迁移旧证书，或在
 `/etc/default/console` 的 `CONSOLE_OPTS` 中保留旧路径。服务名和配置文件路径不变。
-共享代理仅接受对象下载，不需要新增环境变量。详见 [v2.4.1 发布说明](/zh/blog/release/console-2.4.1/)。
+共享代理仅接受对象下载，不需要新增环境变量。详见 [v2.4.1 发布说明](/zh/release/console-2.4.1/)。
 
 ## 参见 {#see-also}
 

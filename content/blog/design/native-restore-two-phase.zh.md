@@ -14,7 +14,7 @@ url: "/zh/blog/design/native-restore-two-phase/"
 
 本文覆盖 [issue #284](https://github.com/pgsty/silo/issues/284)，以及 [#281](https://github.com/pgsty/silo/issues/281) 第一版原生恢复防护带来的两处回归；那些防护记录在[恢复副本：过期的是副本，不是对象](/zh/blog/design/restored-copy-expiry/)中。本文基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 和发布前的 `SILO Server 20261109` 集成分支评估。这个设计取代 #281 防护中私有 upload 的部分，其余部分保留。
 
-**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+**状态：** 已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短结论 {#tldr}
 

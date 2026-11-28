@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**[SILO 20261109](/blog/release/silo-20261109/) / [Console 2.7.0](/blog/release/console-2.7.0/):** The Console Metrics page queries Metrics V3, aggregating across nodes while distinguishing true zero values from missing data. Overview capacity shows the raw capacity reported by the Server (rather than an erasure-coded usable capacity estimate); the bucket list is read live, whereas object counts and usage statistics come from the background scanner (or optional `console usage-worker` in Console 2.7.0). In SILO 20261109, replication worker metrics handle an absent replication pool without panicking while retaining historical averages and peak counts ([`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)), and live batch job metrics preserve pause reasons alongside skipped or refused counts ([#325](https://github.com/pgsty/silo/issues/325)). See the [Console 2.7.0 release notes](/blog/release/console-2.7.0/) and [Metrics V3 mapping reference](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/metrics-v3.md).
+**[SILO 20261109](/release/silo-20261109/) / [Console 2.7.0](/release/console-2.7.0/):** The Console Metrics page queries Metrics V3, aggregating across nodes while distinguishing true zero values from missing data. Overview capacity shows the raw capacity reported by the Server (rather than an erasure-coded usable capacity estimate); the bucket list is read live, whereas object counts and usage statistics come from the background scanner (or optional `console usage-worker` in Console 2.7.0). In SILO 20261109, replication worker metrics handle an absent replication pool without panicking while retaining historical averages and peak counts ([`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)), and live batch job metrics preserve pause reasons alongside skipped or refused counts ([#325](https://github.com/pgsty/silo/issues/325)). See the [Console 2.7.0 release notes](/release/console-2.7.0/) and [Metrics V3 mapping reference](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/metrics-v3.md).
 
 <a id="monitoring-and-alerting-using-prometheus"></a>
 <a id="minio-metrics-collect-using-prometheus"></a>
@@ -21,7 +21,7 @@ MinIO publishes cluster, node, bucket, and resource metrics using the [Prometheu
 
 ## Recommended Metrics V3 Scraping for 20261109 {#metrics-v3}
 
-New deployments and the Console 2.7.0 Metrics page should scrape Metrics V3. Pass `--api-version v3` explicitly with [mcli 20261109](/blog/release/mcli-20261109/):
+New deployments and the Console 2.7.0 Metrics page should scrape Metrics V3. Pass `--api-version v3` explicitly with [mcli 20261109](/release/mcli-20261109/):
 
 ```shell
 mcli admin prometheus generate mysilo --api-version v3

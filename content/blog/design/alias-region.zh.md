@@ -11,7 +11,7 @@ draft: false
 url: "/zh/blog/design/alias-region/"
 ---
 
-**2026-10-23 决策：**[mcli PR #44](https://github.com/pgsty/mc/pull/44) 已在 [`91006a587`](https://github.com/pgsty/mc/commit/91006a5879d34422725d7f6aab9640319be88c94) 合入 `main`。我们接受按 alias 配置区域的方案，保留小范围生产实现并补充回归覆盖。本文记录当时的设计决定。该能力已包含在正式发布的 [mcli 20261109](/zh/blog/release/mcli-20261109/) 中；以下配置边界按该版本源码复核。
+**2026-10-23 决策：**[mcli PR #44](https://github.com/pgsty/mc/pull/44) 已在 [`91006a587`](https://github.com/pgsty/mc/commit/91006a5879d34422725d7f6aab9640319be88c94) 合入 `main`。我们接受按 alias 配置区域的方案，保留小范围生产实现并补充回归覆盖。本文记录当时的设计决定。该能力已包含在正式发布的 [mcli 20261109](/zh/release/mcli-20261109/) 中；以下配置边界按该版本源码复核。
 
 原始补丁和测试由 [mr javad seydi](https://github.com/mrjavadseydi) 贡献，解决的是[上游 issue #5268](https://github.com/minio/mc/issues/5268) 所报告的配置能力缺口。
 

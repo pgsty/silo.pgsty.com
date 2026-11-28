@@ -95,7 +95,7 @@ mc admin heal play/mybucket/myprefix
 
 ## 行为说明 {#behavior}
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）与 [mcli 20261109](/zh/blog/release/mcli-20261109/) 中：
+在 [SILO 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）与 [mcli 20261109](/zh/release/mcli-20261109/) 中：
 
 - `mc admin heal --dry-run`（`-n`）严格保持只读，不会删除磁盘上悬空或损坏的数据（[PR #280](https://github.com/pgsty/silo/pull/280)）。
 - 服务端将 `xl.meta` 校验和错误归类为可自愈状态，使受损元数据分片能够得到修复（[#309](https://github.com/pgsty/silo/issues/309)）。

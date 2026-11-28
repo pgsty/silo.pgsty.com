@@ -36,7 +36,7 @@ The batch expiration job only checks the latest or “current” version of each
 
 ### SILO 20261109 Lifecycle, Permissions, and Object Lock {#silo-lifecycle}
 
-In [SILO 20261109](/blog/release/silo-20261109/):
+In [SILO 20261109](/release/silo-20261109/):
 
 - Submitting a batch `expire` job requires `admin:StartBatchJob`, `s3:ListBucket`, and `s3:ListBucketVersions`. During execution, SILO continuously revalidates the submitter's credential and enforces `s3:GetObject`, `s3:GetObjectVersion`, `s3:DeleteObject`, and `s3:DeleteObjectVersion` on each target version (plus `s3:GetObjectTagging` and `s3:GetObjectVersionTagging` when any rule filters by tags) ([#310](https://github.com/pgsty/silo/issues/310), [#311](https://github.com/pgsty/silo/issues/311)). Disabling, deleting, expiring, or revoking the submitter, or removing these required permissions, stops the job with `failureReason`.
 - Temporary IAM or authorization outages and incomplete bucket listings pause the job (`pausedReason`) and retry automatically instead of recording an interrupted scan as complete ([#313](https://github.com/pgsty/silo/issues/313)).

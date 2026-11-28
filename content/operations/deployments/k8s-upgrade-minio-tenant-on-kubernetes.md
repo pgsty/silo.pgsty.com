@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`). See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261109/#upgrade).
+**Version scope:** commands and illustrative output target [Server 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`). See [downloads](/download/) and the [release upgrade requirements](/release/silo-20261109/#upgrade).
 
 <a id="upgrade-a-minio-tenant"></a>
 <a id="minio-k8s-upgrade-minio-tenant"></a>
@@ -25,7 +25,7 @@ Review historical upstream migration requirements when upgrading very old deploy
 
 ## Before You Upgrade to 20261109 {#prerequisites}
 
-Complete the following checks before upgrading any Kubernetes Tenant or standalone `helm/silo` release to [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`):
+Complete the following checks before upgrading any Kubernetes Tenant or standalone `helm/silo` release to [SILO 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`):
 
 1. **Use a stop-all restart for 18+-pod single-pool layouts.** A single pool whose erasure sets do not all share the same pods/hosts (18 or more pods with automatic layout) requires a drained stop-all restart—scale the StatefulSet to `0` and confirm all old pods terminate before starting `20261109` pods. Do **not** run a rolling StatefulSet update on that topology, because old and new single-pool delete and copy lock domains ([#298](https://github.com/pgsty/silo/issues/298)) do not exclude each other across sets.
 2. **Pause tier restores during mixed versions.** Upgraded pods return `503 Service Unavailable` to `POST ?restore` while any peer runs an older version or is unreachable. Pause new restore requests until all pods run `20261109`. Full multi-pool lifecycle and S3 bulk-delete Object Lock protections also require every serving pod to run `20261109`.

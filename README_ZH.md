@@ -8,21 +8,21 @@
 
 当前版本为 **SILO Server 20261112**（Go 1.27.4）、**SILO Console v2.7.2**、**mcli 20261112**、**silo-pkg v3.16.1**（Go 1.27.4）与 **KES 20261026**（Go 1.27.3）。Server 20261112 内嵌 Console 2.7.2、mcli 20261112 与 silo-pkg v3.16.1；KES 保持独立、可选的外部密钥服务。
 
-| 发布说明                      | English                                                | 简体中文                                             |
-| ----------------------------- | ------------------------------------------------------ | ---------------------------------------------------- |
-| Server 20261112               | [Release notes](content/blog/release/silo-20261112.md) | [发布说明](content/blog/release/silo-20261112.zh.md) |
-| Console 2.7.2                 | [Release notes](content/blog/release/console-2.7.2.md) | [发布说明](content/blog/release/console-2.7.2.zh.md) |
-| Console 2.7.1                 | [Release notes](content/blog/release/console-2.7.1.md) | [发布说明](content/blog/release/console-2.7.1.zh.md) |
-| mcli 20261112                 | [Release notes](content/blog/release/mcli-20261112.md) | [发布说明](content/blog/release/mcli-20261112.zh.md) |
-| silo-pkg 3.16.1               | [Release notes](content/blog/release/pkg-3.16.1.md)    | [发布说明](content/blog/release/pkg-3.16.1.zh.md)    |
-| Server 20261109               | [Release notes](content/blog/release/silo-20261109.md) | [发布说明](content/blog/release/silo-20261109.zh.md) |
-| Console 2.7.0                 | [Release notes](content/blog/release/console-2.7.0.md) | [发布说明](content/blog/release/console-2.7.0.zh.md) |
-| Console 2.6.0                 | [Release notes](content/blog/release/console-2.6.0.md) | [发布说明](content/blog/release/console-2.6.0.zh.md) |
-| mcli 20261109                 | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
-| silo-pkg 3.16.0               | [Release notes](content/blog/release/pkg-3.16.0.md)    | [发布说明](content/blog/release/pkg-3.16.0.zh.md)    |
-| Server / mcli / KES 20261026  | [Release notes](content/blog/release/silo-20261026.md) | [发布说明](content/blog/release/silo-20261026.zh.md) |
-| Console 2.5 系列，含 2.5.1    | [Release notes](content/blog/release/console-2.5.1.md) | [发布说明](content/blog/release/console-2.5.1.zh.md) |
-| silo-pkg 3.15 系列，含 3.15.2 | [Release notes](content/blog/release/pkg-3.15.2.md)    | [发布说明](content/blog/release/pkg-3.15.2.zh.md)    |
+| 发布说明                      | English                                           | 简体中文                                        |
+| ----------------------------- | ------------------------------------------------- | ----------------------------------------------- |
+| Server 20261112               | [Release notes](content/release/silo-20261112.md) | [发布说明](content/release/silo-20261112.zh.md) |
+| Console 2.7.2                 | [Release notes](content/release/console-2.7.2.md) | [发布说明](content/release/console-2.7.2.zh.md) |
+| Console 2.7.1                 | [Release notes](content/release/console-2.7.1.md) | [发布说明](content/release/console-2.7.1.zh.md) |
+| mcli 20261112                 | [Release notes](content/release/mcli-20261112.md) | [发布说明](content/release/mcli-20261112.zh.md) |
+| silo-pkg 3.16.1               | [Release notes](content/release/pkg-3.16.1.md)    | [发布说明](content/release/pkg-3.16.1.zh.md)    |
+| Server 20261109               | [Release notes](content/release/silo-20261109.md) | [发布说明](content/release/silo-20261109.zh.md) |
+| Console 2.7.0                 | [Release notes](content/release/console-2.7.0.md) | [发布说明](content/release/console-2.7.0.zh.md) |
+| Console 2.6.0                 | [Release notes](content/release/console-2.6.0.md) | [发布说明](content/release/console-2.6.0.zh.md) |
+| mcli 20261109                 | [Release notes](content/release/mcli-20261109.md) | [发布说明](content/release/mcli-20261109.zh.md) |
+| silo-pkg 3.16.0               | [Release notes](content/release/pkg-3.16.0.md)    | [发布说明](content/release/pkg-3.16.0.zh.md)    |
+| Server / mcli / KES 20261026  | [Release notes](content/release/silo-20261026.md) | [发布说明](content/release/silo-20261026.zh.md) |
+| Console 2.5 系列，含 2.5.1    | [Release notes](content/release/console-2.5.1.md) | [发布说明](content/release/console-2.5.1.zh.md) |
+| silo-pkg 3.15 系列，含 3.15.2 | [Release notes](content/release/pkg-3.15.2.md)    | [发布说明](content/release/pkg-3.15.2.zh.md)    |
 
 精确源码版本、升级顺序与兼容性边界见[组件矩阵](content/compatibility/versions.zh.md)。
 

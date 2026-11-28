@@ -149,7 +149,7 @@ Audit Log 部分提供用于查看由已配置 PostgreSQL 服务采集的 [审�
 
 > [!NOTE]
 > - **环境变量覆盖（Console v0.24.0+）：** 环境变量中的配置设置会覆盖在 MinIO Console 中保存的自定义值。将鼠标悬停在配置字段上方，可显示工具提示，说明该设置是否由环境变量控制。
-> - **对端重载保持 Webhook 生效（[SILO 20261109](/zh/blog/release/silo-20261109/)，[#259](https://github.com/pgsty/silo/issues/259)）：** 节点间重新加载配置后，已配置的 `audit_webhook` 和 `logger_webhook` 目标在部署的所有服务器节点上保持活跃。
+> - **对端重载保持 Webhook 生效（[SILO 20261109](/zh/release/silo-20261109/)，[#259](https://github.com/pgsty/silo/issues/259)）：** 节点间重新加载配置后，已配置的 `audit_webhook` 和 `logger_webhook` 目标在部署的所有服务器节点上保持活跃。
 
 如果已认证用户不具备 [所需的管理权限](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions)，则某些子部分可能不可见。
 

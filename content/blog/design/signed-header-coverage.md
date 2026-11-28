@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/signed-header-coverage/"
 ---
 
-This article records the unsigned-header coverage repair committed to SILO as [`123325430`](https://github.com/pgsty/silo/commit/123325430) in [PR #173](https://github.com/pgsty/silo/pull/173) (tracked as `SN-2026-011`) and the follow-up signing and payload-verification fixes in [PR #177](https://github.com/pgsty/silo/pull/177) (tracked as `SN-2026-012`), which shipped in [Server 20260916](/blog/release/silo-20260916/). The vulnerability was reported by Oren Yomtov and reproduced locally on both presigned and `Authorization`-header SigV4 paths.
+This article records the unsigned-header coverage repair committed to SILO as [`123325430`](https://github.com/pgsty/silo/commit/123325430) in [PR #173](https://github.com/pgsty/silo/pull/173) (tracked as `SN-2026-011`) and the follow-up signing and payload-verification fixes in [PR #177](https://github.com/pgsty/silo/pull/177) (tracked as `SN-2026-012`), which shipped in [Server 20260916](/release/silo-20260916/). The vulnerability was reported by Oren Yomtov and reproduced locally on both presigned and `Authorization`-header SigV4 paths.
 
 ## Summary (TL;DR) {#tldr}
 
@@ -106,4 +106,4 @@ Several existing unit tests constructed a signed request and then attached `x-am
 
 ## Conclusion {#conclusion}
 
-SigV4 verification must verify both that every header listed in `SignedHeaders` is present and that every arriving `x-amz-*` header is listed in `SignedHeaders`. Rejecting unsigned `x-amz-*` headers before handler dispatch closes the confused-deputy boundary on both signed and presigned SigV4 paths. While this signing fix does not alter storage formats, upgrading to [Server 20260916](/blog/release/silo-20260916/) also includes [IAM changes requiring a coordinated upgrade](/operations/replication/iam-upgrade/).
+SigV4 verification must verify both that every header listed in `SignedHeaders` is present and that every arriving `x-amz-*` header is listed in `SignedHeaders`. Rejecting unsigned `x-amz-*` headers before handler dispatch closes the confused-deputy boundary on both signed and presigned SigV4 paths. While this signing fix does not alter storage formats, upgrading to [Server 20260916](/release/silo-20260916/) also includes [IAM changes requiring a coordinated upgrade](/operations/replication/iam-upgrade/).

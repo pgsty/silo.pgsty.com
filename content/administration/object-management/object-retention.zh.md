@@ -14,7 +14,7 @@ upstream_modified: true
 
 ## 概述 {#overview}
 
-**SILO 20261109 更新：** [SILO 20261109](/zh/blog/release/silo-20261109/) 在批量删除、多池版本、目录 `null` 版本、复制清除、生命周期整键删除规则以及批处理作业中统一执行 Object Lock 检查；请升级所有服务节点，使每个池和站点执行一致的锁定规则。此前，[SILO 20261018](/zh/blog/release/silo-20261018/#security) 修复了保留期授权与受保护版本覆盖问题（SN-2026-015/016，Server 20260916 仍受影响）：每次保留期更新均要求 `s3:PutObjectRetention`，削弱生效中的 `GOVERNANCE` 保留期还要求携带 `x-amz-bypass-governance-retention: true` 请求头及 `s3:BypassGovernanceRetention` 权限。单独升级客户端或 Console 不会修补 Server，升级也不会恢复此前已被覆盖的数据或保留期。受影响路径与缓解措施见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
+**SILO 20261109 更新：** [SILO 20261109](/zh/release/silo-20261109/) 在批量删除、多池版本、目录 `null` 版本、复制清除、生命周期整键删除规则以及批处理作业中统一执行 Object Lock 检查；请升级所有服务节点，使每个池和站点执行一致的锁定规则。此前，[SILO 20261018](/zh/release/silo-20261018/#security) 修复了保留期授权与受保护版本覆盖问题（SN-2026-015/016，Server 20260916 仍受影响）：每次保留期更新均要求 `s3:PutObjectRetention`，削弱生效中的 `GOVERNANCE` 保留期还要求携带 `x-amz-bypass-governance-retention: true` 请求头及 `s3:BypassGovernanceRetention` 权限。单独升级客户端或 Console 不会修补 Server，升级也不会恢复此前已被覆盖的数据或保留期。受影响路径与缓解措施见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
 
 MinIO 对象锁定（“对象保留”）通过强制执行一次写入、多次读取（WORM）不可变性，防止 [已启用版本控制的对象](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 被删除。MinIO 同时支持 [基于时长的对象保留](#minio-object-locking-retention-modes) 和 [无限期 legal hold 保留](#minio-object-locking-legalhold)。
 
@@ -109,11 +109,11 @@ $ mc ls --versions play/locking-guide
 
 不过，对于超过 7 天的 *非当前* 对象，过期规则只有在已配置的 WORM 锁过期 *之后* 才会生效。由于该存储桶设置了 45 天的 `GOVERNANCE` 保留，因此只有 `data.csv` 的 `v1` 版本已解锁，因而可被删除。
 
-在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，生命周期整键删除动作（`ExpiredObjectAllVersions` 与 `DelMarkerExpiration`，[#297](https://github.com/pgsty/silo/issues/297)）以及批处理 `expire` 和 `keyrotate` 作业（[#310](https://github.com/pgsty/silo/issues/310)）同样会保留受 Object Lock 保护的版本，而不会绕过生效中的保留期或 legal hold。
+在 [SILO 20261109](/zh/release/silo-20261109/) 中，生命周期整键删除动作（`ExpiredObjectAllVersions` 与 `DelMarkerExpiration`，[#297](https://github.com/pgsty/silo/issues/297)）以及批处理 `expire` 和 `keyrotate` 作业（[#310](https://github.com/pgsty/silo/issues/310)）同样会保留受 Object Lock 保护的版本，而不会绕过生效中的保留期或 legal hold。
 
 ### 与批量删除和复制的交互 {#interaction-with-bulk-deletion-and-replication}
 
-自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，批量删除与复制执行以下 Object Lock 保护机制：
+自 [SILO 20261109](/zh/release/silo-20261109/) 起，批量删除与复制执行以下 Object Lock 保护机制：
 
 - **持变更锁串行核验物理版本清除（`DeleteObjects`）：** S3 `DeleteObjects` 在执行物理版本移除时，会使用与保留期和 legal hold 更新相同的变更锁逐项串行核验，并合并所有存储池的保护状态（提交 [`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)）。因此在启用 Object Lock 的存储桶中，大批量物理版本清除耗时更长；创建删除标记以及普通存储桶仍保持并发批量路径。
 - **目录 `null` 版本保护：** 批量删除在移除目录对象的 `null` 版本前，会检查该目录对象的 Object Lock 保留期与 legal hold 状态（提交 [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)）。

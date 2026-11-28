@@ -14,7 +14,7 @@ url: "/blog/design/ilm-migration-ordering/"
 
 This record covers [issue #265](https://github.com/pgsty/silo/issues/265), the contributor change [PR #266](https://github.com/pgsty/silo/pull/266), and maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276). The merged [#264](https://github.com/pgsty/silo/pull/264) and [#267](https://github.com/pgsty/silo/pull/267) are relevant predecessors. #266's decommission commit is [19910230a](https://github.com/pgsty/silo/commit/19910230a), and its rebalance commit is [a995921e5](https://github.com/pgsty/silo/commit/a995921e5).
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`).
 
 **Update (2026-11-06).** Lifecycle deletes are not replicated, as in S3 and in every SILO release. #276 briefly made them replicate on `main`: the scanner, the expiry of a transitioned version, and the bulk noncurrent purge evaluated the delete replication decision and queued a delete marker or a version purge for the targets. That is the content of the still-open [PR #240](https://github.com/pgsty/silo/pull/240). `SILO Server 20261109` removed that part before shipping. The rest of #276 stays: the hot-tier delete before the remote one, the free-version retry record, the lifecycle-change fence, and the migration completion checks. Deletes made through the S3 API still replicate as configured. A decommission no longer waits for a replication target before it retires an expired version. The sections below are corrected accordingly.
 

@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）为基准；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261109/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [Server 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）为基准；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/release/silo-20261109/#upgrade)。
 
 <a id="minio-tenant" data-td-print-local></a>
 <a id="upgrade-a-minio-tenant"></a>
@@ -26,7 +26,7 @@ upstream_modified: true
 
 ## 升级到 20261109 之前 {#prerequisites}
 
-将任何 Kubernetes Tenant 或独立 `helm/silo` 部署升级到 [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）之前，请完成以下五项检查：
+将任何 Kubernetes Tenant 或独立 `helm/silo` 部署升级到 [SILO 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）之前，请完成以下五项检查：
 
 1. **18 Pod 及以上单池布局必须排空停机重启。** 若单个存储池内的各纠删集不全共享同一组 Pod/主机（自动布局下通常为 18 个及以上 Pod），必须采用排空全停重启（先将 StatefulSet 缩容至 `0` 并确认全部旧 Pod 终止，再启动 `20261109` Pod），**切勿**直接执行 StatefulSet 滚动更新，因为旧版与新版的单池删除和复制锁域（[#298](https://github.com/pgsty/silo/issues/298)）在跨纠删集时无法互斥。
 2. **混合版本期间暂停归档恢复请求。** 只要仍有对端 Pod 运行旧版本或不可达，已升级的 Pod 会对 `POST ?restore` 返回 `503 Service Unavailable`。请暂停发起新的恢复请求，直至全部 Pod 升级到 `20261109`。完整的多池生命周期保护与 S3 批量删除 Object Lock 保护同样要求所有服务 Pod 完成升级。

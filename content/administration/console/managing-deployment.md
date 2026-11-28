@@ -132,7 +132,7 @@ This section contains the following subsections.
 
 > [!NOTE]
 > - **Environment overrides (Console v0.24.0+):** Environment variable configuration settings override customizations saved in the MinIO Console. Hover over a configuration field to display a tooltip indicating whether an environment variable controls that setting.
-> - **Webhook reload persistence ([SILO 20261109](/blog/release/silo-20261109/), [#259](https://github.com/pgsty/silo/issues/259)):** Peer configuration reloads keep configured `audit_webhook` and `logger_webhook` targets active across all server nodes in the deployment.
+> - **Webhook reload persistence ([SILO 20261109](/release/silo-20261109/), [#259](https://github.com/pgsty/silo/issues/259)):** Peer configuration reloads keep configured `audit_webhook` and `logger_webhook` targets active across all server nodes in the deployment.
 
 Some subsections may not be visible if the authenticated user does not have the [required administrative permissions](/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions).
 

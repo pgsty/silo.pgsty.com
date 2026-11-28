@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/complete-multipart-checksum-type/"
 ---
 
-Shooks（`@Dansyuqri`）贡献的 [PR #57](https://github.com/pgsty/silo/pull/57) 修复了 [#47](https://github.com/pgsty/silo/issues/47)，并已随 [Server 20260903](/zh/blog/release/silo-20260903/) 发布。当对象保存了附加 S3 校验和时，`CompleteMultipartUpload` 的 XML 响应现在会一并返回已存储的 `ChecksumType` 元素。
+Shooks（`@Dansyuqri`）贡献的 [PR #57](https://github.com/pgsty/silo/pull/57) 修复了 [#47](https://github.com/pgsty/silo/issues/47)，并已随 [Server 20260903](/zh/release/silo-20260903/) 发布。当对象保存了附加 S3 校验和时，`CompleteMultipartUpload` 的 XML 响应现在会一并返回已存储的 `ChecksumType` 元素。
 
 ## 缺陷与范围 {#origin}
 
@@ -41,4 +41,4 @@ Shooks（`@Dansyuqri`）贡献的 [PR #57](https://github.com/pgsty/silo/pull/57
 
 忽略未知 XML 元素的客户端保持完全兼容，而检查 `ChecksumType` 的 SDK（如 `silo-go` [`bc3b35f97`](https://github.com/pgsty/silo-go/commit/bc3b35f973d981920cd83e8b5d2b30a45ec1b6dc)）则能在分片完成响应中直接获取已存储的类型值。本次修复未引入新算法、未修改磁盘元数据格式，也无需迁移存量对象。
 
-另外两项相邻的分片校验和修复同样随 [Server 20260903](/zh/blog/release/silo-20260903/) 发布：[UploadPart 校验和推断修复](/zh/blog/design/uploadpart-checksum/)与 [CompleteMultipartUpload 校验和错误映射](/zh/blog/design/complete-multipart-checksum-errors/)（其中 `CRC64NVME + COMPOSITE` 会被显式拒绝，不再静默规范化）。
+另外两项相邻的分片校验和修复同样随 [Server 20260903](/zh/release/silo-20260903/) 发布：[UploadPart 校验和推断修复](/zh/blog/design/uploadpart-checksum/)与 [CompleteMultipartUpload 校验和错误映射](/zh/blog/design/complete-multipart-checksum-errors/)（其中 `CRC64NVME + COMPOSITE` 会被显式拒绝，不再静默规范化）。

@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/checksum-verify/"
 ---
 
-本文记录 MCLI 只读 checksum 校验工作流，以及发布复核阶段发现的 non-TTY 输出缺陷 [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 的设计与实现。该命令经由 [`pgsty/mc`](https://github.com/pgsty/mc) 的 pull request [#8](https://github.com/pgsty/mc/pull/8) 与 [#13](https://github.com/pgsty/mc/pull/13) 合入主干，并随 [mcli 20260903](/zh/blog/release/mcli-20260903/) 正式发布（已内置于 [Server 20260903](/zh/blog/release/silo-20260903/) 容器镜像）。
+本文记录 MCLI 只读 checksum 校验工作流，以及发布复核阶段发现的 non-TTY 输出缺陷 [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 的设计与实现。该命令经由 [`pgsty/mc`](https://github.com/pgsty/mc) 的 pull request [#8](https://github.com/pgsty/mc/pull/8) 与 [#13](https://github.com/pgsty/mc/pull/13) 合入主干，并随 [mcli 20260903](/zh/release/mcli-20260903/) 正式发布（已内置于 [Server 20260903](/zh/release/silo-20260903/) 容器镜像）。
 
 ## 核心概览 {#tldr}
 

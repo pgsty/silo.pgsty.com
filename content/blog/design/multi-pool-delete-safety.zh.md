@@ -11,7 +11,7 @@ draft: false
 url: "/zh/blog/design/multi-pool-delete-safety/"
 ---
 
-**2026 年 10 月 24 日决定：合并修正后的 [PR #257](https://github.com/pgsty/silo/pull/257)（已随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 发布）。** 提交 [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) 修复了 [issue #256](https://github.com/pgsty/silo/issues/256) 报告的多池删除缺陷，并补齐请求开始之后的执行期故障保护。核心不变量是：**先完成其他池的旧副本清理，再删除决定当前读取结果的权威副本。**
+**2026 年 10 月 24 日决定：合并修正后的 [PR #257](https://github.com/pgsty/silo/pull/257)（已随 [Server 20261026](/zh/release/silo-20261026/#server-20261026) 发布）。** 提交 [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) 修复了 [issue #256](https://github.com/pgsty/silo/issues/256) 报告的多池删除缺陷，并补齐请求开始之后的执行期故障保护。核心不变量是：**先完成其他池的旧副本清理，再删除决定当前读取结果的权威副本。**
 
 Denis Babchuk 报告了该问题并提交了初始补丁。代码评审复现了故障，发现批量删除在通过在线盘数预检查后仍存在执行期故障窗口，随后补充分阶段执行、逐项响应身份保持、部分删除重试以及共享分层对象保护。
 
@@ -239,7 +239,7 @@ P99 采用 nearest-rank 算法（每轮批量请求共 64 次，P99 接近单轮
 - **错误码与客户端重试**：单对象删除的写 quorum 失败通常返回 HTTP 503；批量 `DeleteObjects` 则在 HTTP 200 响应体内逐项返回 `SlowDownWrite` 等错误码。实测 S3 SDK 在 `MaxRetries=4` 下收到包含逐项 `SlowDownWrite` 的 HTTP 200 响应时不会自动重发整批请求，`mcli rm` 则会直接报告失败项。调用方必须解析批量响应中的错误列表，在存储恢复后携带原 `versionId` 重试失败项。
 - **并发与请求取消**：既有共享对象写锁将多池删除与跨池写入串行化。HTTP 批量删除 handler 使用脱离客户端连接的后台 context，客户端中途断连不会中止已开始的批次。
 - **暂停版本桶的降级批量标记边界**：补充测试记录了一处在基线 `main` 中既有的边界行为：在两池和三池布局下，仅含 UUID 历史版本的暂停版本桶在磁盘降级期间执行批量删除标记创建，待磁盘恢复后显式清除 `null` 标记仍可能返回 quorum 错误（一次运行暴露出保留的 UUID 历史版本，另一次运行保留了删除标记）。本次修复未改动纯标记批量路径的这一既有行为。
-- **Object Lock 与条件删除**：在 Server 20261026 中，Object Lock 与保留期权限检查保持不变。随后的 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（[`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)、[`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)）将 Object Lock 桶中 S3 `DeleteObjects` 的物理版本清除改为在变更锁下按对象顺序执行（合并跨池保护状态并校验目录对象的 `null` 版本），而普通未加锁批量删除则跨纠删集并发执行各组删除（[#301](https://github.com/pgsty/silo/issues/301)，[`d56b1063b`](https://github.com/pgsty/silo/commit/d56b1063b)）。批量 XML `DeleteObjects` 的 ETag 条件仍不受支持，详见[条件 DELETE](/zh/blog/design/conditional-delete/)。
+- **Object Lock 与条件删除**：在 Server 20261026 中，Object Lock 与保留期权限检查保持不变。随后的 [SILO Server 20261109](/zh/release/silo-20261109/)（[`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)、[`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)）将 Object Lock 桶中 S3 `DeleteObjects` 的物理版本清除改为在变更锁下按对象顺序执行（合并跨池保护状态并校验目录对象的 `null` 版本），而普通未加锁批量删除则跨纠删集并发执行各组删除（[#301](https://github.com/pgsty/silo/issues/301)，[`d56b1063b`](https://github.com/pgsty/silo/commit/d56b1063b)）。批量 XML `DeleteObjects` 的 ETag 条件仍不受支持，详见[条件 DELETE](/zh/blog/design/conditional-delete/)。
 - **升级与回退**：本次修改不涉及 S3 参数、RPC 协议、磁盘格式、外部依赖、选池分配规则或配置开关变更。混合版本滚动升级期间，尚未升级的协调节点仍按旧逻辑处理其接收的删除请求；回退旧版本不会恢复此前已丢失的副本。
 
 ## 备选方案取舍 {#alternatives}

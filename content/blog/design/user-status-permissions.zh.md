@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/user-status-permissions/"
 ---
 
-本文记录 [上游议题 minio/minio#21478](https://github.com/minio/minio/issues/21478)、[SILO PR #73](https://github.com/pgsty/silo/pull/73)（提交 [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) / [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)）以及 `set-group-status` 组状态权限善后提交（`229fe2b3c`）的鉴权设计与验证记录。上述修复已随 [Server 20260903](/zh/blog/release/silo-20260903/) 发布。
+本文记录 [上游议题 minio/minio#21478](https://github.com/minio/minio/issues/21478)、[SILO PR #73](https://github.com/pgsty/silo/pull/73)（提交 [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) / [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)）以及 `set-group-status` 组状态权限善后提交（`229fe2b3c`）的鉴权设计与验证记录。上述修复已随 [Server 20260903](/zh/release/silo-20260903/) 发布。
 
 ## 太长不看（TL;DR） {#tldr}
 
@@ -307,10 +307,10 @@ func setGroupStatusAdminAction(status string) policy.AdminAction {
 
 ### 交付状态 {#delivery}
 
-| 里程碑            | 用户状态修复                                                                                                                                                                                        | 组状态善后                                         |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| 带 DCO 签名的提交 | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1)（合并为 [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)） | `229fe2b3c`                                        |
-| 发布版本          | [Server 20260903](/zh/blog/release/silo-20260903/)                                                                                                                                                  | [Server 20260903](/zh/blog/release/silo-20260903/) |
+| 里程碑            | 用户状态修复                                                                                                                                                                                        | 组状态善后                                    |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| 带 DCO 签名的提交 | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1)（合并为 [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)） | `229fe2b3c`                                   |
+| 发布版本          | [Server 20260903](/zh/release/silo-20260903/)                                                                                                                                                       | [Server 20260903](/zh/release/silo-20260903/) |
 {.wide .expand}
 
 ## 结论 {#conclusion}

@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-box
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261109](/zh/blog/release/silo-20261109/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261109/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [Server 20261109](/zh/release/silo-20261109/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/release/silo-20261109/#upgrade)。
 
 Silo 为 `amd64`/`arm64` 发布 RPM、DEB 与 APK 软件包，托管于 [GitHub Releases](https://github.com/pgsty/silo/releases)，附 SHA-256 校验和与构建溯源 attestation。本页记录相对 `minio` 软件包安装的变化：文件布局、服务账号与注意事项。迁移的总体范围见[迁移指南](/zh/compatibility/migration/)。
 

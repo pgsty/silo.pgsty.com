@@ -14,7 +14,7 @@ url: "/blog/design/native-restore-two-phase/"
 
 This record covers [issue #284](https://github.com/pgsty/silo/issues/284) and two regressions of the first native-restore safeguards for [#281](https://github.com/pgsty/silo/issues/281), described in [Restored Copies: Expire the Copy, Not the Object](/blog/design/restored-copy-expiry/). It was evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) and the pre-release `SILO Server 20261109` integration branch. The design replaces the private-upload part of the #281 safeguards; the rest of them stays.
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 

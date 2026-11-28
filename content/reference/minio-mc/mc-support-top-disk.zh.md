@@ -76,4 +76,4 @@ mc [GLOBALFLAGS] support top disk                     \
 
 ## 行为说明 {#behavior}
 
-在 [mcli 20261109](/zh/blog/release/mcli-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，`mcli support top drive`（`top disk`）将首次驱动器 I/O 采样作为基线，不再将自系统启动以来的累计计数器直接展示为首个采样周期数据。
+在 [mcli 20261109](/zh/release/mcli-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，`mcli support top drive`（`top disk`）将首次驱动器 I/O 采样作为基线，不再将自系统启动以来的累计计数器直接展示为首个采样周期数据。

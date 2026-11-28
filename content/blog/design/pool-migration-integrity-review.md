@@ -14,7 +14,7 @@ url: "/blog/design/pool-migration-integrity-review/"
 
 This record reviews [#261](https://github.com/pgsty/silo/issues/261), [#263](https://github.com/pgsty/silo/issues/263), and [#265](https://github.com/pgsty/silo/issues/265), together with their fixes [#262](https://github.com/pgsty/silo/pull/262), [#264](https://github.com/pgsty/silo/pull/264), and [#266](https://github.com/pgsty/silo/pull/266). It also records the maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276). It is a design and review record, not a release note.
 
-**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`). PRs [#267](https://github.com/pgsty/silo/pull/267) (superseding #262), [#264](https://github.com/pgsty/silo/pull/264), [#266](https://github.com/pgsty/silo/pull/266), and [#276](https://github.com/pgsty/silo/pull/276) (with lifecycle-delete replication removed before release) all shipped together in `RELEASE.2026-11-09T00-00-00Z`.
+**Status:** Shipped in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`). PRs [#267](https://github.com/pgsty/silo/pull/267) (superseding #262), [#264](https://github.com/pgsty/silo/pull/264), [#266](https://github.com/pgsty/silo/pull/266), and [#276](https://github.com/pgsty/silo/pull/276) (with lifecycle-delete replication removed before release) all shipped together in `RELEASE.2026-11-09T00-00-00Z`.
 
 ## Decision at a glance {#decision}
 
@@ -53,7 +53,7 @@ The right repairs are local boundary repairs. They do not require a new metadata
 
 ## Affected release scope and advisory {#advisory}
 
-The three issue fixes are treated as a storage-integrity advisory for releases through [RELEASE.2026-10-26](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z), which predate the repairs. All four PRs ([#264](https://github.com/pgsty/silo/pull/264), [#267](https://github.com/pgsty/silo/pull/267), [#266](https://github.com/pgsty/silo/pull/266), and [#276](https://github.com/pgsty/silo/pull/276) with lifecycle-delete replication removed) shipped together in [SILO Server 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`); operators on `20261026` or earlier should upgrade to `SILO Server 20261109` before running pool decommission or rebalance.
+The three issue fixes are treated as a storage-integrity advisory for releases through [RELEASE.2026-10-26](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z), which predate the repairs. All four PRs ([#264](https://github.com/pgsty/silo/pull/264), [#267](https://github.com/pgsty/silo/pull/267), [#266](https://github.com/pgsty/silo/pull/266), and [#276](https://github.com/pgsty/silo/pull/276) with lifecycle-delete replication removed) shipped together in [SILO Server 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`); operators on `20261026` or earlier should upgrade to `SILO Server 20261109` before running pool decommission or rebalance.
 
 The code-level windows are different:
 
@@ -70,16 +70,16 @@ This is a compound-condition problem, not a statement that every installation or
 | Mixed EC metadata is scanned by old decommission/rebalance                    | The readable object can be omitted; removing the source pool can lose it.  | If the source remains, run the fixed migration path and heal; if it was removed, recover from a copy or backup.        |
 {.wide .expand}
 
-Operators still running `SILO Server 20261026` or earlier should pause pool decommission and rebalance—especially while drives are degraded, tier cleanup is pending, or lifecycle rules are active—preserve the old pool and backups, upgrade to [SILO Server 20261109](/blog/release/silo-20261109/), and verify GET, ListObjectsV2, ListObjectVersions, and object counts after migration. The advisory is conditional on the compound states above, and rebalance still skips transitioned versions by design. A CVE-style security label is unnecessary unless a project classifies storage-integrity failures that way; the `SILO Server 20261109` release notes and operational guidance cover the upgrade boundary.
+Operators still running `SILO Server 20261026` or earlier should pause pool decommission and rebalance—especially while drives are degraded, tier cleanup is pending, or lifecycle rules are active—preserve the old pool and backups, upgrade to [SILO Server 20261109](/release/silo-20261109/), and verify GET, ListObjectsV2, ListObjectVersions, and object counts after migration. The advisory is conditional on the compound states above, and rebalance still skips transitioned versions by design. A CVE-style security label is unnecessary unless a project classifies storage-integrity failures that way; the `SILO Server 20261109` release notes and operational guidance cover the upgrade boundary.
 
 `SILO Server 20261109` delivers the complete migration repair set (#264, #267, #266, and #276, paired with the [multi-pool](/blog/design/multi-pool-lifecycle-expiry/) and [exact-key](/blog/design/ilm-delete-all-exact-key/) lifecycle fixes); a release containing only #264 and #267 would have been insufficient for lifecycle-aware migration. Installations that already completed pool migrations on `20261026` or earlier should audit source copies, replication targets, backups, and audit logs before assuming historical data was unaffected.
 
 ## Merge and delivery summary {#plan}
 
-1. Shipped #264, #267, #266, and #276 together in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`), establishing the logical object view, mixed-EC migration listing, lifecycle action semantics, and external cleanup contracts.
+1. Shipped #264, #267, #266, and #276 together in [SILO Server 20261109](/release/silo-20261109/) (`d998292387cc`), establishing the logical object view, mixed-EC migration listing, lifecycle action semantics, and external cleanup contracts.
 2. Preserved the distinction between a versioned current Expiration, a version-only purge, and a whole-object deletion rather than replacing it with a generic "skip every ILM action" rule.
 3. Retained regression coverage for lifecycle deletes with replication configured (which must queue no replication), transitioned-version cleanup, lifecycle configuration changes, whole-object expiry, and resumable decommission.
-4. Published the migration-integrity guidance in [SILO Server 20261109](/blog/release/silo-20261109/); installations that migrated pools on earlier builds should still audit historical state against backups or replicas.
+4. Published the migration-integrity guidance in [SILO Server 20261109](/release/silo-20261109/); installations that migrated pools on earlier builds should still audit historical state against backups or replicas.
 5. Track rebalance support for transitioned versions separately; #276 deliberately does not broaden that scope.
 
 The detailed records are:

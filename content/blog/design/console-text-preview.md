@@ -16,7 +16,7 @@ SILO Console previews images, PDFs, audio, and video, but in v2.1.1 it could not
 
 Restoring a browser-native iframe viewer would have been easy, and it would have been the wrong fix. An object in storage is controlled by the client that uploaded it. Loading that object as a same-origin HTML or XML document turns a convenience viewer into a script execution boundary.
 
-The design shipped in [Console 2.2.0](/blog/release/console-2.2.0/) (tracking [#17](https://github.com/pgsty/silo/issues/17)) enforces a strict invariant:
+The design shipped in [Console 2.2.0](/release/console-2.2.0/) (tracking [#17](https://github.com/pgsty/silo/issues/17)) enforces a strict invariant:
 
 > SILO Console previews eligible text objects as bounded UTF-8 text. It never asks the browser to interpret their markup, MIME type, or file contents as an executable document.
 
@@ -35,7 +35,7 @@ Console adds a dedicated `text` preview type and a `PreviewText` component gover
 9. Show the complete object or no object at all; never render a truncated JSON or XML fragment.
 10. Keep **Download** available for files that exceed the size limit, fail UTF-8 decoding, or cannot be previewed.
 
-No new S3 operation or backend preview route is added, and the backend inline MIME allowlist remains unchanged. Delivering this feature also tightened Console download responses: zero-byte `Range` requests return an empty `200 OK`, unsatisfiable ranges return `416 Range Not Satisfiable` with `Content-Range: bytes */N`, and `size` is always emitted in object JSON metadata (see [Console 2.2.0](/blog/release/console-2.2.0/#byte-ranges)).
+No new S3 operation or backend preview route is added, and the backend inline MIME allowlist remains unchanged. Delivering this feature also tightened Console download responses: zero-byte `Range` requests return an empty `200 OK`, unsatisfiable ranges return `416 Range Not Satisfiable` with `Content-Range: bytes */N`, and `size` is always emitted in object JSON metadata (see [Console 2.2.0](/release/console-2.2.0/#byte-ranges)).
 
 ## Previous Behavior in Console 2.1.1 {#current-behavior}
 
@@ -311,7 +311,7 @@ End-to-end Playwright checks against a live SILO + Console instance verify Engli
 
 ## Delivery and Completion Gates {#delivery}
 
-Shipped in [`pgsty/silo-console` v2.2.0](/blog/release/console-2.2.0/) ([PR #30](https://github.com/pgsty/silo-console/pull/30)) and embedded in [SILO Server 20260903](/blog/release/silo-20260903/), resolving [pgsty/silo#17](https://github.com/pgsty/silo/issues/17).
+Shipped in [`pgsty/silo-console` v2.2.0](/release/console-2.2.0/) ([PR #30](https://github.com/pgsty/silo-console/pull/30)) and embedded in [SILO Server 20260903](/release/silo-20260903/), resolving [pgsty/silo#17](https://github.com/pgsty/silo/issues/17).
 
 ## Trade-Off Summary {#trade-offs}
 

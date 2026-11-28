@@ -107,7 +107,7 @@ Workloads that require <abbr title="Business Continuity/Disaster Recovery">BC/DR
 
 ### Restore, Expiry, and Pool Decommissioning {#restore-expiry-and-pool-decommissioning}
 
-Starting in [SILO 20261109](/blog/release/silo-20261109/), remote-tier operations enforce the following behavior:
+Starting in [SILO 20261109](/release/silo-20261109/), remote-tier operations enforce the following behavior:
 
 - **Two-phase in-place native restore:** Native restore (`POST ?restore`) downloads remote-tier data outside the object write lock ([#284](https://github.com/pgsty/silo/issues/284)) and restores the exact addressed version in place without changing version ordering or hanging across multiple pools ([#289](https://github.com/pgsty/silo/issues/289)). See [`mc ilm restore`](/reference/minio-mc/mc-ilm-restore/).
 - **Restored-copy and cross-pool retention:** Expiring a restored copy removes only the temporary local cache while keeping the object version and its remote-tier data intact ([#281](https://github.com/pgsty/silo/issues/281)). SILO retains remote-tier payloads while another server pool still references them ([#306](https://github.com/pgsty/silo/issues/306), [#308](https://github.com/pgsty/silo/issues/308)).

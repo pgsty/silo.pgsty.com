@@ -9,7 +9,7 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-SILO **20261112** is the current published Server release, built with **Go 1.27.4** and embedding **[Console 2.7.2](/blog/release/console-2.7.2/)**, **[mcli 20261112](/blog/release/mcli-20261112/)**, and **[silo-pkg 3.16.1](/blog/release/pkg-3.16.1/)**. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
+SILO **20261112** is the current published Server release, built with **Go 1.27.4** and embedding **[Console 2.7.2](/release/console-2.7.2/)**, **[mcli 20261112](/release/mcli-20261112/)**, and **[silo-pkg 3.16.1](/release/pkg-3.16.1/)**. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
 
 ## Server 20261112 {#server-20261112}
 
@@ -36,7 +36,7 @@ SILO **20261112** is the current published Server release, built with **Go 1.27.
 | `docker.io/pgsty/kes`               | `RELEASE.2026-10-26T00-00-00Z`, `latest`                                                                 | `sha256:ea36fcdd260c606eb89e693b0949aea73b149359605273a98fcf13c8433049cd` |
 {.wide .expand}
 
-KES is not embedded in Server and maintains an independent release cycle. [20261112 release and upgrade notes](/blog/release/silo-20261112/) and [Server 20261112 upgrade checks](/compatibility/server/#maintenance-20261112) cover `.minio.sys` quorum verification, mixed-version multi-pool write draining, multi-site service-account edit freezes, strict policy JSON decoding, and per-node S3 readiness checks; the [20261109 upgrade boundaries](/blog/release/silo-20261109/#upgrade) continue to apply when upgrading from `20261026` or earlier.
+KES is not embedded in Server and maintains an independent release cycle. [20261112 release and upgrade notes](/release/silo-20261112/) and [Server 20261112 upgrade checks](/compatibility/server/#maintenance-20261112) cover `.minio.sys` quorum verification, mixed-version multi-pool write draining, multi-site service-account edit freezes, strict policy JSON decoding, and per-node S3 readiness checks; the [20261109 upgrade boundaries](/release/silo-20261109/#upgrade) continue to apply when upgrading from `20261026` or earlier.
 
 ## Server 20261109 {#server-20261109}
 
@@ -52,26 +52,26 @@ KES is not embedded in Server and maintains an independent release cycle. [20261
 | Go / platform archives          | **Go 1.27.3**                                                                                       | Windows ZIP; Linux/macOS tar.gz (Console Windows is amd64 only) |
 {.wide .expand}
 
-Historical 20261109 Docker Hub digests: `pgsty/silo:RELEASE.2026-11-09T00-00-00Z` (`sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d`), `pgsty/silo:RELEASE.2026-11-09T00-00-00Z-distroless` (`sha256:fdf726815e38c2d1cb06c640e237daa83b3914e58099aecd073fef9d8e42cb00`), `pgsty/silo-console:v2.7.0` (`sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`), and `pgsty/mc:RELEASE.2026-11-09T00-00-00Z` (`sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`). See [20261109 release notes](/blog/release/silo-20261109/) and [Server 20261109 upgrade checks](/compatibility/server/#maintenance-20261109).
+Historical 20261109 Docker Hub digests: `pgsty/silo:RELEASE.2026-11-09T00-00-00Z` (`sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d`), `pgsty/silo:RELEASE.2026-11-09T00-00-00Z-distroless` (`sha256:fdf726815e38c2d1cb06c640e237daa83b3914e58099aecd073fef9d8e42cb00`), `pgsty/silo-console:v2.7.0` (`sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`), and `pgsty/mc:RELEASE.2026-11-09T00-00-00Z` (`sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`). See [20261109 release notes](/release/silo-20261109/) and [Server 20261109 upgrade checks](/compatibility/server/#maintenance-20261109).
 
 ## Standalone Console {#console}
 
 <span id="console-2-6-0"></span>
 
-The latest published standalone and embedded Console is [2.7.2](/blog/release/console-2.7.2/),
+The latest published standalone and embedded Console is [2.7.2](/release/console-2.7.2/),
 from source `0e7953ff59c4a1eb77c7d203b265e6783ff18d01` (`v0.0.0-20261112031746-0e7953ff59c4`),
-synchronizing release metadata and optimized embedded assets for [SILO Server 20261112](/blog/release/silo-20261112/)
-on top of [2.7.1](/blog/release/console-2.7.1/) (`3825ebc44451fdc8eefda3d4ec523a79dfecb236`).
+synchronizing release metadata and optimized embedded assets for [SILO Server 20261112](/release/silo-20261112/)
+on top of [2.7.1](/release/console-2.7.1/) (`3825ebc44451fdc8eefda3d4ec523a79dfecb236`).
 It preserves service-account policy inheritance on metadata edits, blocks empty
 inline-policy variants, renders save errors inside the edit modal, preserves the
 request host (or `CONSOLE_SECURE_TLS_HOST`) on `--host 0.0.0.0` HTTP-to-HTTPS
 redirects, and enforces strict policy JSON decoding, built with Go 1.27.4,
-[silo-pkg v3.16.1](/blog/release/pkg-3.16.1/) and [mcli 20261112](/blog/release/mcli-20261112/)
+[silo-pkg v3.16.1](/release/pkg-3.16.1/) and [mcli 20261112](/release/mcli-20261112/)
 (`v0.0.0-20261111180825-a37a9f054fba`).
-[2.7.0](/blog/release/console-2.7.0/) (source
+[2.7.0](/release/console-2.7.0/) (source
 `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`) added ten UI languages, Arabic RTL,
 container CA/temporary-directory fixes, and usage-worker, plain-HTTP and upload
-fixes; [2.6.0](/blog/release/console-2.6.0/) (source
+fixes; [2.6.0](/release/console-2.6.0/) (source
 `f8ab146695fd1df74e4b84128a286d552921bf00`) added usage scans, retained-version
 totals and bucket-administration fixes.
 Published Server 20261112 embeds Console 2.7.2; historical Server 20261109 embeds
@@ -81,28 +81,28 @@ Console 2.7.0 and Server 20261026 retains Console 2.5.1.
 
 <span id="mcli-20261109"></span>
 
-The latest [standalone client release](/blog/release/mcli-20261112/) uses tag
+The latest [standalone client release](/release/mcli-20261112/) uses tag
 `RELEASE.2026-11-12T00-00-00Z`, package `20261112000000.0.0`, and source
 [`a37a9f054fba828a0bbbceb4e9ff247ccf09c28d`](https://github.com/pgsty/mc/commit/a37a9f054fba828a0bbbceb4e9ff247ccf09c28d)
 (`v0.0.0-20261111180825-a37a9f054fba`). It is built with Go 1.27.4,
-[silo-pkg v3.16.1](/blog/release/pkg-3.16.1/) and upstream minio-go
+[silo-pkg v3.16.1](/release/pkg-3.16.1/) and upstream minio-go
 `v7.4.2-0.20261025165926-320af050c445`, aligning explicit empty inline-policy
 resets across access-key edit commands and enforcing strict policy JSON decoding.
 Server 20261112 and Console 2.7.2 adopt mcli 20261112; historical Server 20261109 retains
-[mcli 20261109](/blog/release/mcli-20261109/) (`e1d4cc5abfe00b674eb36347399e7398990be467`),
+[mcli 20261109](/release/mcli-20261109/) (`e1d4cc5abfe00b674eb36347399e7398990be467`),
 and older binaries retain their original embedded client builds.
 
 ## Shared package v3.16.1 {#pkg-3-16-1}
 
 <span id="pkg-3-16-0"></span>
 
-[silo-pkg v3.16.1](/blog/release/pkg-3.16.1/) (`433f7eefa714a30b72ca70c4dffcd5faca25804f`)
+[silo-pkg v3.16.1](/release/pkg-3.16.1/) (`433f7eefa714a30b72ca70c4dffcd5faca25804f`)
 is a separate source-only release requiring Go 1.27.4. It hardens strict JSON
 policy decoding in `ParseConfigStrict` and `ParseBucketPolicyConfig` and updates
 base `golang.org/x/*`, gRPC, and `go-humanize` dependencies while preserving
 public APIs and valid policy semantics. Server 20261112, Console 2.7.2, and mcli 20261112 build
 with `github.com/pgsty/silo-pkg/v3 v3.16.1`; historical Server 20261109 retains
-[silo-pkg v3.16.0](/blog/release/pkg-3.16.0/) (`b7aeea85e84e8888d6ab424c7123a1297711bc3f`),
+[silo-pkg v3.16.0](/release/pkg-3.16.0/) (`b7aeea85e84e8888d6ab424c7123a1297711bc3f`),
 and external Go consumers must select `v3.16.1` and rebuild.
 
 ## Released 20261026 components {#server-20261026}
@@ -122,15 +122,15 @@ and external Go consumers must select `v3.16.1` and rebuild.
 
 The 20261026 Server, mcli and KES artifacts use package version `20261026000000.0.0`. Upgrading a standalone Console deployment does not replace an older Server's embedded UI or server-side behavior; built-in policy Reset, live bucket inventory reads, and the lifecycle and replication fixes require Server 20261026.
 
-[Combined release notes](/blog/release/silo-20261026/) · [Console 2.5](/blog/release/console-2.5.1/) · [pkg 3.15](/blog/release/pkg-3.15.2/) · [Upgrade checks](/compatibility/server/#maintenance-20261026) · [Downloads](/download/)
+[Combined release notes](/release/silo-20261026/) · [Console 2.5](/release/console-2.5.1/) · [pkg 3.15](/release/pkg-3.15.2/) · [Upgrade checks](/compatibility/server/#maintenance-20261026) · [Downloads](/download/)
 
 Official container images are published on Docker Hub under `pgsty/silo`, `pgsty/mc`, `pgsty/silo-console`, and `pgsty/kes` (package-repository mirrors may update slightly after GitHub Releases). The historical dependency graphs below are retained for upgrade and rollback checks.
 
 ## Server 20261018 release {#october-release}
 
-The target is `RELEASE.2026-10-18T00-00-00Z`, package version `20261018000000.0.0`, selected source [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce). The GitHub release is **public**, with anonymous downloads and Docker Hub images verified on 2026-10-19. See the [20261018 release notes](/blog/release/silo-20261018/) for features, security changes, compatibility and remaining limits.
+The target is `RELEASE.2026-10-18T00-00-00Z`, package version `20261018000000.0.0`, selected source [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce). The GitHub release is **public**, with anonymous downloads and Docker Hub images verified on 2026-10-19. See the [20261018 release notes](/release/silo-20261018/) for features, security changes, compatibility and remaining limits.
 
-[20261015](/blog/release/silo-20261015/) remains a historical Draft superseded by the [20261018 release](/blog/release/silo-20261018/#delivery), which delivers the October Object Lock, IAM, and LIST repairs (absent from Server 20260916).
+[20261015](/release/silo-20261015/) remains a historical Draft superseded by the [20261018 release](/release/silo-20261018/#delivery), which delivers the October Object Lock, IAM, and LIST repairs (absent from Server 20260916).
 
 ## October component graph {#october-components}
 
@@ -143,11 +143,11 @@ The target is `RELEASE.2026-10-18T00-00-00Z`, package version `20261018000000.0.
 | Build toolchain                | Go 1.27.2; Console frontend uses Node 24.22.0 LTS |
 {.wide .expand}
 
-The historical Console v2.4.2 and mcli 20261018 releases declare pkg v3.14.2; Server's module graph selects v3.14.3. The [v3.14.2 dependency baseline](/blog/release/pkg-3.14.2/) and v3.14.3 [admin-action classification optimization](/blog/release/pkg-3.14.3/) preserve APIs, policy formats and authorization behavior. Server must select Console and MC replacements explicitly; Go does not inherit dependency replacements. The supported integration target is the PGSTY stack, with best-effort upstream MinIO/MC compatibility.
+The historical Console v2.4.2 and mcli 20261018 releases declare pkg v3.14.2; Server's module graph selects v3.14.3. The [v3.14.2 dependency baseline](/release/pkg-3.14.2/) and v3.14.3 [admin-action classification optimization](/release/pkg-3.14.3/) preserve APIs, policy formats and authorization behavior. Server must select Console and MC replacements explicitly; Go does not inherit dependency replacements. The supported integration target is the PGSTY stack, with best-effort upstream MinIO/MC compatibility.
 
 ## September 16 dependency graph {#source}
 
-[Console v2.4.1](/blog/release/console-2.4.1/) selects the released pkg and MC
+[Console v2.4.1](/release/console-2.4.1/) selects the released pkg and MC
 sources below. These identities are verified through the public Go proxy and
 checksum database.
 
@@ -236,7 +236,7 @@ rejects redirects, system paths and query-selected non-download operations.
 No sharing-disable environment variable was added. Normal public, presigned and
 versioned downloads remain supported; see the [behavior and design tradeoffs](/reference/minio-server/settings/console/#object-sharing).
 
-The fix is released in [Console v2.4.1](/blog/release/console-2.4.1/).
+The fix is released in [Console v2.4.1](/release/console-2.4.1/).
 The exact release source passed the complete CI matrix, vulnerability checks
 and release workflow. Real API and browser sharing tests passed in standalone
 and embedded deployments; the downloaded standalone binary also passed the
@@ -284,7 +284,7 @@ defect. Final packaged-candidate and rollout acceptance remain tracked in
   design; see the
   [design record](/blog/design/replication-reliability/#third-round-limits).
 - **Listing during rolling restarts:** [#239](https://github.com/pgsty/silo/pull/239)
-  (shipped in [Server 20261018](/blog/release/silo-20261018/)) carries the follow-up to [#218](https://github.com/pgsty/silo/issues/218): confirm
+  (shipped in [Server 20261018](/release/silo-20261018/)) carries the follow-up to [#218](https://github.com/pgsty/silo/issues/218): confirm
   eligible unresolved latest-object entries, distinguish deletion from read
   failure and preserve terminal errors through pagination. It adds no disk
   format, client parameter or migration switch. See the [current design and
@@ -359,10 +359,10 @@ updates separate from final caches. Storage formats, RPC fields and dependency
 versions are unchanged. The [problem and repair record](/blog/design/stale-metadata-reuse/)
 documents deterministic regression coverage, a two-process scanner check,
 post-merge CI, and operator verification. The source repair entered the
-[Server 20261015](/blog/release/silo-20261015/) draft and shipped publicly in [Server 20261018](/blog/release/silo-20261018/).
+[Server 20261015](/release/silo-20261015/) draft and shipped publicly in [Server 20261018](/release/silo-20261018/).
 
 ## Repairs after 20261015 included in 20261018 {#post-20261015}
 
 20261018 adds commit-metadata error classification (#232), upload-time parsing (#236), checksum and Console errors (#229/#238), IAM Admin authorization and bulk self-listing (#242, `995439260`), LIST recovery and directory preservation (#239, `3dd53eb81`, `2080b3d03`), empty upload-parent cleanup (`0f9199e0c`) and withdrawal of public persistent scanning (`4733e1423`). The shared package is now v3.14.3. The final candidate also includes migration overwrite/delete-marker repairs (`60c7179dd`, `1748f62c7`) and durable STS enumeration, revocation propagation and missed-notification recovery (`0cd388c66`).
 
-The [20261018 release notes](/blog/release/silo-20261018/) cover behavior, upgrade steps and remaining work. Former strict users lose durable listing and strict cancellation; #79 and #217 remain unresolved.
+The [20261018 release notes](/release/silo-20261018/) cover behavior, upgrade steps and remaining work. Former strict users lose durable listing and strict cancellation; #79 and #217 remain unresolved.

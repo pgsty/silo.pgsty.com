@@ -17,7 +17,7 @@ The real answer isn't clicking fork. It's what happens when CVEs start landing.
 Between April 15 and 17, `pgsty/minio` shipped [RELEASE.2026-04-17](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-04-17T00-00-00Z),
 closing four CVEs and a handful of related vulnerabilities disclosed in the same window.
 
-[![gh-release.webp](gh-release.webp)](/blog/release/20260417/)
+[![gh-release.webp](gh-release.webp)](/release/20260417/)
 
 The scope I committed to originally was narrow: no new features, keep the supply chain running,
 handle reproducible bugs and security issues as they come in.
@@ -47,7 +47,7 @@ Someone still has to patch the old one.
 
 ## What this release fixes {#what-this-release-fixes}
 
-Full write-ups, CVSS arithmetic, and PoCs are in the [release notes](/blog/release/20260417/). The short version:
+Full write-ups, CVSS arithmetic, and PoCs are in the [release notes](/release/20260417/). The short version:
 
 - **CVE-2026-33322 (OIDC JWT algorithm confusion, CVSS 9.8)**: under certain IdP configurations, an attacker who knows the OIDC ClientSecret can mint a token claiming any identity — including `consoleAdmin` — and MinIO will accept it. Vulnerable window: November 2022 through March 2026. About three and a half years.
 - **CVE-2026-33419 (LDAP STS enumeration and brute-force)**: the login endpoint leaks which usernames are real, and there's no rate limiting on the subsequent password guessing. End of the chain is an STS credential.

@@ -103,7 +103,7 @@ mc [GLOBALFLAGS] admin rebalance ALIAS
 
 *mc-cmd*
 
-Ends an in-progress rebalance job on the specified deployment. In [SILO 20261109](/blog/release/silo-20261109/), `mc admin rebalance stop` returns cleanly instead of panicking when rebalance metadata is absent ([#270](https://github.com/pgsty/silo/issues/270)).
+Ends an in-progress rebalance job on the specified deployment. In [SILO 20261109](/release/silo-20261109/), `mc admin rebalance stop` returns cleanly instead of panicking when rebalance metadata is absent ([#270](https://github.com/pgsty/silo/issues/270)).
 
 {{< tabs group="examples-syntax" >}}
 {{< tab label="EXAMPLES" value="examples" >}}
@@ -138,7 +138,7 @@ Use the [`mc admin cluster bucket export`](/reference/minio-mc-admin/mc-admin-cl
 
 SILO rebalance does **not** drop delete markers or silently skip versions whose lifecycle state is uncertain across pools. Preserving delete markers and unconfirmed versions prevents older object versions in other pools from reappearing during or after migration.
 
-In [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), rebalancing enforces the following guarantees:
+In [SILO 20261109](/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), rebalancing enforces the following guarantees:
 
 - Preserves `null` and UUID [delete markers](/administration/object-management/object-versioning/#minio-bucket-versioning-delete) across pools instead of dropping them.
 - Moves objects whose copies use mixed erasure layouts across pools ([#261](https://github.com/pgsty/silo/issues/261)), ILM-expired current versions ([#265](https://github.com/pgsty/silo/issues/265)), and versions whose cross-pool [lifecycle](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) expiry is refused because authoritative quorum or lock state cannot be confirmed ([#278](https://github.com/pgsty/silo/issues/278)).

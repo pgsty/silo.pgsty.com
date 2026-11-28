@@ -10,22 +10,22 @@ icon: fa-solid fa-terminal
 
 `mcli` 是 Silo 构建的 MinIO 客户端（`mc`）。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。
 
-[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/)、[20260903](/zh/blog/release/mcli-20260903/)、[20260913](/zh/blog/release/mcli-20260913/)、[20260916](/zh/blog/release/mcli-20260916/)、[20261018](/zh/blog/release/mcli-20261018/)、[20261026](/zh/blog/release/silo-20261026/#mcli) 与 [20261109](/zh/blog/release/mcli-20261109/)。最新版本为 [20261112](/zh/blog/release/mcli-20261112/)；历史说明保留各自比较基线。
+[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/release/mcli-20260804/)、[20260806](/zh/release/mcli-20260806/)、[20260903](/zh/release/mcli-20260903/)、[20260913](/zh/release/mcli-20260913/)、[20260916](/zh/release/mcli-20260916/)、[20261018](/zh/release/mcli-20261018/)、[20261026](/zh/release/silo-20261026/#mcli) 与 [20261109](/zh/release/mcli-20261109/)。最新版本为 [20261112](/zh/release/mcli-20261112/)；历史说明保留各自比较基线。
 
 > [!TIP]
-> **当前正式版：** [mcli 20261112](/zh/blog/release/mcli-20261112/)，标签 `RELEASE.2026-11-12T00-00-00Z`，包版本 `20261112000000.0.0`，源码 `a37a9f054fba`，Docker Hub `pgsty/mc:RELEASE.2026-11-12T00-00-00Z` 与 `latest`（`sha256:b532278b7a3747dbab6fe45eebb40a653efa704e6758e24e9d9ec54fc96c1800`）。Windows 使用 ZIP；Linux/macOS 使用 tar.gz，提供 Linux RPM/DEB/APK。
+> **当前正式版：** [mcli 20261112](/zh/release/mcli-20261112/)，标签 `RELEASE.2026-11-12T00-00-00Z`，包版本 `20261112000000.0.0`，源码 `a37a9f054fba`，Docker Hub `pgsty/mc:RELEASE.2026-11-12T00-00-00Z` 与 `latest`（`sha256:b532278b7a3747dbab6fe45eebb40a653efa704e6758e24e9d9ec54fc96c1800`）。Windows 使用 ZIP；Linux/macOS 使用 tar.gz，提供 Linux RPM/DEB/APK。
 
 <a id="candidate-policy-edit" data-td-print-local></a><span id="next-release"></span><span id="current-release"></span>
 
 ## 当前版本变化（20261112） {#release-20261112}
 
-[mcli 20261112](/zh/blog/release/mcli-20261112/)（`a37a9f054fba`，Go `1.27.4`，[silo-pkg v3.16.1](/zh/blog/release/pkg-3.16.1/)）的 `admin user svcacct edit --policy`、`admin accesskey edit --policy`、`idp ldap accesskey edit --policy` 与 `idp openid accesskey edit --policy` 均接受显式空策略文档，例如 `{}` 或 `{"Statement":[]}`（[#78](https://github.com/pgsty/mc/issues/78)；`admin user svcacct set` 此前已支持空策略文档），并对客户端侧 IAM 与桶策略命令启用严格 JSON 解码（拒绝未知字段、尾部多余载荷、空 `Principal: {}` 及未实现的 `NotPrincipal`）。配合 [SILO Server 20261112](/zh/compatibility/server/#maintenance-20261112) 后，显式空策略会清除 inline policy 并恢复继承，省略 `--policy` 则保留已有策略；创建账号与写入命名策略仍拒绝空策略。
+[mcli 20261112](/zh/release/mcli-20261112/)（`a37a9f054fba`，Go `1.27.4`，[silo-pkg v3.16.1](/zh/release/pkg-3.16.1/)）的 `admin user svcacct edit --policy`、`admin accesskey edit --policy`、`idp ldap accesskey edit --policy` 与 `idp openid accesskey edit --policy` 均接受显式空策略文档，例如 `{}` 或 `{"Statement":[]}`（[#78](https://github.com/pgsty/mc/issues/78)；`admin user svcacct set` 此前已支持空策略文档），并对客户端侧 IAM 与桶策略命令启用严格 JSON 解码（拒绝未知字段、尾部多余载荷、空 `Principal: {}` 及未实现的 `NotPrincipal`）。配合 [SILO Server 20261112](/zh/compatibility/server/#maintenance-20261112) 后，显式空策略会清除 inline policy 并恢复继承，省略 `--policy` 则保留已有策略；创建账号与写入命名策略仍拒绝空策略。
 
-[SILO Server 20261112](/zh/blog/release/silo-20261112/)、[Console 2.7.2](/zh/blog/release/console-2.7.2/) 与 [Console 2.7.1](/zh/blog/release/console-2.7.1/) 均直接采用该正式提交（`v0.0.0-20261111180825-a37a9f054fba`），经典 `pgsty/silo:RELEASE.2026-11-12T00-00-00Z` 镜像内置 `mcli 20261112`；只替换客户端二进制无法修改旧版 Server（`20261109` 及更早版本）的服务端行为。
+[SILO Server 20261112](/zh/release/silo-20261112/)、[Console 2.7.2](/zh/release/console-2.7.2/) 与 [Console 2.7.1](/zh/release/console-2.7.1/) 均直接采用该正式提交（`v0.0.0-20261111180825-a37a9f054fba`），经典 `pgsty/silo:RELEASE.2026-11-12T00-00-00Z` 镜像内置 `mcli 20261112`；只替换客户端二进制无法修改旧版 Server（`20261109` 及更早版本）的服务端行为。
 
 ## 继承自 20261109 的变化 {#release-20261109}
 
-[20261109 发布说明](/zh/blog/release/mcli-20261109/) 覆盖 [pgsty/mc#74](https://github.com/pgsty/mc/pull/74)、[#76](https://github.com/pgsty/mc/pull/76) 和 [#77](https://github.com/pgsty/mc/pull/77) 的修复。完整变更见源码的[更新日志](https://github.com/pgsty/mc/blob/RELEASE.2026-11-09T00-00-00Z/CHANGELOG.md)。[SILO Server 20261109](/zh/blog/release/silo-20261109/) 与 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 均直接链接该正式版本（`v0.0.0-20261109021353-e1d4cc5abfe0`）；经典 `pgsty/silo:RELEASE.2026-11-09T00-00-00Z` 镜像内置 `mcli 20261109` 并在 `/licenses/mcli` 下包含其法律声明（经典与 `-distroless` 服务端镜像均在 `/licenses/` 下附带服务端法律声明）。
+[20261109 发布说明](/zh/release/mcli-20261109/) 覆盖 [pgsty/mc#74](https://github.com/pgsty/mc/pull/74)、[#76](https://github.com/pgsty/mc/pull/76) 和 [#77](https://github.com/pgsty/mc/pull/77) 的修复。完整变更见源码的[更新日志](https://github.com/pgsty/mc/blob/RELEASE.2026-11-09T00-00-00Z/CHANGELOG.md)。[SILO Server 20261109](/zh/release/silo-20261109/) 与 [Console 2.7.0](/zh/release/console-2.7.0/) 均直接链接该正式版本（`v0.0.0-20261109021353-e1d4cc5abfe0`）；经典 `pgsty/silo:RELEASE.2026-11-09T00-00-00Z` 镜像内置 `mcli 20261109` 并在 `/licenses/mcli` 下包含其法律声明（经典与 `-distroless` 服务端镜像均在 `/licenses/` 下附带服务端法律声明）。
 
 - `cp` 和 `mv` 在准备某个源失败后继续处理其他独立源，整体返回非零。参数列表中后面的源仍可能被复制或移动；成功移动的源会被删除。成功操作不会回滚。
 - 逐对象 JSON 开始记录中的 `totalCount`、`totalSize` 分别是累计准备好的对象数与字节数，会随源列举继续增长。它们不是最终任务总量，也不能用作完成百分比的分母。请检查最终退出码、错误记录与最终字节汇总。
@@ -41,7 +41,7 @@ icon: fa-solid fa-terminal
 
 基于 Go 1.27.3、silo-pkg 3.15.2 与固定提交的上游 SDK（`320af050c445`）构建。相比 20261018，本版修复了身份与连接配置缓存隔离、`admin replicate resync` 的 JSON 输出与终态判定、吞吐量及 batch IOPs 计数溢出、无实时指标时的任务状态轮询、部分操作失败的退出码、别名区域配置以及 SDK 分片上传/读取/批量删除行为。自动化脚本需适配新增的 `pending` 状态，以及部分 resync 变更操作失败时的非零退出码（查询已处于失败状态的任务仍返回退出码 `0`）。别名 region 支持未引入新 CLI 参数，原有配置可直接沿用。
 
-20261026 对应的模块版本为 `github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0`。客户端升级不涉及服务端协议变更，以 SILO 作为正式维护目标。详见[完整变更](/zh/blog/release/silo-20261026/#mcli)与[组件矩阵](/zh/compatibility/versions/)。
+20261026 对应的模块版本为 `github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0`。客户端升级不涉及服务端协议变更，以 SILO 作为正式维护目标。详见[完整变更](/zh/release/silo-20261026/#mcli)与[组件矩阵](/zh/compatibility/versions/)。
 
 ## 继承自 20260916 的变化 {#release-20260916}
 
@@ -54,7 +54,7 @@ JWX 更新修复输出 JSON 字段名的转义，pkg v3.14.0 的密码权限语�
 - legalhold set/clear、递归 retention 部分失败，以及 `mv` 复制成功但源删除失败都会返回非零；成功对象不回滚。retention 每个失败对象只输出一次诊断。
 - 空 retention 时长和非法 find regex 正常报错，不再 panic；极短传输的 JSON 速度统计不再产生 Inf。
 
-**脚本升级注意：** 上述失败曾返回 0 的路径现在返回 1，请检查最终退出码与错误记录。配置格式、别名和 `MC_*` 变量不变。详见[本次发布说明](/zh/blog/release/mcli-20260916/)。
+**脚本升级注意：** 上述失败曾返回 0 的路径现在返回 1，请检查最终退出码与错误记录。配置格式、别名和 `MC_*` 变量不变。详见[本次发布说明](/zh/release/mcli-20260916/)。
 
 ## 继承自 20260913 的变化 {#release-20260913}
 

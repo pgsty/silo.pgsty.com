@@ -99,7 +99,7 @@ $$\text{entries} = N \times (H + U)$$
 | 文档                                                                             | 说明                                                               |
 | :------------------------------------------------------------------------------- | :----------------------------------------------------------------- |
 | [S3 API 兼容性 — 分片上传 API 差异说明](/zh/reference/s3-api-compatibility/#id5) | Server `20261018` 中 `ListMultipartUploads` 的权威用户侧兼容性说明 |
-| [SILO 20260916 发布注记](/zh/blog/release/silo-20260916/)                        | 记录已发布的 legacy 默认、strict 可选、UploadID 校验和取消边界     |
+| [SILO 20260916 发布注记](/zh/release/silo-20260916/)                             | 记录已发布的 legacy 默认、strict 可选、UploadID 校验和取消边界     |
 {.wide .expand}
 
 ---

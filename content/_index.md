@@ -11,7 +11,7 @@ upstream_modified: true
 body_class: landing-page
 ---
 
-This site documents **[SILO 20261112](/blog/release/silo-20261112/)** (with embedded and standalone **[Console 2.7.2](/blog/release/console-2.7.2/)**, **[mcli 20261112](/blog/release/mcli-20261112/)**, and **[silo-pkg 3.16.1](/blog/release/pkg-3.16.1/)**, built with Go 1.27.4) and the optional external key service **[KES 20261026](/blog/release/silo-20261026/#kes)**. Review the [component matrix](/compatibility/versions/) and [20261112 upgrade checks](/compatibility/server/#maintenance-20261112) before upgrading (updating standalone `mcli` or Console does not replace components embedded in an older Server binary).
+This site documents **[SILO 20261112](/release/silo-20261112/)** (with embedded and standalone **[Console 2.7.2](/release/console-2.7.2/)**, **[mcli 20261112](/release/mcli-20261112/)**, and **[silo-pkg 3.16.1](/release/pkg-3.16.1/)**, built with Go 1.27.4) and the optional external key service **[KES 20261026](/release/silo-20261026/#kes)**. Review the [component matrix](/compatibility/versions/) and [20261112 upgrade checks](/compatibility/server/#maintenance-20261112) before upgrading (updating standalone `mcli` or Console does not replace components embedded in an older Server binary).
 
 > [!WARNING]
 > **SILO is a MinIO fork maintained by the Pigsty community.** It is not affiliated with, endorsed by, or sponsored by MinIO, Inc. “MinIO” is a trademark of MinIO, Inc., used here only to identify the upstream project. See [Attribution](/about/attribution/) for source and licensing details.
@@ -22,7 +22,7 @@ SILO gives existing MinIO deployments an open release and security-maintenance p
 
 {{< tabs group="quickstart" >}}
 {{< tab label="Docker" value="docker" >}}
-The commands below pin [Server 20261112](/blog/release/silo-20261112/#delivery). Example credentials are for local evaluation only.
+The commands below pin [Server 20261112](/release/silo-20261112/#delivery). Example credentials are for local evaluation only.
 
 {{% steps %}}
 

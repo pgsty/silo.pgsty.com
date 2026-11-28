@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/tls-parameter-pinning/"
 ---
 
-Go TLS 默认值修复 [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31) 随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布后，[issue #154](https://github.com/pgsty/silo/issues/154) 的报告人在该版本复测，OIDC discovery 仍然报同一条 `connection reset by peer`。与此同时，上游 Go 社区的同类 issue 将完全一致的症状定位到检查 `signature_algorithms_cert` 扩展并发送重置的 TLS 中间设备（见[上游的同款案例](#upstream)）。本文在[《Go 1.27 TLS 默认值与 OIDC Discovery 故障形态》](/zh/blog/design/go127-tls-oidc-discovery/)的基础上，补充发布后的复测与机制分析、20260916 修复的覆盖边界、受影响部署的可选解法，以及由此确立的发布与沟通门禁。
+Go TLS 默认值修复 [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31) 随 [Server 20260916](/zh/release/silo-20260916/) 发布后，[issue #154](https://github.com/pgsty/silo/issues/154) 的报告人在该版本复测，OIDC discovery 仍然报同一条 `connection reset by peer`。与此同时，上游 Go 社区的同类 issue 将完全一致的症状定位到检查 `signature_algorithms_cert` 扩展并发送重置的 TLS 中间设备（见[上游的同款案例](#upstream)）。本文在[《Go 1.27 TLS 默认值与 OIDC Discovery 故障形态》](/zh/blog/design/go127-tls-oidc-discovery/)的基础上，补充发布后的复测与机制分析、20260916 修复的覆盖边界、受影响部署的可选解法，以及由此确立的发布与沟通门禁。
 
 ## 先把本质说清楚 {#plain}
 
@@ -239,7 +239,7 @@ CVE-2020-1967 当年正是通过畸形的 `signature_algorithms_cert` 触发的�
 
 ## 发布与沟通门槛 {#gates}
 
-这次修复的兼容前提写在 Server README 的 TLS 小节、[Go 1.27 TLS 与 OIDC](/zh/blog/design/go127-tls-oidc-discovery/)，以及 [20260916 发布说明](/zh/blog/release/silo-20260916/) 中。但在 issue 处置中有三件事没有做到位：
+这次修复的兼容前提写在 Server README 的 TLS 小节、[Go 1.27 TLS 与 OIDC](/zh/blog/design/go127-tls-oidc-discovery/)，以及 [20260916 发布说明](/zh/release/silo-20260916/) 中。但在 issue 处置中有三件事没有做到位：
 
 - 未在 issue 中直接说明该修复需要配合设置 `GODEBUG=tlsmlkem=0` 才会生效，以及它针对的是哪条故障分支。
 - 该配置要求仅作为变更记录写入说明，而未作为受影响环境升级时的显式操作项列入升级检查清单。

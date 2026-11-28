@@ -3,7 +3,7 @@ columns:
     links:
       - { label: "SILO 下载", url: "download/#server" }
       - { label: "MCLI 下载", url: "download/#client" }
-      - { label: "发布注记", url: "blog/release/" }
+      - { label: "发布注记", url: "release/" }
       - { label: "安全注记", url: "blog/security/" }
   - title: "文档"
     links:

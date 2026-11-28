@@ -9,13 +9,13 @@ weight: 1
 url: "/zh/blog/security/20260916-release-hardening/"
 ---
 
-本文汇总随 [Server 20260916](/zh/blog/release/silo-20260916/) 与 [Console v2.4.1](/zh/blog/release/console-2.4.1/) 发布的三项安全修复（`SN-2026-012` 至 `SN-2026-014`）及底层依赖安全更新。完整台账索引见[安全公告台账](/zh/about/security-advisories/)。
+本文汇总随 [Server 20260916](/zh/release/silo-20260916/) 与 [Console v2.4.1](/zh/release/console-2.4.1/) 发布的三项安全修复（`SN-2026-012` 至 `SN-2026-014`）及底层依赖安全更新。完整台账索引见[安全公告台账](/zh/about/security-advisories/)。
 
-| 编号与问题                           | 修复源码                                                                                                                  | 发布状态                                                                                                                            |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `SN-2026-012`：预签名载荷完整性      | Server `c4b5e1cb4`，[PR #177](https://github.com/pgsty/silo/pull/177)                                                     | 已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布（`RELEASE.2026-09-03T13-18-01Z` 及更早版本受影响）                     |
-| `SN-2026-013`：持久 IAM 撤销         | Server [PR #191](https://github.com/pgsty/silo/pull/191) / [PR #192](https://github.com/pgsty/silo/pull/192)              | 已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；需跨节点与跨站点协调升级                                              |
-| `SN-2026-014`：匿名 Console 分享代理 | [Console PR #56](https://github.com/pgsty/silo-console/pull/56)；[Server PR #209](https://github.com/pgsty/silo/pull/209) | 已在独立 [Console v2.4.1](/zh/blog/release/console-2.4.1/) 与内嵌该版本的 [Server 20260916](/zh/blog/release/silo-20260916/) 中发布 |
+| 编号与问题                           | 修复源码                                                                                                                  | 发布状态                                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `SN-2026-012`：预签名载荷完整性      | Server `c4b5e1cb4`，[PR #177](https://github.com/pgsty/silo/pull/177)                                                     | 已随 [Server 20260916](/zh/release/silo-20260916/) 发布（`RELEASE.2026-09-03T13-18-01Z` 及更早版本受影响）                |
+| `SN-2026-013`：持久 IAM 撤销         | Server [PR #191](https://github.com/pgsty/silo/pull/191) / [PR #192](https://github.com/pgsty/silo/pull/192)              | 已随 [Server 20260916](/zh/release/silo-20260916/) 发布；需跨节点与跨站点协调升级                                         |
+| `SN-2026-014`：匿名 Console 分享代理 | [Console PR #56](https://github.com/pgsty/silo-console/pull/56)；[Server PR #209](https://github.com/pgsty/silo/pull/209) | 已在独立 [Console v2.4.1](/zh/release/console-2.4.1/) 与内嵌该版本的 [Server 20260916](/zh/release/silo-20260916/) 中发布 |
 {.wide .expand}
 
 ## 预签名载荷完整性 — SN-2026-012 {#sn-2026-012}
@@ -42,8 +42,8 @@ Jiri Pejchal 报告：无需认证的 Console 分享下载代理接受了指向�
 
 [Console #56](https://github.com/pgsty/silo-console/pull/56) 严格限定目标 URL 的协议、主机与端口必须匹配已配置的 S3 源站，要求路径必须为合法的 `/{bucket}/{object}`，拒绝系统保留前缀、路径穿越片段以及改变操作类型的查询参数，禁止跟随上游重定向，并透传客户端取消信号；合法的预签名对象下载 URL 则原样保留原始签名字节。
 
-独立部署的 Console 请升级至 [Console v2.4.1](/zh/blog/release/console-2.4.1/)；使用内嵌 Console 的服务端部署（通过 [Server #209](https://github.com/pgsty/silo/pull/209) 集成）请升级至 [Server 20260916](/zh/blog/release/silo-20260916/)。
+独立部署的 Console 请升级至 [Console v2.4.1](/zh/release/console-2.4.1/)；使用内嵌 Console 的服务端部署（通过 [Server #209](https://github.com/pgsty/silo/pull/209) 集成）请升级至 [Server 20260916](/zh/release/silo-20260916/)。
 
 ## 相邻依赖加固 {#dependencies}
 
-[Server 20260916](/zh/blog/release/silo-20260916/) 将 `github.com/rabbitmq/amqp091-go` 升级至 `v1.14.0` 以修复 [GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp)（上游于 `v1.13.0` 修复：配置了 AMQP 桶事件通知目标时，恶意 AMQP 对端可触发过量内存分配），并同步升级至包含 JWX JSON 编码修复的 [pkg v3.14.1](/zh/blog/release/pkg-3.14.1/)。
+[Server 20260916](/zh/release/silo-20260916/) 将 `github.com/rabbitmq/amqp091-go` 升级至 `v1.14.0` 以修复 [GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp)（上游于 `v1.13.0` 修复：配置了 AMQP 桶事件通知目标时，恶意 AMQP 对端可触发过量内存分配），并同步升级至包含 JWX JSON 编码修复的 [pkg v3.14.1](/zh/release/pkg-3.14.1/)。

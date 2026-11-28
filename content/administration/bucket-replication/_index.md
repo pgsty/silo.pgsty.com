@@ -7,9 +7,9 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**SILO 20261109 release changes:** [SILO 20261109](/blog/release/silo-20261109/) preserves target Object Lock retention and legal hold on replicated deletes (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)), stops replicating lifecycle-created delete markers and version purges to match AWS S3 semantics (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), and prevents replication worker metrics from panicking when the replication pool is absent while retaining historical averages and peak counts (commit [`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf3)).
+**SILO 20261109 release changes:** [SILO 20261109](/release/silo-20261109/) preserves target Object Lock retention and legal hold on replicated deletes (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)), stops replicating lifecycle-created delete markers and version purges to match AWS S3 semantics (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), and prevents replication worker metrics from panicking when the replication pool is absent while retaining historical averages and peak counts (commit [`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf3)).
 
-**20261026 release change:** Multipart replication now preserves the `FULL_OBJECT` checksum type for composite CRC algorithms (earlier versions omitted the header, causing the destination to initialize a `COMPOSITE` multipart upload and reject the full-object CRC at completion). This fix is in [Server 20261026](/blog/release/silo-20261026/#server-20261026); after upgrading the sending Server, verify pending/failed replicas and destination checksums.
+**20261026 release change:** Multipart replication now preserves the `FULL_OBJECT` checksum type for composite CRC algorithms (earlier versions omitted the header, causing the destination to initialize a `COMPOSITE` multipart upload and reject the full-object CRC at completion). This fix is in [Server 20261026](/release/silo-20261026/#server-20261026); after upgrading the sending Server, verify pending/failed replicas and destination checksums.
 
 <a id="bucket-replication"></a>
 <a id="minio-bucket-replication"></a>
@@ -72,7 +72,7 @@ For delete marker replication, MinIO begins the replication process after a dele
 
 For replicating the deletion of a specific object version, MinIO marks the object version as `PENDING` until replication completes. Once the remote target deletes that object version, MinIO deletes the object on the source. While this process ensures near-synchronized version deletion, it may result in listing operations returning the object version after the initial delete operation. MinIO uses the `X-Minio-Replication-Delete-Status` for tracking delete version replication status.
 
-In [SILO 20261109](/blog/release/silo-20261109/), replicated deletes preserve the target's Object Lock legal hold and retention (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)). A source purge that bypassed `GOVERNANCE` retention does not grant a bypass on the target; if the target version still carries active retention or a legal hold, the target refuses the replicated purge and the source retries.
+In [SILO 20261109](/release/silo-20261109/), replicated deletes preserve the target's Object Lock legal hold and retention (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)). A source purge that bypassed `GOVERNANCE` retention does not grant a bypass on the target; if the target version still carries active retention or a legal hold, the target refuses the replicated purge and the source retries.
 
 SILO replicates only explicit client-driven delete operations. Lifecycle-created delete markers and version purges from [lifecycle management expiration rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) are **not** replicated (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), matching AWS S3 semantics. Configure expiration rules independently on source and target buckets—and identically across all buckets in [active-active](/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) configurations—when replicas require consistent expiration.
 
@@ -126,7 +126,7 @@ This section documents internal replication behavior and is not critical to usin
 
 #### Replication Process {#replication-process}
 
-MinIO uses a replication queuing system with multiple concurrent replication workers operating on that queue. MinIO continuously works to replicate and remove objects from the queue while scanning for new unreplicated objects to add to the queue. In [SILO 20261109](/blog/release/silo-20261109/), replication worker metrics no longer panic when the replication worker pool is absent and continue to retain historical averages and peak counts (commit [`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf3)).
+MinIO uses a replication queuing system with multiple concurrent replication workers operating on that queue. MinIO continuously works to replicate and remove objects from the queue while scanning for new unreplicated objects to add to the queue. In [SILO 20261109](/release/silo-20261109/), replication worker metrics no longer panic when the replication worker pool is absent and continue to retain historical averages and peak counts (commit [`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf3)).
 
 > [!NOTE]
 > **Queue retry and requeue behavior**

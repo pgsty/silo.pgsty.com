@@ -85,7 +85,7 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Failure Reporting and Legacy Fallback (`mcli 20261109`) {#failure-reporting}
 
-In [`mcli 20261109`](/blog/release/mcli-20261109/):
+In [`mcli 20261109`](/release/mcli-20261109/):
 
 - When the server reports failed IAM entity imports, `mc admin cluster iam import` returns exit status `1` while preserving detailed error reports so automation can detect partial import failures.
 - `mc admin cluster iam import` falls back to the legacy API only when the server explicitly returns `NotImplemented` or `XMinioAdminVersionMismatch`. Other HTTP, authentication, authorization, transport, or decoding errors from `ImportIAMv2` return directly without triggering a second import.

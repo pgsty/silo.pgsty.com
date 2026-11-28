@@ -85,7 +85,7 @@ MinIO 会为每个已转移对象创建元数据，用于标识其在远程存�
 
 如需迁移对象的非当前版本，请在创建迁移规则时指定 [`--noncurrent-transition-days`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-transition-days) 和 [`--noncurrent-transition-tier`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-transition-tier) 选项。
 
-自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，远端分层管理与 [`mc ilm restore`](/zh/reference/minio-mc/mc-ilm-restore/) 包含以下更新：
+自 [SILO 20261109](/zh/release/silo-20261109/) 起，远端分层管理与 [`mc ilm restore`](/zh/reference/minio-mc/mc-ilm-restore/) 包含以下更新：
 
 - **两阶段原地原生恢复：** 原生恢复（`POST ?restore`，提交 [`86dc6ee2e`](https://github.com/pgsty/silo/commit/86dc6ee2e)）在对象写锁之外下载并暂存远程层数据（[#284](https://github.com/pgsty/silo/issues/284)），随后在短暂持锁下核验所有权并原地发布恢复副本，不会改变版本顺序，多池部署下也不再挂起或卡住（[#289](https://github.com/pgsty/silo/issues/289)）。
 - **恢复副本与远程层安全：** 已恢复副本到期时仅清理本地临时缓存，同时保留对象版本及其远程层数据（[#281](https://github.com/pgsty/silo/issues/281)）。SILO 在普通版本历史中排除分层 free-version 标记（[#263](https://github.com/pgsty/silo/issues/263)），且只要其他存储池仍引用某份远程层数据，就会保留该远程对象（[#306](https://github.com/pgsty/silo/issues/306)、[#308](https://github.com/pgsty/silo/issues/308)）。
@@ -94,9 +94,9 @@ MinIO 会为每个已转移对象创建元数据，用于标识其在远程存�
 
 ## 对象过期 {#object-expiration}
 
-**SILO 20261109 正式版变化：** 在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，生命周期过期会在对象锁内跨所有存储池评估，并要求取得权威法定人数后才移除版本（[#278](https://github.com/pgsty/silo/issues/278)）。整键删除动作（`ExpiredObjectAllVersions` 与 `DelMarkerExpiration`）仅作用于已过期的精确对象键而不再波及前缀下的子键，且在对象键包含已分层版本或受 Object Lock 保护的版本时拒绝整键删除（[#297](https://github.com/pgsty/silo/issues/297)）。唯一动作为 `DelMarkerExpiration` 的规则可正常执行（[#268](https://github.com/pgsty/silo/issues/268)），且生命周期统计仅计入实际发生的移除（[#305](https://github.com/pgsty/silo/issues/305)）。请升级全部服务节点以启用完整的多池生命周期保护。
+**SILO 20261109 正式版变化：** 在 [SILO 20261109](/zh/release/silo-20261109/) 中，生命周期过期会在对象锁内跨所有存储池评估，并要求取得权威法定人数后才移除版本（[#278](https://github.com/pgsty/silo/issues/278)）。整键删除动作（`ExpiredObjectAllVersions` 与 `DelMarkerExpiration`）仅作用于已过期的精确对象键而不再波及前缀下的子键，且在对象键包含已分层版本或受 Object Lock 保护的版本时拒绝整键删除（[#297](https://github.com/pgsty/silo/issues/297)）。唯一动作为 `DelMarkerExpiration` 的规则可正常执行（[#268](https://github.com/pgsty/silo/issues/268)），且生命周期统计仅计入实际发生的移除（[#305](https://github.com/pgsty/silo/issues/305)）。请升级全部服务节点以启用完整的多池生命周期保护。
 
-**20261026 正式版变化：** 在 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)中，当生命周期过期仅写入删除标记时（包括已暂停版本控制桶中的非 `null` 版本），SILO 会保留上一版本的远端分层对象数据，直至该特定版本被永久删除且不再受保留期或共享引用保护。Server 20261018 不包含此修复；升级前已被误删的历史远端数据需从备份恢复。
+**20261026 正式版变化：** 在 [Server 20261026](/zh/release/silo-20261026/#server-20261026)中，当生命周期过期仅写入删除标记时（包括已暂停版本控制桶中的非 `null` 版本），SILO 会保留上一版本的远端分层对象数据，直至该特定版本被永久删除且不再受保留期或共享引用保护。Server 20261018 不包含此修复；升级前已被误删的历史远端数据需从备份恢复。
 
 MinIO 生命周期管理支持对存储桶中的对象执行过期操作。 对象“过期”是指对该对象执行 `DELETE` 操作。 例如，您可以创建生命周期管理规则，使所有超过 365 天的对象过期。
 

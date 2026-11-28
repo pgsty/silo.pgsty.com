@@ -10,7 +10,7 @@ upstream_link: ""
 
 [`mc checksum verify`](#command-mc.checksum.verify) 将 S3 端点保存的附加校验和，与该端点返回的逻辑对象字节重新独立计算出的校验和进行比较。
 
-这是 [mcli 20260903](/zh/blog/release/mcli-20260903/) 新增的**只读审计命令**，只使用 S3 LIST、HEAD 与 GET；它绝不修复 metadata、改写对象，也不会武断地判断是哪条历史写入路径造成了 mismatch。
+这是 [mcli 20260903](/zh/release/mcli-20260903/) 新增的**只读审计命令**，只使用 S3 LIST、HEAD 与 GET；它绝不修复 metadata、改写对象，也不会武断地判断是哪条历史写入路径造成了 mismatch。
 
 命令支持 `FULL_OBJECT` 类型的 CRC32、CRC32C、CRC64NVME、SHA1 与 SHA256。`COMPOSITE` 校验和报告为不支持；缺少 `x-amz-checksum-type` 时报告 `UNKNOWN_CHECKSUM_TYPE`。
 

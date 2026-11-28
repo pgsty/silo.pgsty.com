@@ -10,7 +10,7 @@ upstream_modified: true
 <a id="kes"></a>
 <a id="server-side-object-encryption-with-kes"></a>
 
-使用 **PGSTY KES** 作为 SILO 的独立密钥加密服务。上游 MinIO KES 已弃用，但持续维护的 [`pgsty/kes`](https://github.com/pgsty/kes) 分支已正式发布 [20261026](/zh/blog/release/silo-20261026/#kes)。KES 是可选的独立服务，不内嵌于 SILO 二进制。
+使用 **PGSTY KES** 作为 SILO 的独立密钥加密服务。上游 MinIO KES 已弃用，但持续维护的 [`pgsty/kes`](https://github.com/pgsty/kes) 分支已正式发布 [20261026](/zh/release/silo-20261026/#kes)。KES 是可选的独立服务，不内嵌于 SILO 二进制。
 
 维护的集成路径为 **SILO → PGSTY KES → OpenBao KV v2**：SILO 加密对象数据，KES 验证 SILO 身份并生成或解密数据密钥，OpenBao 持久保存 KES 根密钥。OpenBao 使用 KES 的 `keystore.vault` 配置。验证范围与升级边界见[集成设计](/zh/blog/design/kes-openbao/)。
 

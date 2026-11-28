@@ -14,7 +14,7 @@ url: "/zh/blog/design/heal-dry-run-safety/"
 
 本文覆盖 Jasper Bernhardt（[`@dihmandrake`](https://github.com/dihmandrake)）提交的 [PR #280](https://github.com/pgsty/silo/pull/280) 中与演练（dry run）相关的部分，基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 评估。同一个 PR 还让深度扫描并发校验一个对象的各块盘。这项优化另行评审，不在本文范围内。
 
-**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+**状态：** 已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短结论 {#tldr}
 

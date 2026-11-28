@@ -15,7 +15,7 @@ draft: false
 url: "/blog/design/tls-parameter-pinning/"
 ---
 
-After the Go TLS default repair [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31) shipped in [Server 20260916](/blog/release/silo-20260916/), the reporter of [issue #154](https://github.com/pgsty/silo/issues/154) retested on that release and still saw `connection reset by peer` on OIDC discovery. Meanwhile, upstream Go issues reported the exact same symptom and traced it to TLS-inspecting middleboxes resetting connections over the `signature_algorithms_cert` extension (see [The Known Upstream Instance](#upstream)). This article extends [Go 1.27 TLS Defaults and OIDC Discovery Failure Modes](/blog/design/go127-tls-oidc-discovery/) with the post-release mechanism analysis, the scope of the 20260916 repair, the remediation options for affected deployments, and the resulting release and issue-closure gates.
+After the Go TLS default repair [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31) shipped in [Server 20260916](/release/silo-20260916/), the reporter of [issue #154](https://github.com/pgsty/silo/issues/154) retested on that release and still saw `connection reset by peer` on OIDC discovery. Meanwhile, upstream Go issues reported the exact same symptom and traced it to TLS-inspecting middleboxes resetting connections over the `signature_algorithms_cert` extension (see [The Known Upstream Instance](#upstream)). This article extends [Go 1.27 TLS Defaults and OIDC Discovery Failure Modes](/blog/design/go127-tls-oidc-discovery/) with the post-release mechanism analysis, the scope of the 20260916 repair, the remediation options for affected deployments, and the resulting release and issue-closure gates.
 
 ## In Plain Terms {#plain}
 
@@ -240,7 +240,7 @@ Two options are explicitly rejected:
 
 ## Release and Communication Gates {#gates}
 
-The repair's compatibility requirement was documented in the Server README's TLS section, in [Go 1.27 TLS and OIDC](/blog/design/go127-tls-oidc-discovery/), and in the [20260916 release notes](/blog/release/silo-20260916/). However, three things were missed during issue handling:
+The repair's compatibility requirement was documented in the Server README's TLS section, in [Go 1.27 TLS and OIDC](/blog/design/go127-tls-oidc-discovery/), and in the [20260916 release notes](/release/silo-20260916/). However, three things were missed during issue handling:
 
 - The reporter was not told in the issue that the repair requires setting `GODEBUG=tlsmlkem=0` to take effect, nor which branch it addresses.
 - The `GODEBUG` requirement was documented as a change note without being highlighted as an explicit operator action on the upgrade checklist.

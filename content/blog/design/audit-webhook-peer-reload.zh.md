@@ -14,7 +14,7 @@ url: "/zh/blog/design/audit-webhook-peer-reload/"
 
 本文覆盖 Henrik Feldt 报告的 [issue #259](https://github.com/pgsty/silo/issues/259)，基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 评估。本修复完成了维护者此前未提交的工作：补上 Kafka 调用点，在目标从未启动时把排队记录交给替代者，并增加 Kafka 测试覆盖。
 
-**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+**状态：** 已随 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短结论 {#tldr}
 

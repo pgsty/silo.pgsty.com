@@ -18,7 +18,7 @@ Pigsty 维护的客户端在独立归档与 Linux 软件包中以 **`mcli`** 发
 
 Silo 项目无法保证它与每一种其他 S3 兼容服务的行为，因为各家实现存在差异。在将其他服务视为兼容对象前，请先测试工作负载依赖的操作。
 
-当前版本为 [mcli 20261112](/zh/blog/release/mcli-20261112/)（`RELEASE.2026-11-12T00-00-00Z`），使用 Go 1.27.4、`silo-pkg` [v3.16.1](/zh/blog/release/pkg-3.16.1/) 与上游 SDK `v7.4.2-0.20261025165926-320af050c445`。完整行为变化见[兼容性注记](/zh/compatibility/mcli/#current-release)，Server/Console 版本边界见[组件矩阵](/zh/compatibility/versions/)。
+当前版本为 [mcli 20261112](/zh/release/mcli-20261112/)（`RELEASE.2026-11-12T00-00-00Z`），使用 Go 1.27.4、`silo-pkg` [v3.16.1](/zh/release/pkg-3.16.1/) 与上游 SDK `v7.4.2-0.20261025165926-320af050c445`。完整行为变化见[兼容性注记](/zh/compatibility/mcli/#current-release)，Server/Console 版本边界见[组件矩阵](/zh/compatibility/versions/)。
 
 [`mc`](#command-mc) 的语法如下：
 
@@ -56,7 +56,7 @@ mc [GLOBALFLAGS] COMMAND --help
 
 独立归档与 Linux 软件包安装的命令名是 **`mcli`**，容器与源码构建则保留 **`mc`**。两者是同一个客户端的别名；本文档示例使用 `mc`，若主机上安装的是 `mcli`，请直接替换命令名。
 
-直接运行已发布的多架构容器镜像（[mcli 20261109](/zh/blog/release/mcli-20261109/) 预先创建了带粘滞可写权限的 `/.mc` 目录，便于非 root UID 初始化配置）：
+直接运行已发布的多架构容器镜像（[mcli 20261109](/zh/release/mcli-20261109/) 预先创建了带粘滞可写权限的 `/.mc` 目录，便于非 root UID 初始化配置）：
 
 ```shell
 docker pull pgsty/mc:RELEASE.2026-11-09T00-00-00Z

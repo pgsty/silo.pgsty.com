@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/replication-reliability/"
 ---
 
-This article records the root-cause analysis, design tradeoffs, and validation across three rounds of replication reliability repairs shipped in [Server 20260916](/blog/release/silo-20260916/):
+This article records the root-cause analysis, design tradeoffs, and validation across three rounds of replication reliability repairs shipped in [Server 20260916](/release/silo-20260916/):
 
 - **Round 1 ([PR #162](https://github.com/pgsty/silo/pull/162), merged as [`d1105bbb`](https://github.com/pgsty/silo/commit/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e)):** addresses [#153](https://github.com/pgsty/silo/issues/153), [#152](https://github.com/pgsty/silo/issues/152), and [#137](https://github.com/pgsty/silo/issues/137), covering operation classification at the HTTP handler entry, MRF drop observability, and the resync cancellation lifecycle.
 - **Round 2 ([PR #196](https://github.com/pgsty/silo/pull/196), commit [`0c61128d2`](https://github.com/pgsty/silo/commit/0c61128d2)):** repairs the replication worker's delete exits, outer status aggregation, and the persisted MRF marker-recovery path (see [Round 2](#second-round)).
@@ -234,7 +234,7 @@ The legacy in-memory task shape does not serialize across restarts and has no ac
 
 ## Third Round (2026-09-16): Exact-Version Purges, Marker Healing, and Stale Creations {#third-round}
 
-Round 2 made the worker's purge exits truthful. Round 3 — commits [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3), [`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0), and [`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb), shipped in [Server 20260916](/blog/release/silo-20260916/) (`40220bd836cbd066ca424fa4dc5dbb90057fb55a`, alongside `silo-pkg` [`v3.14.1`](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) / `fa657ef`) — repairs how an exact-version purge updates drives and how queued marker creations behave after a purge completes. It was prompted by three-site container runs (three sites, four processes and sixteen drives per site, EC 12+4) in which a purged delete marker reappeared on both target sites while the source site still returned the data version.
+Round 2 made the worker's purge exits truthful. Round 3 — commits [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3), [`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0), and [`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb), shipped in [Server 20260916](/release/silo-20260916/) (`40220bd836cbd066ca424fa4dc5dbb90057fb55a`, alongside `silo-pkg` [`v3.14.1`](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) / `fa657ef`) — repairs how an exact-version purge updates drives and how queued marker creations behave after a purge completes. It was prompted by three-site container runs (three sites, four processes and sixteen drives per site, EC 12+4) in which a purged delete marker reappeared on both target sites while the source site still returned the data version.
 
 ### What Was Still Broken {#third-round-defects}
 

@@ -11,7 +11,7 @@ draft: false
 url: "/zh/blog/design/object-lock-replication-ordering/"
 ---
 
-Object Lock 复制时间戳排序的初始修复（[`f4c1286c9`](https://github.com/pgsty/silo/commit/f4c1286c9)）已随 [SILO Server 20260903](/zh/blog/release/silo-20260903/) 发布（收录于[安全公告台账](/zh/about/security-advisories/#operational)）。针对仅携带时间戳的删除（墓碑）、SSE-C 副本完整重传以及跨存储池 Object Lock 状态合并的后续修复（[PR #129](https://github.com/pgsty/silo/pull/129)、[PR #134](https://github.com/pgsty/silo/pull/134) 与 [PR #178](https://github.com/pgsty/silo/pull/178)）已随 [SILO Server 20260916](/zh/blog/release/silo-20260916/) 正式发布。
+Object Lock 复制时间戳排序的初始修复（[`f4c1286c9`](https://github.com/pgsty/silo/commit/f4c1286c9)）已随 [SILO Server 20260903](/zh/release/silo-20260903/) 发布（收录于[安全公告台账](/zh/about/security-advisories/#operational)）。针对仅携带时间戳的删除（墓碑）、SSE-C 副本完整重传以及跨存储池 Object Lock 状态合并的后续修复（[PR #129](https://github.com/pgsty/silo/pull/129)、[PR #134](https://github.com/pgsty/silo/pull/134) 与 [PR #178](https://github.com/pgsty/silo/pull/178)）已随 [SILO Server 20260916](/zh/release/silo-20260916/) 正式发布。
 
 ## 在重建目标元数据前捕获已存状态 {#problem}
 
@@ -41,7 +41,7 @@ Object Lock 复制时间戳排序的初始修复（[`f4c1286c9`](https://github.
 
 时间戳排序仅用于在已获授权的副本写入上裁决新旧冲突，本身不会授予修改 Object Lock 的权限；复制信任边界校验与相应的 S3/管理端权限（`s3:ReplicateObject`、`s3:BypassGovernanceRetention`、`s3:PutObjectRetention`、`s3:PutObjectLegalHold`）依然强制执行。该机制建立的是基于源端时间戳的逐跳字段顺序，不提供跨站点未同步时钟之间的因果全序，也不提供部分磁盘故障后的分布式事务回滚。
 
-配套的删除路径 Object Lock 加固已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 发布：[`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef) 在复制删除时保留目标端的保留期与法务锁定（源端绕过 `GOVERNANCE` 保留期发起的版本清除会被仍持有该锁的目标端副本拒绝，复制删除标记则启用 `RefuseLockedOverwrite`），[`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf) 在批量删除前检查目录对象 `null` 版本的锁状态，[`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc) 则在变更锁下跨池复检 S3 `DeleteObjects` 的物理版本清除。
+配套的删除路径 Object Lock 加固已随 [SILO Server 20261109](/zh/release/silo-20261109/) 发布：[`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef) 在复制删除时保留目标端的保留期与法务锁定（源端绕过 `GOVERNANCE` 保留期发起的版本清除会被仍持有该锁的目标端副本拒绝，复制删除标记则启用 `RefuseLockedOverwrite`），[`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf) 在批量删除前检查目录对象 `null` 版本的锁状态，[`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc) 则在变更锁下跨池复检 S3 `DeleteObjects` 的物理版本清除。
 
 升级至包含修复的版本可阻止旧复制事件再次覆盖较新的锁定状态，但无法自动重建升级前已被旧事件覆盖的历史状态。运维人员在确认恢复前，应结合权威记录核对各站点精确版本的保留期与法务锁定状态。
 

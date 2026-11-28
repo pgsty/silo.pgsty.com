@@ -11,8 +11,8 @@ upstream_modified: true
 > - **启用 LDAP 时的 Console root 登录（[#272](https://github.com/pgsty/silo/issues/272)）：** 启用 Active Directory / LDAP 后，`root` 用户仍可登录内嵌 Console。
 > - **多盘纠删集上的长 DN LDAP 登录（[#271](https://github.com/pgsty/silo/issues/271)）：** 规范化 DN 单段超过 255 字节的 LDAP 用户可在多盘纠删码集合部署上正常登录。
 > - **持久化 IAM 变更与完整策略加载（[#316](https://github.com/pgsty/silo/issues/316)、[#317](https://github.com/pgsty/silo/issues/317)、[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)）：** IAM 用户、用户组、策略、LDAP 组成员刷新及服务账户修改直接作用于持久化记录，且 IAM 拒绝不完整的策略加载并在惰性重载期间保持缓存认证可用，防止过期节点恢复旧凭据或已删除身份。
-> - **阿拉伯语 RTL 表单控件（[Console v2.7.0](/zh/blog/release/console-2.7.0/)）：** 阿拉伯语从右向左（RTL）界面下，密码显示按钮与字段单位选择器保持在输入文本旁，不再遮挡输入内容。
-> - **此前 Console 2.5.1 / Server 20261026 更新：** 切换用户组启用/禁用状态时保留现有成员；支持解析 OIDC 字符串数组形式的组声明；配置 HTTPS 或可信 TLS 反向代理后会话 Cookie 自动带 `Secure` 属性；新建访问密钥导出标准 UTF-8 JSON 凭据文件；内置策略 **Reset** 需配合 [SILO 20261026](/zh/blog/release/silo-20261026/#server-20261026) 及更高版本使用（[Console 2.5.1](/zh/blog/release/console-2.5.1/)）。
+> - **阿拉伯语 RTL 表单控件（[Console v2.7.0](/zh/release/console-2.7.0/)）：** 阿拉伯语从右向左（RTL）界面下，密码显示按钮与字段单位选择器保持在输入文本旁，不再遮挡输入内容。
+> - **此前 Console 2.5.1 / Server 20261026 更新：** 切换用户组启用/禁用状态时保留现有成员；支持解析 OIDC 字符串数组形式的组声明；配置 HTTPS 或可信 TLS 反向代理后会话 Cookie 自动带 `Secure` 属性；新建访问密钥导出标准 UTF-8 JSON 凭据文件；内置策略 **Reset** 需配合 [SILO 20261026](/zh/release/silo-20261026/#server-20261026) 及更高版本使用（[Console 2.5.1](/zh/release/console-2.5.1/)）。
 
 <a id="security-and-access"></a>
 <a id="minio-console-security-access"></a>
@@ -53,7 +53,7 @@ upstream_modified: true
 
 ## 策略 {#policies}
 
-Console v2.5.1 对内置策略提供 **Reset**（重置），对自定义策略提供 **Delete**（删除）。**Reset** 会移除管理员对内置策略的自定义覆盖并恢复 SILO 原生定义。[Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)使恢复后的内置定义立即可读，并在收到对端/etcd 通知时重新加载已提交状态以防延迟通知抹去后续编辑（仍会执行策略在用检查）。
+Console v2.5.1 对内置策略提供 **Reset**（重置），对自定义策略提供 **Delete**（删除）。**Reset** 会移除管理员对内置策略的自定义覆盖并恢复 SILO 原生定义。[Server 20261026](/zh/release/silo-20261026/#server-20261026)使恢复后的内置定义立即可读，并在收到对端/etcd 通知时重新加载已提交状态以防延迟通知抹去后续编辑（仍会执行策略在用检查）。
 
 **Policies** 部分会显示 MinIO 部署上的所有 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。 *Policies* 部分允许你创建、修改或删除策略。
 
@@ -147,4 +147,4 @@ MinIO 支持使用 [Active Directory 或 LDAP (AD/LDAP)](/zh/administration/iden
 
 使用本节中的界面可以查看、添加或编辑部署的 LDAP 配置。 MinIO 仅支持一个活动 LDAP 配置。
 
-MinIO 会查询 Active Directory / LDAP 服务器，以验证客户端指定的凭证。 如果进行了相应配置，MinIO 还会在 AD/LDAP 服务器上执行组查找。自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，启用 LDAP 后 `root` 用户仍可登录内嵌 Console（[#272](https://github.com/pgsty/silo/issues/272)），且规范化 DN 单段超过 255 字节的组授权 LDAP 用户可在多盘纠删码集合部署上正常登录（[#271](https://github.com/pgsty/silo/issues/271)）。
+MinIO 会查询 Active Directory / LDAP 服务器，以验证客户端指定的凭证。 如果进行了相应配置，MinIO 还会在 AD/LDAP 服务器上执行组查找。自 [SILO 20261109](/zh/release/silo-20261109/) 起，启用 LDAP 后 `root` 用户仍可登录内嵌 Console（[#272](https://github.com/pgsty/silo/issues/272)），且规范化 DN 单段超过 255 字节的组授权 LDAP 用户可在多盘纠删码集合部署上正常登录（[#271](https://github.com/pgsty/silo/issues/271)）。

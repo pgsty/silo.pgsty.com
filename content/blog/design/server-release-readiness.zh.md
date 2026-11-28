@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/server-release-readiness/"
 ---
 
-本文记录 [SILO 20260903](/zh/blog/release/silo-20260903/)（`RELEASE.2026-09-03T13-18-01Z`，对应提交 `9b11dc9469e650815b775cb47b039610644f5da4`，候选复审提交 `6e112d1856d4f3655f30fc81ee47e9f43d50d8f3`，对比基线 `RELEASE.2026-08-06T00-00-00Z` 即 `3be10fcc1a44f6620ded0bd303461f9d688cca23`）的发布前工程复审：第二轮复审发现了哪些遗漏缺陷、修复边界如何收窄，以及发布门禁如何组织。后续九月与十月版本的修复见[复制可靠性](/zh/blog/design/replication-reliability/)、[Server 20260916](/zh/blog/release/silo-20260916/) 与 [Server 20261018](/zh/blog/release/silo-20261018/#delivery)。
+本文记录 [SILO 20260903](/zh/release/silo-20260903/)（`RELEASE.2026-09-03T13-18-01Z`，对应提交 `9b11dc9469e650815b775cb47b039610644f5da4`，候选复审提交 `6e112d1856d4f3655f30fc81ee47e9f43d50d8f3`，对比基线 `RELEASE.2026-08-06T00-00-00Z` 即 `3be10fcc1a44f6620ded0bd303461f9d688cca23`）的发布前工程复审：第二轮复审发现了哪些遗漏缺陷、修复边界如何收窄，以及发布门禁如何组织。后续九月与十月版本的修复见[复制可靠性](/zh/blog/design/replication-reliability/)、[Server 20260916](/zh/release/silo-20260916/) 与 [Server 20261018](/zh/release/silo-20261018/#delivery)。
 
 ## 为什么需要第二轮审查 {#why-review}
 

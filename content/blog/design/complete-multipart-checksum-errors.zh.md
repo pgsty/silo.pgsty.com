@@ -12,11 +12,11 @@ draft: false
 url: "/zh/blog/design/complete-multipart-checksum-errors/"
 ---
 
-[#48](https://github.com/pgsty/silo/issues/48) 与 [#50](https://github.com/pgsty/silo/issues/50) 的修复已随 [Server 20260903](/zh/blog/release/silo-20260903/) 发布，流式校验和后续修复（[PR #143](https://github.com/pgsty/silo/pull/143)）已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布。本文取代八月早期提案中“暂时保留 `CRC64NVME` 静默规范化”的结论。
+[#48](https://github.com/pgsty/silo/issues/48) 与 [#50](https://github.com/pgsty/silo/issues/50) 的修复已随 [Server 20260903](/zh/release/silo-20260903/) 发布，流式校验和后续修复（[PR #143](https://github.com/pgsty/silo/pull/143)）已随 [Server 20260916](/zh/release/silo-20260916/) 发布。本文取代八月早期提案中“暂时保留 `CRC64NVME` 静默规范化”的结论。
 
 ## 20261018：消息文字与提交失败 {#october-errors}
 
-[Server 20261018](/zh/blog/release/silo-20261018/#reliability) 包含 [#225](https://github.com/pgsty/silo/issues/225)、[#229](https://github.com/pgsty/silo/issues/229) 与 [#238](https://github.com/pgsty/silo/issues/238) 的消息格式修复：`Content-MD5` 大小写对齐 S3 规范、`PutObject` 与 `UploadPart` 校验失败时显示已知算法名，以及移除 `CompleteMultipartUpload` 错误消息中重复的 `"checksum"` 字样。未知算法仍保留通用描述，各操作对应的 S3 错误码与校验条件保持不变。下文提及的“保持 `UploadPart` 错误映射器不变”对应八月修复范围；十月版本更新了其消息文本生成。客户端应依据 HTTP 状态码与 S3 错误码判断失败原因，而非解析完整的英文消息字符串。
+[Server 20261018](/zh/release/silo-20261018/#reliability) 包含 [#225](https://github.com/pgsty/silo/issues/225)、[#229](https://github.com/pgsty/silo/issues/229) 与 [#238](https://github.com/pgsty/silo/issues/238) 的消息格式修复：`Content-MD5` 大小写对齐 S3 规范、`PutObject` 与 `UploadPart` 校验失败时显示已知算法名，以及移除 `CompleteMultipartUpload` 错误消息中重复的 `"checksum"` 字样。未知算法仍保留通用描述，各操作对应的 S3 错误码与校验条件保持不变。下文提及的“保持 `UploadPart` 错误映射器不变”对应八月修复范围；十月版本更新了其消息文本生成。客户端应依据 HTTP 状态码与 S3 错误码判断失败原因，而非解析完整的英文消息字符串。
 
 此外，[#232](https://github.com/pgsty/silo/issues/232) 将最终提交阶段暂存 `xl.meta` 丢失归类为 `503 SlowDownWrite`。该状态与下表中客户端提供错误校验和导致的 HTTP 400 不同，也不改变请求体不完整时的原有处理逻辑。详见 [S3 写入提交错误参考](/zh/reference/s3-api-compatibility/#write-commit-errors)。
 
@@ -53,7 +53,7 @@ url: "/zh/blog/design/complete-multipart-checksum-errors/"
 
 ## 独立的流式校验和后续修复 {#streaming}
 
-[PR #143](https://github.com/pgsty/silo/pull/143) 修复了 `@cbornet` 报告的 [#107](https://github.com/pgsty/silo/issues/107)，专门处理 AWS Java SDK v2 使用的混合请求模式：`aws-chunked` 流式请求在 `x-amz-trailer` 中声明了校验和请求头，但实际通过普通 HTTP 请求头直接发送该校验和值。该修复同时拒绝格式非法的请求头校验和值，防止因解析失败而静默跳过校验。此项修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，与分片完成阶段的错误映射相互独立。
+[PR #143](https://github.com/pgsty/silo/pull/143) 修复了 `@cbornet` 报告的 [#107](https://github.com/pgsty/silo/issues/107)，专门处理 AWS Java SDK v2 使用的混合请求模式：`aws-chunked` 流式请求在 `x-amz-trailer` 中声明了校验和请求头，但实际通过普通 HTTP 请求头直接发送该校验和值。该修复同时拒绝格式非法的请求头校验和值，防止因解析失败而静默跳过校验。此项修复已随 [Server 20260916](/zh/release/silo-20260916/) 发布，与分片完成阶段的错误映射相互独立。
 
 ## 兼容性与剩余边界 {#impact}
 

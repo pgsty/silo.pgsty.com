@@ -34,7 +34,7 @@ MinIO 支持使用兼容 OpenID Connect (OIDC) 的 Identity Provider (IDP) 来�
 ### 兼容 OpenID-Connect (OIDC) 的 Identity Provider {#openid-connect-oidc-compatible-identity-provider}
 
 > [!NOTE]
-> **SILO 20261109 OIDC 与 JWT 兼容性：** [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）通过 [`silo-pkg v3.16.0`](/zh/blog/release/pkg-3.16.0/) 采用 `github.com/go-jose/go-jose/v4 v4.1.9`，进一步加固 OIDC/JWT 令牌验证上限（包括 RSA 证书校验边界及 JWS 签名与 JWE 接收方数量限制）以及 JWS/JWE 头部校验。自 [SILO 20261018](/zh/blog/release/silo-20261018/) 起，`go-jose` 还会拒绝超过 **4096 位**的 RSA JWK，防止特制密钥引发过量 CPU 消耗。升级前请检查身份提供方的签名密钥、discovery 端点、JWKS 刷新与完整登录流程；不兼容的密钥需在身份提供方轮换。参见[依赖安全说明](/zh/blog/security/20261018-release-hardening/#dependencies)。
+> **SILO 20261109 OIDC 与 JWT 兼容性：** [SILO 20261109](/zh/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）通过 [`silo-pkg v3.16.0`](/zh/release/pkg-3.16.0/) 采用 `github.com/go-jose/go-jose/v4 v4.1.9`，进一步加固 OIDC/JWT 令牌验证上限（包括 RSA 证书校验边界及 JWS 签名与 JWE 接收方数量限制）以及 JWS/JWE 头部校验。自 [SILO 20261018](/zh/release/silo-20261018/) 起，`go-jose` 还会拒绝超过 **4096 位**的 RSA JWK，防止特制密钥引发过量 CPU 消耗。升级前请检查身份提供方的签名密钥、discovery 端点、JWKS 刷新与完整登录流程；不兼容的密钥需在身份提供方轮换。参见[依赖安全说明](/zh/blog/security/20261018-release-hardening/#dependencies)。
 
 本流程假定你已经拥有一个现成的 OIDC 提供方，例如 Okta、KeyCloak、Dex、Google 或 Facebook。 这些服务本身的配置不在本流程范围内。
 

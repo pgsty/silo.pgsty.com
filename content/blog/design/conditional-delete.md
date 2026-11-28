@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/conditional-delete/"
 ---
 
-Single-object conditional deletion (`If-Match` on `DeleteObject`) landed in [PR #145](https://github.com/pgsty/silo/pull/145), and [PR #178](https://github.com/pgsty/silo/pull/178) repaired multi-pool serialization and reconciliation. Both changes shipped in [Server 20260916](/blog/release/silo-20260916/).
+Single-object conditional deletion (`If-Match` on `DeleteObject`) landed in [PR #145](https://github.com/pgsty/silo/pull/145), and [PR #178](https://github.com/pgsty/silo/pull/178) repaired multi-pool serialization and reconciliation. Both changes shipped in [Server 20260916](/release/silo-20260916/).
 
 An earlier August proposal around [PR #12](https://github.com/pgsty/silo/pull/12) sketched a broader scope—including batch `DeleteObjects` rejection, an extra `s3:GetObject` authorization check, and a current-version-only rule—that was not adopted in the merged implementation. This note documents the shipped behavior in [`f99ed829b`](https://github.com/pgsty/silo/tree/f99ed829b5eba549160725f035156c9e020b6a07) and why precondition evaluation must sit above individual storage pools.
 

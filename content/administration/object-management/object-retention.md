@@ -14,7 +14,7 @@ upstream_modified: true
 
 ## Overview {#overview}
 
-**SILO 20261109 update:** [SILO 20261109](/blog/release/silo-20261109/) enforces Object Lock checks across bulk deletion, multi-pool versions, directory `null` versions, replicated purges, lifecycle delete-all rules, and batch jobs; upgrade all serving nodes so every pool and site enforces the same lock rules. Earlier, [SILO 20261018](/blog/release/silo-20261018/#security) repaired retention authorization and protected-version overwrites (SN-2026-015/016; Server 20260916 remains affected): every retention update requires `s3:PutObjectRetention`, and weakening active `GOVERNANCE` retention additionally requires `x-amz-bypass-governance-retention: true` and `s3:BypassGovernanceRetention`. Updating a client or Console does not patch the Server, and upgrading does not restore previously overwritten data or retention. See the [security advisory](/blog/security/20260926-governance-retention-bypass/) for affected paths and mitigations.
+**SILO 20261109 update:** [SILO 20261109](/release/silo-20261109/) enforces Object Lock checks across bulk deletion, multi-pool versions, directory `null` versions, replicated purges, lifecycle delete-all rules, and batch jobs; upgrade all serving nodes so every pool and site enforces the same lock rules. Earlier, [SILO 20261018](/release/silo-20261018/#security) repaired retention authorization and protected-version overwrites (SN-2026-015/016; Server 20260916 remains affected): every retention update requires `s3:PutObjectRetention`, and weakening active `GOVERNANCE` retention additionally requires `x-amz-bypass-governance-retention: true` and `s3:BypassGovernanceRetention`. Updating a client or Console does not patch the Server, and upgrading does not restore previously overwritten data or retention. See the [security advisory](/blog/security/20260926-governance-retention-bypass/) for affected paths and mitigations.
 
 MinIO Object Locking (“Object Retention”) enforces Write-Once Read-Many (WORM) immutability to protect [versioned objects](/administration/object-management/object-versioning/#minio-bucket-versioning) from deletion. MinIO supports both [duration based object retention](#minio-object-locking-retention-modes) and [indefinite legal hold retention](#minio-object-locking-legalhold).
 
@@ -109,11 +109,11 @@ $ mc ls --versions play/locking-guide
 
 However, an expiration rule for *non-current* objects older than 7 days would only take effect *after* the configured WORM lock expires. Since the bucket has a 45 day `GOVERNANCE` retention set, only the `v1` version of `data.csv` is unlocked and therefore eligible for deletion.
 
-In [SILO 20261109](/blog/release/silo-20261109/), lifecycle delete-all actions (`ExpiredObjectAllVersions` and `DelMarkerExpiration`, [#297](https://github.com/pgsty/silo/issues/297)) and batch `expire` and `keyrotate` jobs ([#310](https://github.com/pgsty/silo/issues/310)) also preserve Object Lock protected versions instead of bypassing active retention or legal holds.
+In [SILO 20261109](/release/silo-20261109/), lifecycle delete-all actions (`ExpiredObjectAllVersions` and `DelMarkerExpiration`, [#297](https://github.com/pgsty/silo/issues/297)) and batch `expire` and `keyrotate` jobs ([#310](https://github.com/pgsty/silo/issues/310)) also preserve Object Lock protected versions instead of bypassing active retention or legal holds.
 
 ### Interaction with Bulk Deletion and Replication {#interaction-with-bulk-deletion-and-replication}
 
-Starting in [SILO 20261109](/blog/release/silo-20261109/), bulk deletion and replication enforce the following Object Lock guarantees:
+Starting in [SILO 20261109](/release/silo-20261109/), bulk deletion and replication enforce the following Object Lock guarantees:
 
 - **Sequential mutation-locked version purges (`DeleteObjects`):** S3 `DeleteObjects` checks physical version removals sequentially under the same mutation lock used for retention and legal-hold updates, merging protection state across all server pools (commit [`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)). Large version-purge batches in Object Lock buckets therefore take longer, while delete-marker creation and ordinary buckets retain the concurrent bulk path.
 - **Directory `null`-version protection:** Bulk deletion checks Object Lock retention and legal hold on directory objects before removing a directory `null` version (commit [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)).

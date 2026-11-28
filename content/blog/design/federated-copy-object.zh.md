@@ -12,7 +12,7 @@ draft: false
 url: "/zh/blog/design/federated-copy-object/"
 ---
 
-[Server 20260916](/zh/blog/release/silo-20260916/) 通过 [PR #157](https://github.com/pgsty/silo/pull/157)、[PR #159](https://github.com/pgsty/silo/pull/159)、[PR #163](https://github.com/pgsty/silo/pull/163)、[PR #177](https://github.com/pgsty/silo/pull/177) 与 [PR #179](https://github.com/pgsty/silo/pull/179) 修复了旧版 etcd 存储桶联邦（bucket federation）的 `CopyObject` 转发路径。当代理节点将跨集群复制作为远端 `PutObject` 转发到目标集群时，代理节点流式读取并发送源对象的逻辑字节，由目标端执行加密与 Object Lock 规则，校验完整对象校验和，并原样返回目标端实际提交的写入元数据。
+[Server 20260916](/zh/release/silo-20260916/) 通过 [PR #157](https://github.com/pgsty/silo/pull/157)、[PR #159](https://github.com/pgsty/silo/pull/159)、[PR #163](https://github.com/pgsty/silo/pull/163)、[PR #177](https://github.com/pgsty/silo/pull/177) 与 [PR #179](https://github.com/pgsty/silo/pull/179) 修复了旧版 etcd 存储桶联邦（bucket federation）的 `CopyObject` 转发路径。当代理节点将跨集群复制作为远端 `PutObject` 转发到目标集群时，代理节点流式读取并发送源对象的逻辑字节，由目标端执行加密与 Object Lock 规则，校验完整对象校验和，并原样返回目标端实际提交的写入元数据。
 
 ## 转发一次逻辑字节，由目标端执行加密 {#bytes}
 

@@ -12,7 +12,7 @@ draft: false
 url: "/blog/design/multipart-complete-retry/"
 ---
 
-This record covers a defect identified during release acceptance of [SILO Server 20261109](/blog/release/silo-20261109/). It reproduces on [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) and on `SILO Server 20261109` (`d998292387cc`), and is inherited from upstream MinIO. It has no GitHub issue ID.
+This record covers a defect identified during release acceptance of [SILO Server 20261109](/release/silo-20261109/). It reproduces on [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) and on `SILO Server 20261109` (`d998292387cc`), and is inherited from upstream MinIO. It has no GitHub issue ID.
 
 **Status:** Analyzed and reproduced during `SILO Server 20261109` release acceptance. A candidate fix was drafted, and an adversarial review rejected it as too risky for `SILO Server 20261109`. `SILO Server 20261109` documents the defect as a known limitation, and the repair is deferred to a post-`20261109` release alongside completion fencing for storage RPCs.
 

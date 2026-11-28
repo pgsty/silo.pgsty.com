@@ -14,7 +14,7 @@ url: "/zh/blog/design/console-quota-numeric-validation/"
 
 本文覆盖 [silo-console#72](https://github.com/pgsty/silo-console/issues/72)（在 Web Console 中设置的配额在桶列表里显示为短横线）和 [silo-console#73](https://github.com/pgsty/silo-console/issues/73)（创建桶表单的数值校验）。评估基于修复之前的 Console 源码 [3d264aea9](https://github.com/pgsty/silo-console/commit/3d264aea9b67aa40baf706f3e13c8d4145671ea1)，以及修复提交 [a85665814](https://github.com/pgsty/silo-console/commit/a85665814ff74d8a9d0cbd42a51f518c79c9a227) 至 [5a34232e7](https://github.com/pgsty/silo-console/commit/5a34232e72162274d621c57342c75c06fc35befd)。
 
-**状态：** [PR #74](https://github.com/pgsty/silo-console/pull/74)（[`3d1dd56eb`](https://github.com/pgsty/silo-console/commit/3d1dd56ebaacf219191ed92d351a27bddd653838)，2026-11-04）已随独立版 [Console 2.6.0](/zh/blog/release/console-2.6.0/)（[`f8ab14669`](https://github.com/pgsty/silo-console/commit/f8ab146695fd1df74e4b84128a286d552921bf00)）发布。PR `#74` 及全部数值后续修复（[#75](https://github.com/pgsty/silo-console/issues/75) [`2b18ff854`](https://github.com/pgsty/silo-console/commit/2b18ff854f81b08080094f0f3231f6b249c64d49)、[#76](https://github.com/pgsty/silo-console/issues/76) [`4da296098`](https://github.com/pgsty/silo-console/commit/4da296098) 与 [PR #79](https://github.com/pgsty/silo-console/pull/79)）已随独立版 [Console 2.7.0](/zh/blog/release/console-2.7.0/)（[`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)）发布，并内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）。
+**状态：** [PR #74](https://github.com/pgsty/silo-console/pull/74)（[`3d1dd56eb`](https://github.com/pgsty/silo-console/commit/3d1dd56ebaacf219191ed92d351a27bddd653838)，2026-11-04）已随独立版 [Console 2.6.0](/zh/release/console-2.6.0/)（[`f8ab14669`](https://github.com/pgsty/silo-console/commit/f8ab146695fd1df74e4b84128a286d552921bf00)）发布。PR `#74` 及全部数值后续修复（[#75](https://github.com/pgsty/silo-console/issues/75) [`2b18ff854`](https://github.com/pgsty/silo-console/commit/2b18ff854f81b08080094f0f3231f6b249c64d49)、[#76](https://github.com/pgsty/silo-console/issues/76) [`4da296098`](https://github.com/pgsty/silo-console/commit/4da296098) 与 [PR #79](https://github.com/pgsty/silo-console/pull/79)）已随独立版 [Console 2.7.0](/zh/release/console-2.7.0/)（[`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)）发布，并内嵌于 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）。
 
 ## 简短结论 {#tldr}
 
@@ -103,7 +103,7 @@ url: "/zh/blog/design/console-quota-numeric-validation/"
 | 20261109                                         | Console v2.7.0                      | 否                   |
 {.wide .expand}
 
-[SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）内嵌 [Console 2.7.0](/zh/blog/release/console-2.7.0/)（[`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)），在内嵌界面中一并修复了这两个缺陷（取代了此前 `main` 分支 [`28a9e67ac`](https://github.com/pgsty/silo/commit/28a9e67ac) 中的 `v2.6.0` 中间升级）。Server 标签 20260304、20260323 和 20260330 内嵌的是写入端改变之前的 Console 构建，不受影响。
+[SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）内嵌 [Console 2.7.0](/zh/release/console-2.7.0/)（[`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)），在内嵌界面中一并修复了这两个缺陷（取代了此前 `main` 分支 [`28a9e67ac`](https://github.com/pgsty/silo/commit/28a9e67ac) 中的 `v2.6.0` 中间升级）。Server 标签 20260304、20260323 和 20260330 内嵌的是写入端改变之前的 Console 构建，不受影响。
 
 ### #73：minio/console 的原有代码 {#original-code}
 
@@ -185,7 +185,7 @@ url: "/zh/blog/design/console-quota-numeric-validation/"
 ## 剩余限制 {#limits}
 
 - **已被设成 1 字节配额的桶仍然被阻止写入。** 用 `mcli quota info ALIAS/BUCKET` 查找（大小为 1 字节即是迹象），然后设置期望的配额，或用 `mcli quota clear ALIAS/BUCKET` 清除。
-- **旧版 Server 发布仍保留内嵌缺陷。** 独立版 [Console 2.6.0](/zh/blog/release/console-2.6.0/)、[Console 2.7.0](/zh/blog/release/console-2.7.0/)（`4e91ae506e70`）以及 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）已包含全部修复；`20260314` 至 `20261026` 的 SILO Server 发布内嵌的 Console 界面仍有这两个缺陷。
+- **旧版 Server 发布仍保留内嵌缺陷。** 独立版 [Console 2.6.0](/zh/release/console-2.6.0/)、[Console 2.7.0](/zh/release/console-2.7.0/)（`4e91ae506e70`）以及 [SILO Server 20261109](/zh/release/silo-20261109/)（`d998292387cc`）已包含全部修复；`20260314` 至 `20261026` 的 SILO Server 发布内嵌的 Console 界面仍有这两个缺陷。
 - **大配额仍用 `mcli`。** 在 Console `2.6.0` 与 `2.7.0`（以及内嵌于 `SILO Server 20261109` 的界面）中，浏览器拒绝写入 8 PiB（`2^53` 字节）及以上的配额，因为 JSON 数字只在此范围内是精确的（[#75](https://github.com/pgsty/silo-console/issues/75)，由 [2b18ff854](https://github.com/pgsty/silo-console/commit/2b18ff854f81b08080094f0f3231f6b249c64d49) 关闭）。最初的 PR #74 分支顶端曾通过 JavaScript 数字允许到 `2^63`。
 - **窄屏。** 现有的响应式布局在 1200 px 以下隐藏桶列表的配额列；Summary 仍显示配额。
 
@@ -211,4 +211,4 @@ url: "/zh/blog/design/console-quota-numeric-validation/"
 - 修复：[PR #74](https://github.com/pgsty/silo-console/pull/74)，合并提交 [3d1dd56eb](https://github.com/pgsty/silo-console/commit/3d1dd56ebaacf219191ed92d351a27bddd653838)
 - 写入端改动：[georgmangold/console#28](https://github.com/georgmangold/console/pull/28)
 - 后续修复（已随 Console 2.6.0、Console 2.7.0 与 SILO Server 20261109 发布）：[silo-console#75](https://github.com/pgsty/silo-console/issues/75)（64 位精度，[2b18ff854](https://github.com/pgsty/silo-console/commit/2b18ff854f81b08080094f0f3231f6b249c64d49)）、[silo-console#76](https://github.com/pgsty/silo-console/issues/76)（`calculateBytes`，[4da296098](https://github.com/pgsty/silo-console/commit/4da296098)）、[PR #79](https://github.com/pgsty/silo-console/pull/79)（创建时校验）
-- 发布页面：[SILO 20261109](/zh/blog/release/silo-20261109/)、[Console 2.7.0](/zh/blog/release/console-2.7.0/)、[Console 2.6.0](/zh/blog/release/console-2.6.0/)、[Console 2.5.1](/zh/blog/release/console-2.5.1/)、[SILO 20261026](/zh/blog/release/silo-20261026/)
+- 发布页面：[SILO 20261109](/zh/release/silo-20261109/)、[Console 2.7.0](/zh/release/console-2.7.0/)、[Console 2.6.0](/zh/release/console-2.6.0/)、[Console 2.5.1](/zh/release/console-2.5.1/)、[SILO 20261026](/zh/release/silo-20261026/)
